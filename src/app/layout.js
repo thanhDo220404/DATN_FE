@@ -1,16 +1,5 @@
-import localFont from "next/font/local";
-import "./globals.css";
-
-const geistSans = localFont({
-  src: "./fonts/GeistVF.woff",
-  variable: "--font-geist-sans",
-  weight: "100 900",
-});
-const geistMono = localFont({
-  src: "./fonts/GeistMonoVF.woff",
-  variable: "--font-geist-mono",
-  weight: "100 900",
-});
+// import "../../public/bootstrap/css/bootstrap.min.css";
+import "bootstrap/dist/css/bootstrap.min.css";
 
 export const metadata = {
   title: "Create Next App",
@@ -20,8 +9,11 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body className={`${geistSans.variable} ${geistMono.variable}`}>
-        {children}
+      <body>
+        <div id="" className="container-xxl">
+          {children}
+        </div>
+        <script src="/bootstrap/js/bootstrap.bundle.js"></script>
       </body>
     </html>
   );
