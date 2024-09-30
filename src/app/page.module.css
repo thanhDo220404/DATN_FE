@@ -163,9 +163,3 @@ a.secondary {
     filter: invert();
   }
 }
-
-.something{
-  border: 1px solid red;
-  width: 200px;
-  height: 500px;
-}
