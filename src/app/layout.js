@@ -12,7 +12,6 @@ export default function RootLayout({ children }) {
       <body>
         <div id="" className="container-xxl">
           {children}
-        </div>
         <script src="/bootstrap/js/bootstrap.bundle.js"></script>
       </body>
     </html>
