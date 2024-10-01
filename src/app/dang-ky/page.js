@@ -12,7 +12,7 @@ export default function Resign() {
                 id="floatingInput"
                 placeholder="name@example.com"
               ></input>
-              <label for="floatingInput">Email</label>;
+              <label for="floatingInput">Email</label>
             </div>
             <div class="form-floating mb-3">
               <input
