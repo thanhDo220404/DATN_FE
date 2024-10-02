@@ -1,4 +1,4 @@
-export default function Resign() {
+export default function Register() {
   return (
     <>
       <div className="row m-auto w-100 text-center">
