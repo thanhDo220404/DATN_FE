@@ -9,5 +9,9 @@ export default function Container({ children }) {
 
   // Ẩn `Menu` nếu đang trong trang admin
   if (isAdminPage) return children;
-  return <div className="container">{children}</div>;
+  return (
+    <main>
+      <div className="container">{children}</div>
+    </main>
+  );
 }
