@@ -27,7 +27,7 @@ export default function Register() {
     formState: { errors },
   } = useForm();
   const { data, isLoading, error } = useSWR(
-    "http://localhost:3000/users",
+    "http://localhost:2204/users",
     fetcher,
     { refreshInterval: 6000 }
   );
