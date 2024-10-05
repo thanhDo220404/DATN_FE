@@ -72,17 +72,17 @@ export default function Footer() {
                 </li>
                 <li className="footer-nav-item">
                   <a href="#" className="footer-nav-link">
-                   Flase Sale
+                    Flase Sale
                   </a>
                 </li>
                 <li className="footer-nav-item">
                   <a href="#" className="footer-nav-link">
-                   Về Chúng Tôi
+                    Về Chúng Tôi
                   </a>
                 </li>
                 <li className="footer-nav-item">
                   <a href="#" className="footer-nav-link">
-                   Hỗ Trợ
+                    Hỗ Trợ
                   </a>
                 </li>
               </ul>
@@ -93,11 +93,20 @@ export default function Footer() {
                 href="/"
                 className="footer-logo d-flex align-items-center mb-3"
               >
-                <img src="/images/logo1x.png" alt="Logo" style={{ height: '200px' }} />
+                <img
+                  src="/images/logo1x.png"
+                  alt="Logo"
+                  style={{ height: "200px" }}
+                />
               </a>
-          
             </div>
           </div>
+        </div>
+        <div
+          className="w-100 text-center text-light"
+          style={{ background: "#006B61" }}
+        >
+          Copyright by team Dreamers
         </div>
       </footer>
     </>

@@ -3,13 +3,14 @@
 import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import useSWR from "swr";
+import Overlay from "../components/overlay";
 
 const fetcher = (...args) => fetch(...args).then((res) => res.json());
 const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
 const Alert = ({ message, countdown, onClose }) => (
   <div
-    className="alert alert-light border border-success position-absolute"
+    className="alert alert-light border border-success position-absolute shadow-lg"
     role="alert"
     style={{
       top: "20%",
@@ -31,10 +32,10 @@ const Alert = ({ message, countdown, onClose }) => (
     <p className="mb-0">Thời gian còn lại: {countdown} giây</p>
     <div className="position-absolute w-100 h-100 top-0 start-0">
       <div
-        className="fs-4 ms-2 text-danger position-absolute top-0 start-100"
+        className="fs-4 ms-2 text-light position-absolute top-0 start-100"
         onClick={onClose}
       >
-        <i class="bi bi-x-circle-fill"></i>
+        <i class="bi bi-x-lg"></i>
       </div>
     </div>
   </div>
@@ -109,7 +110,9 @@ export default function Register() {
   };
 
   return (
-    <div className="row m-auto w-100 text-center position-relative">
+    <div className="row m-auto w-75 text-center position-relative my-5">
+      {/* Overlay làm mờ khi hiển thị Alert */}
+      {showAlert && <Overlay />}
       <div className="col border border-dark p-5">
         <h1>Đăng ký</h1>
         <form onSubmit={handleSubmit(onSubmit)}>

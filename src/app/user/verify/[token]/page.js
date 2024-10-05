@@ -45,8 +45,8 @@ export default function VerifyToken({ params }) {
         )}
       </div>
       <div className="text-center mt-4">
-        <Link href="/" className="btn btn-primary">
-          Về trang chủ
+        <Link href="/dang-nhap" className="btn btn-primary">
+          Đăng nhập ngay
         </Link>
       </div>
     </div>

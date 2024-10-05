@@ -4,7 +4,7 @@ import "bootstrap-icons/font/bootstrap-icons.css";
 import "./globals.css";
 import Header from "./components/header";
 import Footer from "./components/footer";
-import Container from "./components/container";
+import Main from "./components/main";
 
 export const metadata = {
   title: "Dreamers",
@@ -16,11 +16,10 @@ export default function RootLayout({ children }) {
     <html lang="en">
       <body>
         <Header></Header>
-        <Container>{children}</Container>
+        <Main>{children}</Main>
         <Footer></Footer>
         <script src="/bootstrap/js/bootstrap.bundle.js"></script>
         <script src="https://unpkg.com/boxicons@2.1.4/dist/boxicons.js"></script>
-
       </body>
     </html>
   );

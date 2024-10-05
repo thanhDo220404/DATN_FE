@@ -24,7 +24,7 @@ export default function Header() {
             <div className="container-fluid d-flex justify-content-between align-items-center">
               <a className="navbar-brand" href="#">
                 <img
-                  src="./images/logo1x.png"
+                  src="/images/logo1x.png"
                   alt="Logo"
                   style={{ width: "70px", height: "70px" }}
                 />
@@ -56,21 +56,35 @@ export default function Header() {
                       href="#"
                       onClick={toggleSubMenu} // Toggle menu con khi nhấn vào
                     >
-                      Sản phẩm <MdArrowDropDown className="dropdown-icon" /> {/* Thêm icon mũi tên */}
+                      Sản phẩm <MdArrowDropDown className="dropdown-icon" />{" "}
+                      {/* Thêm icon mũi tên */}
                     </a>
-                    
+
                     {showSubMenu && (
                       <ul className="sub-menu">
-                        <li><a href="#">ÁO THUN - T SHIRT</a></li>
-                        <li><a href="#">QUẦN - PANTS</a></li>
-                        <li><a href="#">ÁO KHOÁC - HOODIE</a></li>
-                        <li><a href="#">PHỤ KIỆN - ACCESSORY</a></li>
+                        <li>
+                          <a href="#">ÁO THUN - T SHIRT</a>
+                        </li>
+                        <li>
+                          <a href="#">QUẦN - PANTS</a>
+                        </li>
+                        <li>
+                          <a href="#">ÁO KHOÁC - HOODIE</a>
+                        </li>
+                        <li>
+                          <a href="#">PHỤ KIỆN - ACCESSORY</a>
+                        </li>
                       </ul>
                     )}
                   </li>
                   <li className="nav-item">
-                    <a className="nav-link" href="#">
+                    <a className="nav-link d-flex" href="#">
                       Flash Sale
+                      <img
+                        src="./images/fireFlashSale.png"
+                        width="20px"
+                        alt=""
+                      />
                     </a>
                   </li>
                   <li className="nav-item">
@@ -84,7 +98,7 @@ export default function Header() {
                     </a>
                   </li>
                 </ul>
-                
+
                 <form className="d-flex search-form" role="search">
                   <input
                     className="form-control"
@@ -92,7 +106,10 @@ export default function Header() {
                     placeholder="Tìm kiếm sản phẩm..."
                     aria-label="Search"
                   />
-                  <button className="btn btn-outline-light search-btn" type="submit">
+                  <button
+                    className="btn btn-outline-light search-btn"
+                    type="submit"
+                  >
                     <FaSearch />
                   </button>
                 </form>
