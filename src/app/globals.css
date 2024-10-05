@@ -144,19 +144,4 @@ th, td {
   color: black; /* Màu chữ mặc định trong menu con */
 }
 
-/* Thay đổi màu nền khi rê chuột vào các mục trong menu con */
-.dropdown-item:hover {
-  background-color: yellow; /* Màu nền khi rê chuột */
-  color: black; /* Màu chữ khi rê chuột */
-}
 
-
-
-
-/* Nhung: sửa footer */
-
-
-/* CSS cho footer */
-.footer-bg {
-  background-color: #324B4D;
-}
