@@ -1,22 +1,33 @@
 "use client";
 import { usePathname } from "next/navigation";
+import { useState } from "react";
+import { FaSearch, FaShoppingCart, FaUser } from "react-icons/fa";
+import { MdArrowDropDown } from "react-icons/md"; // Import icon mũi tên xuống
 
 export default function Header() {
   const pathname = usePathname();
-
-  // Kiểm tra nếu đường dẫn hiện tại chứa "admin"
   const isAdminPage = pathname.includes("/admin");
 
-  // Ẩn `Menu` nếu đang trong trang admin
+  const [showSubMenu, setShowSubMenu] = useState(false);
+
+  const toggleSubMenu = () => {
+    setShowSubMenu(!showSubMenu);
+  };
+
   if (isAdminPage) return null;
+
   return (
     <>
-      <header className="bg-primary">
+      <header className="menu-header">
         <div className="container">
           <nav className="navbar navbar-expand-lg">
-            <div className="container-fluid">
+            <div className="container-fluid d-flex justify-content-between align-items-center">
               <a className="navbar-brand" href="#">
-                Navbar
+                <img
+                  src="./images/logo1x.png"
+                  alt="Logo"
+                  style={{ width: "70px", height: "70px" }}
+                />
               </a>
               <button
                 className="navbar-toggler"
@@ -30,68 +41,65 @@ export default function Header() {
                 <span className="navbar-toggler-icon"></span>
               </button>
               <div
-                className="collapse navbar-collapse"
+                className="collapse navbar-collapse justify-content-between"
                 id="navbarSupportedContent"
               >
-                <ul className="navbar-nav me-auto mb-2 mb-lg-0">
+                <ul className="navbar-nav mb-2 mb-lg-0">
                   <li className="nav-item">
                     <a className="nav-link active" aria-current="page" href="#">
-                      Home
+                      Trang chủ
+                    </a>
+                  </li>
+                  <li className="nav-item">
+                    <a
+                      className="nav-link"
+                      href="#"
+                      onClick={toggleSubMenu} // Toggle menu con khi nhấn vào
+                    >
+                      Sản phẩm <MdArrowDropDown className="dropdown-icon" /> {/* Thêm icon mũi tên */}
+                    </a>
+                    
+                    {showSubMenu && (
+                      <ul className="sub-menu">
+                        <li><a href="#">ÁO THUN - T SHIRT</a></li>
+                        <li><a href="#">QUẦN - PANTS</a></li>
+                        <li><a href="#">ÁO KHOÁC - HOODIE</a></li>
+                        <li><a href="#">PHỤ KIỆN - ACCESSORY</a></li>
+                      </ul>
+                    )}
+                  </li>
+                  <li className="nav-item">
+                    <a className="nav-link" href="#">
+                      Flash Sale
                     </a>
                   </li>
                   <li className="nav-item">
                     <a className="nav-link" href="#">
-                      Link
+                      Về chúng tôi
                     </a>
-                  </li>
-                  <li className="nav-item dropdown">
-                    <a
-                      className="nav-link dropdown-toggle"
-                      href="#"
-                      role="button"
-                      data-bs-toggle="dropdown"
-                      aria-expanded="false"
-                    >
-                      Dropdown
-                    </a>
-                    <ul className="dropdown-menu">
-                      <li>
-                        <a className="dropdown-item" href="#">
-                          Action
-                        </a>
-                      </li>
-                      <li>
-                        <a className="dropdown-item" href="#">
-                          Another action
-                        </a>
-                      </li>
-                      <li>
-                        <hr className="dropdown-divider"></hr>
-                      </li>
-                      <li>
-                        <a className="dropdown-item" href="#">
-                          Something else here
-                        </a>
-                      </li>
-                    </ul>
                   </li>
                   <li className="nav-item">
-                    <a className="nav-link disabled" aria-disabled="true">
-                      Disabled
+                    <a className="nav-link" href="#">
+                      Hỗ trợ
                     </a>
                   </li>
                 </ul>
-                <form className="d-flex" role="search">
+                
+                <form className="d-flex search-form" role="search">
                   <input
-                    className="form-control me-2"
+                    className="form-control"
                     type="search"
-                    placeholder="Search"
+                    placeholder="Tìm kiếm sản phẩm..."
                     aria-label="Search"
-                  ></input>
-                  <button className="btn btn-outline-success" type="submit">
-                    Search
+                  />
+                  <button className="btn btn-outline-light search-btn" type="submit">
+                    <FaSearch />
                   </button>
                 </form>
+                <div className="nav-icons d-flex align-items-center">
+                  <FaUser className="nav-icon" />
+                  <FaShoppingCart className="nav-icon" />
+                </div>
               </div>
             </div>
           </nav>

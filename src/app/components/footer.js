@@ -7,116 +7,95 @@ export default function Footer() {
   // Kiểm tra nếu đường dẫn hiện tại chứa "admin"
   const isAdminPage = pathname.includes("/admin");
 
-  // Ẩn `Menu` nếu đang trong trang admin
+  // Ẩn footer nếu đang trong trang admin
   if (isAdminPage) return null;
+
   return (
     <>
-      <footer className="bg-primary">
-        <div className="container">
-          <div className="row row-cols-1 row-cols-sm-2 row-cols-md-5 py-5 border-top">
-            <div className="col mb-3">
+      <footer className="footer-bg">
+        <div className="footer-container">
+          <div className="footer-row">
+            <div className="footer-col">
+              <h5>Giới thiệu</h5>
+              <ul className="footer-nav">
+                <li className="footer-nav-item">
+                  <a href="#" className="footer-nav-link">
+                    Giới thiệu về chúng tôi
+                  </a>
+                </li>
+                <li className="footer-nav-item">
+                  <a href="#" className="footer-nav-link">
+                    Đội ngũ của chúng tôi
+                  </a>
+                </li>
+                <li className="footer-nav-item">
+                  <a href="#" className="footer-nav-link">
+                    Tầm nhìn và sứ mệnh
+                  </a>
+                </li>
+              </ul>
+            </div>
+
+            <div className="footer-col">
+              <h5>Thông tin liên hệ</h5>
+              <ul className="footer-nav">
+                <li className="footer-nav-item">
+                  <a href="#" className="footer-nav-link">
+                    Email: contact@example.com
+                  </a>
+                </li>
+                <li className="footer-nav-item">
+                  <a href="#" className="footer-nav-link">
+                    Điện thoại: 0123-456-789
+                  </a>
+                </li>
+                <li className="footer-nav-item">
+                  <a href="#" className="footer-nav-link">
+                    Địa chỉ: 123 Đường ABC, Quận 1, HCM
+                  </a>
+                </li>
+              </ul>
+            </div>
+
+            <div className="footer-col">
+              <h5>Chuyên mục</h5>
+              <ul className="footer-nav">
+                <li className="footer-nav-item">
+                  <a href="#" className="footer-nav-link">
+                    Trang Chủ
+                  </a>
+                </li>
+                <li className="footer-nav-item">
+                  <a href="#" className="footer-nav-link">
+                    Sản Phẩm
+                  </a>
+                </li>
+                <li className="footer-nav-item">
+                  <a href="#" className="footer-nav-link">
+                   Flase Sale
+                  </a>
+                </li>
+                <li className="footer-nav-item">
+                  <a href="#" className="footer-nav-link">
+                   Về Chúng Tôi
+                  </a>
+                </li>
+                <li className="footer-nav-item">
+                  <a href="#" className="footer-nav-link">
+                   Hỗ Trợ
+                  </a>
+                </li>
+              </ul>
+            </div>
+
+            <div className="footer-col">
               <a
                 href="/"
-                className="d-flex align-items-center mb-3 link-body-emphasis text-decoration-none"
+                className="footer-logo d-flex align-items-center mb-3"
               >
-                <img src="./images/logo4x.png" alt="" />
+                <img src="/images/logo1x.png" alt="Logo" style={{ height: '200px' }} />
               </a>
-              <p className="text-body-secondary">&copy; 2024</p>
-            </div>
-
-            <div className="col mb-3"></div>
-
-            <div className="col mb-3">
-              <h5>Section</h5>
-              <ul className="nav flex-column">
-                <li className="nav-item mb-2">
-                  <a href="#" className="nav-link p-0 text-body-secondary">
-                    Home
-                  </a>
-                </li>
-                <li className="nav-item mb-2">
-                  <a href="#" className="nav-link p-0 text-body-secondary">
-                    Features
-                  </a>
-                </li>
-                <li className="nav-item mb-2">
-                  <a href="#" className="nav-link p-0 text-body-secondary">
-                    Pricing
-                  </a>
-                </li>
-                <li className="nav-item mb-2">
-                  <a href="#" className="nav-link p-0 text-body-secondary">
-                    FAQs
-                  </a>
-                </li>
-                <li className="nav-item mb-2">
-                  <a href="#" className="nav-link p-0 text-body-secondary">
-                    About
-                  </a>
-                </li>
-              </ul>
-            </div>
-
-            <div className="col mb-3">
-              <h5>Section</h5>
-              <ul className="nav flex-column">
-                <li className="nav-item mb-2">
-                  <a href="#" className="nav-link p-0 text-body-secondary">
-                    Home
-                  </a>
-                </li>
-                <li className="nav-item mb-2">
-                  <a href="#" className="nav-link p-0 text-body-secondary">
-                    Features
-                  </a>
-                </li>
-                <li className="nav-item mb-2">
-                  <a href="#" className="nav-link p-0 text-body-secondary">
-                    Pricing
-                  </a>
-                </li>
-                <li className="nav-item mb-2">
-                  <a href="#" className="nav-link p-0 text-body-secondary">
-                    FAQs
-                  </a>
-                </li>
-                <li className="nav-item mb-2">
-                  <a href="#" className="nav-link p-0 text-body-secondary">
-                    About
-                  </a>
-                </li>
-              </ul>
-            </div>
-
-            <div className="col mb-3">
-              <h5>Section</h5>
-              <ul className="nav flex-column">
-                <li className="nav-item mb-2">
-                  <a href="#" className="nav-link p-0 text-body-secondary">
-                    Home
-                  </a>
-                </li>
-                <li className="nav-item mb-2">
-                  <a href="#" className="nav-link p-0 text-body-secondary">
-                    Features
-                  </a>
-                </li>
-                <li className="nav-item mb-2">
-                  <a href="#" className="nav-link p-0 text-body-secondary">
-                    Pricing
-                  </a>
-                </li>
-                <li className="nav-item mb-2">
-                  <a href="#" className="nav-link p-0 text-body-secondary">
-                    FAQs
-                  </a>
-                </li>
-                <li className="nav-item mb-2">
-                  <a href="#" className="nav-link p-0 text-body-secondary">
-                    About
-                  </a>
-                </li>
-              </ul>
+          
             </div>
           </div>
         </div>

@@ -19,6 +19,8 @@ export default function RootLayout({ children }) {
         <Container>{children}</Container>
         <Footer></Footer>
         <script src="/bootstrap/js/bootstrap.bundle.js"></script>
+        <script src="https://unpkg.com/boxicons@2.1.4/dist/boxicons.js"></script>
+
       </body>
     </html>
   );
