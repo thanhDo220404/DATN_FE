@@ -1,127 +1,123 @@
 "use client";
+import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
 import { FaSearch, FaShoppingCart, FaUser } from "react-icons/fa";
-import { MdArrowDropDown } from "react-icons/md"; // Import icon mũi tên xuống
 
 export default function Header() {
   const pathname = usePathname();
   const isAdminPage = pathname.includes("/admin");
 
-  const [showSubMenu, setShowSubMenu] = useState(false);
-
-  const toggleSubMenu = () => {
-    setShowSubMenu(!showSubMenu);
-  };
-
   if (isAdminPage) return null;
 
   return (
-    <>
-      <header className="menu-header">
-        <div className="container">
-          <nav className="navbar navbar-expand-lg">
-            <div className="container-fluid d-flex justify-content-between align-items-center">
-              <a className="navbar-brand" href="#">
-                <img
-                  src="/images/logo1x.png"
-                  alt="Logo"
-                  style={{ width: "70px", height: "70px" }}
-                />
-              </a>
-              <button
-                className="navbar-toggler"
-                type="button"
-                data-bs-toggle="collapse"
-                data-bs-target="#navbarSupportedContent"
-                aria-controls="navbarSupportedContent"
-                aria-expanded="false"
-                aria-label="Toggle navigation"
-              >
-                <span className="navbar-toggler-icon"></span>
-              </button>
-              <div
-                className="collapse navbar-collapse justify-content-between"
-                id="navbarSupportedContent"
-              >
-                <ul className="navbar-nav mb-2 mb-lg-0">
-                  <li className="nav-item">
-                    <a className="nav-link active" aria-current="page" href="#">
-                      Trang chủ
-                    </a>
+    <header className="menu-header">
+      <div className="container">
+        <nav className="navbar navbar-expand-lg navbar-dark">
+          <div className="nav-icons d-flex d-lg-none align-items-center">
+            <Link href="/dang-nhap" passHref>
+              <FaUser className="nav-icon text-light fs-5 me-3" />
+            </Link>
+            <Link href="/gio-hang" passHref>
+              <FaShoppingCart className="nav-icon text-light fs-5" />
+            </Link>
+          </div>
+          <Link className="navbar-brand" href="/">
+            <img
+              src="/images/logo1x.png"
+              alt="Logo"
+              style={{ width: "70px", height: "70px" }}
+            />
+          </Link>
+          <button
+            className="navbar-toggler"
+            type="button"
+            data-bs-toggle="collapse"
+            data-bs-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent"
+            aria-expanded="false"
+            aria-label="Toggle navigation"
+          >
+            <span className="navbar-toggler-icon"></span>
+          </button>
+          <div className="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul className="navbar-nav me-auto mb-2 mb-lg-0">
+              <li className="nav-item">
+                <Link className="nav-link" aria-current="page" href="/">
+                  Trang chủ
+                </Link>
+              </li>
+              <li className="nav-item dropdown">
+                <Link
+                  className="nav-link dropdown-toggle"
+                  href="#"
+                  role="button"
+                  data-bs-toggle="dropdown"
+                  aria-expanded="false"
+                >
+                  Sản phẩm
+                </Link>
+                <ul className="dropdown-menu">
+                  <li>
+                    <Link className="dropdown-item" href="#">
+                      ÁO THUN - T SHIRT
+                    </Link>
                   </li>
-                  <li className="nav-item">
-                    <a
-                      className="nav-link"
-                      href="#"
-                      onClick={toggleSubMenu} // Toggle menu con khi nhấn vào
-                    >
-                      Sản phẩm <MdArrowDropDown className="dropdown-icon" />{" "}
-                      {/* Thêm icon mũi tên */}
-                    </a>
-
-                    {showSubMenu && (
-                      <ul className="sub-menu">
-                        <li>
-                          <a href="#">ÁO THUN - T SHIRT</a>
-                        </li>
-                        <li>
-                          <a href="#">QUẦN - PANTS</a>
-                        </li>
-                        <li>
-                          <a href="#">ÁO KHOÁC - HOODIE</a>
-                        </li>
-                        <li>
-                          <a href="#">PHỤ KIỆN - ACCESSORY</a>
-                        </li>
-                      </ul>
-                    )}
+                  <li>
+                    <Link className="dropdown-item" href="#">
+                      QUẦN - PANTS
+                    </Link>
                   </li>
-                  <li className="nav-item">
-                    <a className="nav-link d-flex" href="#">
-                      Flash Sale
-                      <img
-                        src="./images/fireFlashSale.png"
-                        width="20px"
-                        alt=""
-                      />
-                    </a>
+                  <li>
+                    <Link className="dropdown-item" href="#">
+                      ÁO KHOÁC - HOODIE
+                    </Link>
                   </li>
-                  <li className="nav-item">
-                    <a className="nav-link" href="#">
-                      Về chúng tôi
-                    </a>
-                  </li>
-                  <li className="nav-item">
-                    <a className="nav-link" href="#">
-                      Hỗ trợ
-                    </a>
+                  <li>
+                    <Link className="dropdown-item" href="#">
+                      PHỤ KIỆN - ACCESSORY
+                    </Link>
                   </li>
                 </ul>
-
-                <form className="d-flex search-form" role="search">
-                  <input
-                    className="form-control"
-                    type="search"
-                    placeholder="Tìm kiếm sản phẩm..."
-                    aria-label="Search"
-                  />
-                  <button
-                    className="btn btn-outline-light search-btn"
-                    type="submit"
-                  >
-                    <FaSearch />
-                  </button>
-                </form>
-                <div className="nav-icons d-flex align-items-center">
-                  <FaUser className="nav-icon" />
-                  <FaShoppingCart className="nav-icon" />
-                </div>
-              </div>
+              </li>
+              <li className="nav-item">
+                <a className="nav-link d-flex" href="#">
+                  Flash Sale
+                  <img src="./images/fireFlashSale.png" width="20px" alt="" />
+                </a>
+              </li>
+              <li className="nav-item">
+                <Link className="nav-link" href="#">
+                  Về chúng tôi
+                </Link>
+              </li>
+              <li className="nav-item">
+                <Link className="nav-link" href="#">
+                  Hỗ trợ
+                </Link>
+              </li>
+            </ul>
+            <form className="d-flex me-2" role="search">
+              <input
+                className="form-control me-2"
+                type="search"
+                placeholder="Tìm kiếm sản phẩm..."
+                aria-label="Search"
+              />
+              <button className="btn btn-outline-light" type="submit">
+                <FaSearch />
+              </button>
+            </form>
+            <div className="nav-icons d-none d-lg-flex align-items-center">
+              <Link href="/dang-nhap" passHref>
+                <FaUser className="nav-icon text-light fs-5 me-3" />
+              </Link>
+              <Link href="/gio-hang" passHref>
+                <FaShoppingCart className="nav-icon text-light fs-5" />
+              </Link>
             </div>
-          </nav>
-        </div>
-      </header>
-    </>
+          </div>
+        </nav>
+      </div>
+    </header>
   );
 }

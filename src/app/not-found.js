@@ -23,7 +23,7 @@ export default function NotFound() {
   }, [countdown, router]);
 
   return (
-    <div className="container d-flex justify-content-center align-items-center vh-100">
+    <div className="d-flex justify-content-center align-items-center vh-100">
       <div className="text-center">
         <h1 className="display-1 text-danger">404</h1>
         <h2 className="mb-4">Oops! Trang bạn tìm kiếm không tồn tại</h2>
