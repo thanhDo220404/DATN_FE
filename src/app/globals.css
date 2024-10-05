@@ -15,6 +15,7 @@ html, body {
   font-size: 16px; /* Đặt kích thước font chữ mặc định */
   line-height: 1.6; /* Khoảng cách dòng */
   color: #333; /* Màu chữ mặc định */
+
 }
 
 /* Các thiết lập toàn cục khác */
@@ -52,7 +53,6 @@ h1, h2, h3, h4, h5, h6 {
   font-family: 'Helvetica Neue', Arial, sans-serif;
   margin: 0;
   padding-bottom: 10px;
-  color: #111;
 }
 
 /* Định dạng cho paragraph */
@@ -80,9 +80,83 @@ th, td {
 
 /* Tạo các biến CSS */
 :root {
-  --primary-color: #0070f3;
+  --primary-color: #324B4D;
   --secondary-color: #666;
   --border-radius: 4px;
   --font-size: 16px;
+
 }
 
+.bg-main-color{
+  background-color: var(--primary-color);
+}
+
+
+
+/* Nhung: sửa header  */
+
+.menu-header {
+  background-color: #324B4D;
+}
+
+/* Style cho thanh tìm kiếm */
+.search-form {
+  position: relative;
+}
+
+/* Style cho các icon cuối menu */
+.nav-icons {
+  display: flex;
+  align-items: center;
+}
+
+/* Căn giữa nội dung trong header */
+.navbar {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between; 
+}
+
+/* Màu sắc mặc định của chữ */
+.navbar-nav .nav-item .nav-link {
+  color: white; 
+}
+
+/* Màu sắc của chữ khi rê chuột vào */
+.navbar-nav .nav-item .nav-link:hover {
+  color: yellow; /* Thay đổi màu sắc thành màu vàng khi rê chuột */
+}
+
+/* Định dạng cho menu con */
+.dropdown-submenu {
+  position: relative;
+}
+
+.dropdown-submenu .dropdown-menu {
+  top: 0;
+  left: 100%; /* Để cho submenu nằm bên phải của mục cha */
+  margin-top: -6px; /* Điều chỉnh để căn giữa submenu với mục cha */
+}
+
+/* Màu chữ mặc định trong menu con */
+.dropdown-item {
+  color: black; /* Màu chữ mặc định trong menu con */
+}
+
+/* Thay đổi màu nền khi rê chuột vào các mục trong menu con */
+.dropdown-item:hover {
+  background-color: yellow; /* Màu nền khi rê chuột */
+  color: black; /* Màu chữ khi rê chuột */
+}
+
+
+
+
+/* Nhung: sửa footer */
+
+
+/* CSS cho footer */
+.footer-bg {
+  background-color: #324B4D;
+}

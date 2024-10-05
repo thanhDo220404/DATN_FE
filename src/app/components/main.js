@@ -1,7 +1,7 @@
 "use client";
 import { usePathname } from "next/navigation";
 
-export default function Container({ children }) {
+export default function Main({ children }) {
   const pathname = usePathname();
 
   // Kiểm tra nếu đường dẫn hiện tại chứa "admin"
@@ -9,9 +9,5 @@ export default function Container({ children }) {
 
   // Ẩn `Menu` nếu đang trong trang admin
   if (isAdminPage) return children;
-  return (
-    <main>
-      <div className="container">{children}</div>
-    </main>
-  );
+  return <main>{children}</main>;
 }
