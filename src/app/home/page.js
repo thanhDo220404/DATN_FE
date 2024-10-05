@@ -60,8 +60,6 @@ export default function Home() {
         </button>
       </div>
 
-    
-
       {/* product-category */}
       <div className="container mt-5">
         <div className="row product-category">
