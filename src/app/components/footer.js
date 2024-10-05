@@ -3,122 +3,101 @@ import { usePathname } from "next/navigation";
 
 export default function Footer() {
   const pathname = usePathname();
-
-  // Kiểm tra nếu đường dẫn hiện tại chứa "admin"
   const isAdminPage = pathname.includes("/admin");
 
-  // Ẩn `Menu` nếu đang trong trang admin
   if (isAdminPage) return null;
+
   return (
     <>
-      <footer className="bg-primary">
-        <div className="container">
-          <div className="row row-cols-1 row-cols-sm-2 row-cols-md-5 py-5 border-top">
-            <div className="col mb-3">
-              <a
-                href="/"
-                className="d-flex align-items-center mb-3 link-body-emphasis text-decoration-none"
-              >
-                <img src="./images/logo4x.png" alt="" />
+      <footer className="bg-main-color text-white">
+        <div className="container py-5">
+          <div className="row">
+            <div className="col-md-3">
+              <h5>Giới thiệu</h5>
+              <ul className="list-unstyled">
+                <li>
+                  <a href="#" className="text-white">
+                    Giới thiệu về chúng tôi
+                  </a>
+                </li>
+                <li>
+                  <a href="#" className="text-white">
+                    Đội ngũ của chúng tôi
+                  </a>
+                </li>
+                <li>
+                  <a href="#" className="text-white">
+                    Tầm nhìn và sứ mệnh
+                  </a>
+                </li>
+              </ul>
+            </div>
+
+            <div className="col-md-3">
+              <h5>Thông tin liên hệ</h5>
+              <ul className="list-unstyled">
+                <li>
+                  <a href="#" className="text-white">
+                    Email: contact@example.com
+                  </a>
+                </li>
+                <li>
+                  <a href="#" className="text-white">
+                    Điện thoại: 0123-456-789
+                  </a>
+                </li>
+                <li>
+                  <a href="#" className="text-white">
+                    Địa chỉ: 123 Đường ABC, Quận 1, HCM
+                  </a>
+                </li>
+              </ul>
+            </div>
+
+            <div className="col-md-3">
+              <h5>Chuyên mục</h5>
+              <ul className="list-unstyled">
+                <li>
+                  <a href="#" className="text-white">
+                    Trang Chủ
+                  </a>
+                </li>
+                <li>
+                  <a href="#" className="text-white">
+                    Sản Phẩm
+                  </a>
+                </li>
+                <li>
+                  <a href="#" className="text-white">
+                    Flash Sale
+                  </a>
+                </li>
+                <li>
+                  <a href="#" className="text-white">
+                    Về Chúng Tôi
+                  </a>
+                </li>
+                <li>
+                  <a href="#" className="text-white">
+                    Hỗ Trợ
+                  </a>
+                </li>
+              </ul>
+            </div>
+
+            <div className="col-md-3 d-flex justify-content-center align-items-center">
+              <a href="/" className="d-block mb-3">
+                <img
+                  src="/images/logo1x.png"
+                  alt="Logo"
+                  style={{ height: "200px" }}
+                />
               </a>
-              <p className="text-body-secondary">&copy; 2024</p>
-            </div>
-
-            <div className="col mb-3"></div>
-
-            <div className="col mb-3">
-              <h5>Section</h5>
-              <ul className="nav flex-column">
-                <li className="nav-item mb-2">
-                  <a href="#" className="nav-link p-0 text-body-secondary">
-                    Home
-                  </a>
-                </li>
-                <li className="nav-item mb-2">
-                  <a href="#" className="nav-link p-0 text-body-secondary">
-                    Features
-                  </a>
-                </li>
-                <li className="nav-item mb-2">
-                  <a href="#" className="nav-link p-0 text-body-secondary">
-                    Pricing
-                  </a>
-                </li>
-                <li className="nav-item mb-2">
-                  <a href="#" className="nav-link p-0 text-body-secondary">
-                    FAQs
-                  </a>
-                </li>
-                <li className="nav-item mb-2">
-                  <a href="#" className="nav-link p-0 text-body-secondary">
-                    About
-                  </a>
-                </li>
-              </ul>
-            </div>
-
-            <div className="col mb-3">
-              <h5>Section</h5>
-              <ul className="nav flex-column">
-                <li className="nav-item mb-2">
-                  <a href="#" className="nav-link p-0 text-body-secondary">
-                    Home
-                  </a>
-                </li>
-                <li className="nav-item mb-2">
-                  <a href="#" className="nav-link p-0 text-body-secondary">
-                    Features
-                  </a>
-                </li>
-                <li className="nav-item mb-2">
-                  <a href="#" className="nav-link p-0 text-body-secondary">
-                    Pricing
-                  </a>
-                </li>
-                <li className="nav-item mb-2">
-                  <a href="#" className="nav-link p-0 text-body-secondary">
-                    FAQs
-                  </a>
-                </li>
-                <li className="nav-item mb-2">
-                  <a href="#" className="nav-link p-0 text-body-secondary">
-                    About
-                  </a>
-                </li>
-              </ul>
-            </div>
-
-            <div className="col mb-3">
-              <h5>Section</h5>
-              <ul className="nav flex-column">
-                <li className="nav-item mb-2">
-                  <a href="#" className="nav-link p-0 text-body-secondary">
-                    Home
-                  </a>
-                </li>
-                <li className="nav-item mb-2">
-                  <a href="#" className="nav-link p-0 text-body-secondary">
-                    Features
-                  </a>
-                </li>
-                <li className="nav-item mb-2">
-                  <a href="#" className="nav-link p-0 text-body-secondary">
-                    Pricing
-                  </a>
-                </li>
-                <li className="nav-item mb-2">
-                  <a href="#" className="nav-link p-0 text-body-secondary">
-                    FAQs
-                  </a>
-                </li>
-                <li className="nav-item mb-2">
-                  <a href="#" className="nav-link p-0 text-body-secondary">
-                    About
-                  </a>
-                </li>
-              </ul>
             </div>
           </div>
+        </div>
+        <div className="text-center py-2" style={{ background: "#006B61" }}>
+          Copyright by team Dreamers
         </div>
       </footer>
     </>
