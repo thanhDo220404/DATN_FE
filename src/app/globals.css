@@ -15,6 +15,7 @@ html, body {
   font-size: 16px; /* Đặt kích thước font chữ mặc định */
   line-height: 1.6; /* Khoảng cách dòng */
   color: #333; /* Màu chữ mặc định */
+
 }
 
 /* Các thiết lập toàn cục khác */
@@ -84,5 +85,198 @@ th, td {
   --secondary-color: #666;
   --border-radius: 4px;
   --font-size: 16px;
+
 }
+
+
+
+
+/* Nhung: sửa header  */
+
+.menu-header {
+  height: 80px;
+  background-color: #324B4D;
+  padding: 1px;
+  display: flex;
+  align-items: center; /* Căn giữa theo chiều dọc */
+  justify-content: center; /* Căn giữa theo chiều ngang */
+}
+
+/* Căn chỉnh khoảng cách giữa các mục */
+.navbar-nav .nav-item {
+  margin-right: 10px;
+  margin-top: 5px;
+}
+
+/* Style cho thanh tìm kiếm */
+.search-form {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.search-form .form-control {
+  border: none;
+  border-radius: 4px 0 0 4px; /* Bo góc bên trái */
+  padding: 8px 12px;
+  padding-right: 40px; /* Chừa khoảng trống cho nút tìm kiếm */
+  width: 100%; /* Chiếm toàn bộ chiều rộng */
+}
+
+.search-form .search-btn {
+  position: absolute;
+  right: 10px; /* Đặt nút tìm kiếm ở bên phải */
+  padding: 8px 12px;
+  background-color: transparent; /* Nền trong suốt */
+  border: none; /* Xóa viền */
+  color: #111; /* Màu của icon */
+  cursor: pointer; /* Chỉ thị con trỏ là pointer */
+  display: flex; /* Hiển thị icon */
+  align-items: center;
+  justify-content: center;
+}
+
+/* Style cho các icon cuối menu */
+.nav-icons {
+  margin-left: 20px;
+  display: flex;
+  align-items: center;
+}
+
+.nav-icon {
+  font-size: 1.5rem;
+  color: #fff;
+  margin-left: 15px;
+  cursor: pointer;
+}
+
+.navbar-brand img {
+  max-width: 70px;
+}
+
+/* Căn giữa nội dung trong header */
+.navbar {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between; 
+  right: 50px;
+  margin-left: 20px;
+}
+/* Màu sắc mặc định của chữ */
+.navbar-nav .nav-item .nav-link {
+  color: white; 
+  margin-left: 40px;
+}
+
+/* Màu sắc của chữ khi rê chuột vào */
+.navbar-nav .nav-item .nav-link:hover {
+  color: yellow; /* Thay đổi màu sắc thành màu vàng khi rê chuột */
+}
+
+.nav-item {
+  margin-right: 50px; /* Điều chỉnh khoảng cách giữa các mục menu */
+}
+/* Định dạng cho menu con */
+.sub-menu {
+  position: absolute; /* Đặt vị trí tuyệt đối để menu con không ảnh hưởng đến layout */
+  top: 100%; /* Đặt menu con bên dưới mục cha */
+  background-color: #fff; /* Màu nền của menu con */
+  border-radius: 4px; /* Bo góc cho menu con */
+  padding: 0px 0; /* Khoảng cách giữa các mục trong menu con */
+  z-index: 1000; 
+  margin-left: 25px;
+  margin-top: -8px;
+  width: 190px; /* Chiều rộng cố định cho menu con */
+  visibility: hidden; 
+  transition: opacity 0.3s ease, visibility 0s 0.3s; /* Hiệu ứng chuyển đổi mượt mà */
+}
+
+/* Hiển thị menu con khi showSubMenu là true */
+.nav-item:hover .sub-menu,
+.sub-menu.show {
+  display: block; /* Hiện menu con */
+  opacity: 1; /* Đặt độ mờ thành 1 khi hiển thị */
+  visibility: visible; /* Hiển thị menu con */
+  transition: opacity 0.3s ease; /* Chỉ hiệu ứng độ mờ */
+}
+.sub-menu li a {
+  display: block; /* Để mỗi mục chiếm toàn bộ chiều ngang */
+  width: 100%; /* Đặt chiều rộng của mục bằng với chiều rộng của menu con */
+  padding: 8px 16px; /* Khoảng cách cho các mục trong menu con */
+  color: black; /* Màu chữ mặc định trong menu con */
+  text-decoration: none; /* Bỏ gạch chân */
+  font-size: 12px;
+  transition: background-color 0.3s, transform 0.3s; /* Thêm hiệu ứng chuyển đổi cho scale */
+}
+
+/* Thay đổi màu nền khi rê chuột vào các mục trong menu con */
+.sub-menu li a:hover {
+  background-color: yellow; /* Màu nền khi rê chuột */
+  color: black; /* Màu chữ khi rê chuột */
+}
+
+
+
+/* Nhung: sửa footer */
+
+
+/* CSS cho footer */
+.footer-bg {
+  background-color: #324B4D;
+}
+
+.footer-container {
+  max-width: 1200px; /* Chiều rộng tối đa của footer */
+  margin: 0 auto; /* Căn giữa */
+  padding: 20px; /* Padding cho footer */
+}
+
+.footer-row {
+  display: flex; /* Sử dụng flexbox để tạo hàng */
+  justify-content: space-between; /* Căn giữa các cột */
+  flex-wrap: wrap; /* Cho phép cột xuống hàng mới nếu không đủ chỗ */
+}
+
+.footer-col {
+  flex: 1; /* Mỗi cột chiếm 1 phần bằng nhau */
+  margin: 10px; /* Khoảng cách giữa các cột */
+  min-width: 200px; /* Chiều rộng tối thiểu của mỗi cột */
+}
+.footer-col h5{
+  color:#fff;
+ 
+}
+
+.footer-nav {
+  list-style: none; /* Bỏ dấu đầu dòng */
+  padding: 0; /* Bỏ padding */
+}
+
+.footer-nav-item {
+  margin-bottom: 10px; /* Khoảng cách giữa các item */
+}
+
+.footer-nav-link {
+  color:#fff; /* Màu chữ mặc định */
+  text-decoration: none; /* Bỏ gạch chân */
+  transition: color 0.3s;
+  font-size: 14px;
+}
+
+.footer-nav-link:hover {
+  color: yellow; /* Màu khi rê chuột */
+}
+
+.footer-logo {
+  text-align: center; /* Căn giữa logo */
+  margin-top: 20px; /* Khoảng cách từ hàng trên */
+}
+
+.footer-text {
+  color: #6c757d; /* Màu chữ */
+  text-align: center; /* Căn giữa chữ */
+  margin-top: 10px; /* Khoảng cách giữa logo và chữ */
+}
+
 
