@@ -86,3 +86,123 @@ th, td {
   --font-size: 16px;
 }
 
+/* css sile cho slide */
+.carousel-item img {
+  width: 696px;
+  height: 600px;
+  object-fit: cover; /* Đảm bảo hình ảnh vừa khít khung */
+  margin: 20px auto; /* Thêm khoảng cách margin top và bottom */
+}
+
+/* css danh mục và sản phẩm */
+
+/* Kích thước và style cho category card */
+.product-category .card {
+  height: 300px;
+  margin-bottom: 20px;
+  border: none;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Đảm bảo hình ảnh trong card phủ đầy không bị méo */
+.product-category .card-img {
+  height: 100%;
+  object-fit: cover;
+  filter: brightness(70%); /* Làm tối ảnh để chữ nổi bật hơn */
+}
+
+/* Tiêu đề overlay căn giữa dọc và ngang, chữ to và rõ nét */
+.product-category .card-img-overlay {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  background-color: rgba(0, 0, 0, 0.5); /* Overlay tối màu */
+  transition: background-color 0.3s ease;
+}
+
+.product-category .card-title {
+  color: white;
+  font-size: 24px;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+/* Hiệu ứng khi hover vào card */
+.product-category .card:hover .card-img-overlay {
+  background-color: rgba(0, 0, 0, 0.7);
+}
+
+/* Khoảng cách giữa các danh mục */
+.product-category {
+  margin-top: 40px;
+  margin-bottom: 40px;
+}
+
+/* Kích thước và hiển thị hình ảnh sản phẩm nổi bật */
+.featured-products .card img {
+  height: 300px;
+  object-fit: cover;
+}
+
+/* Căn giữa tiêu đề sản phẩm nổi bật và thêm khoảng cách trên */
+.product-title {
+  text-align: center;
+  font-weight: bold;
+  margin-top: 20px;
+}
+/* khoản cách giửa các hàng featured-products*/
+.featured-products{
+  margin: 20px auto;
+}
+
+/* thẻ sản phẩm */
+.cardt {
+  border: none; /* Bỏ viền cho thẻ card */
+  border-radius: 8px; /* Bo góc cho card */
+  overflow: hidden; /* Ẩn các phần vượt ra ngoài card */
+  background-color: rgb(239, 245, 246);
+  padding-top: 10px;
+}
+
+.card-body {
+  padding: 20px; /* Thêm padding cho card-body */
+}
+
+.card-title {
+  font-weight: bold; /* Đậm cho tiêu đề */
+  font-size: 1.5rem; /* Kích thước chữ lớn hơn cho tiêu đề */
+}
+
+.card-text {
+  font-size: 1.2rem; /* Kích thước chữ cho văn bản */
+  margin: 10px 0; /* Thêm margin trên và dưới cho văn bản */
+}
+
+.btn-warning {
+  background-color: #ffc107; /* Màu nền cho nút "MUA NGAY" */
+  border: none; /* Bỏ viền cho nút */
+}
+
+.btn-outline-secondary {
+  border: 1px solid #6c757d; /* Đường viền cho nút "Xem chi tiết" */
+  color: #6c757d; /* Màu chữ cho nút */
+}
+
+.btn-custom {
+  width: 40%; /* Chiều rộng nút */
+}
+
+.img-fluid {
+  max-width: 100%; /* Đảm bảo hình ảnh không vượt quá chiều rộng */
+  height: auto; /* Tự động điều chỉnh chiều cao */
+}
+
+.rounded-start {
+  border-top-left-radius: 8px; /* Bo góc cho bên trái của hình ảnh */
+  border-bottom-left-radius: 8px; /* Bo góc cho bên trái của hình ảnh */
+}
+
+

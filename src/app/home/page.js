@@ -1,212 +1,500 @@
-"use client";
-import React, { useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
-import useSWR from "swr";
+import "bootstrap/dist/css/bootstrap.min.css";
+import "bootstrap-icons/font/bootstrap-icons.css";
+import "../globals.css";
 
-const fetcher = (...args) => fetch(...args).then((res) => res.json());
-
-const Alert = ({ message, countdown, onClose }) => (
-  <div className="alert alert-light border border-success mt-3" role="alert">
-    <h1 className="alert-heading text-success">
-      <i className="bi bi-check-circle-fill"></i>
-    </h1>
-    <p>{message}</p>
-    <hr />
-    <p className="my-3 fs-3 text-danger">
-      Hãy kiểm tra email và xác nhận tài khoản
-    </p>
-    <p className="mb-0">Thời gian còn lại: {countdown} giây</p>
-    {countdown <= 0 && onClose()}
-  </div>
-);
-
-export default function Register() {
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm();
-  const { data, isLoading, error } = useSWR(
-    "http://localhost:3000/users",
-    fetcher,
-    { refreshInterval: 6000 }
-  );
-
-  const [isLoadingSubmit, setIsLoadingSubmit] = useState(false);
-  const [showAlert, setShowAlert] = useState(false);
-  const [countdown, setCountdown] = useState(10);
-
-  useEffect(() => {
-    let timer;
-    if (showAlert) {
-      timer = setInterval(() => {
-        setCountdown((prev) => {
-          if (prev <= 1) {
-            clearInterval(timer);
-            setShowAlert(false);
-            return 0;
-          }
-          return prev - 1;
-        });
-      }, 1000);
-    }
-    return () => clearInterval(timer);
-  }, [showAlert]);
-
-  if (error)
-    return <div className="text-center text-danger">Lỗi load dữ liệu.</div>;
-  if (isLoading)
-    return (
-      <div className="text-center text-success py-5">
-        <div className="spinner-border"></div>
-        <br />
-        Đang tải...
-      </div>
-    );
-
-  const checkEmailExists = async (email) => {
-    return data.Users.some((user) => user.email === email)
-      ? "Email đã tồn tại"
-      : true;
-  };
-
-  const onSubmit = async (formData) => {
-    setIsLoadingSubmit(true);
-    try {
-      const res = await fetch("http://localhost:3000/users/register", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
-      });
-      const result = await res.json();
-      if (!result.error) {
-        setShowAlert(true);
-        setCountdown(10);
-      }
-    } catch (error) {
-      console.error("Error register:", error);
-    } finally {
-      setIsLoadingSubmit(false);
-    }
-  };
-
+export default function Home() {
   return (
-    <div className="row m-auto w-100 text-center">
-      <div className="col border border-dark p-5">
-        <h1>Đăng ký</h1>
-        <form onSubmit={handleSubmit(onSubmit)}>
-          {/* Các trường nhập liệu */}
-          <div className="form-floating mb-3">
-            <input
-              type="text"
-              className={`form-control ${errors.name ? "is-invalid" : ""}`}
-              id="floatingName"
-              placeholder="Tên"
-              {...register("name", { required: "Tên không được bỏ trống" })}
+    <>
+      {/* slide */}
+      <div
+        className="carousel slide"
+        data-bs-ride="carousel"
+        id="carouselExampleInterval"
+      >
+        <div className="carousel-inner">
+          <div className="carousel-item active" data-bs-interval="10000">
+            <img
+              alt="First slide"
+              className="d-block w-100"
+              src="./images/slider_1.jpg"
             />
-            <label htmlFor="floatingName">Tên</label>
-            {errors.name && (
-              <span className="text-danger">{errors.name.message}</span>
-            )}
           </div>
-
-          <div className="form-floating mb-3">
-            <input
-              type="email"
-              className={`form-control ${errors.email ? "is-invalid" : ""}`}
-              id="floatingEmail"
-              placeholder="name@example.com"
-              {...register("email", {
-                required: "Email không được bỏ trống",
-                pattern: {
-                  value: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/,
-                  message: "Email không hợp lệ",
-                },
-                validate: checkEmailExists,
-              })}
+          <div className="carousel-item" data-bs-interval="2000">
+            <img
+              alt="Second slide"
+              className="d-block w-100"
+              src="./images/slider_2.jpg"
             />
-            <label htmlFor="floatingEmail">Email</label>
-            {errors.email && (
-              <span className="text-danger">{errors.email.message}</span>
-            )}
           </div>
-
-          <div className="form-floating mb-3">
-            <input
-              type="text"
-              className={`form-control ${errors.phone ? "is-invalid" : ""}`}
-              id="floatingPhoneNumber"
-              placeholder="Số điện thoại"
-              {...register("phone", {
-                required: "Số điện thoại không được bỏ trống",
-              })}
+          <div className="carousel-item">
+            <img
+              alt="Third slide"
+              className="d-block w-100"
+              src="./images/slider_3.jpg"
             />
-            <label htmlFor="floatingPhoneNumber">Số điện thoại</label>
-            {errors.phone && (
-              <span className="text-danger">{errors.phone.message}</span>
-            )}
-          </div>
-
-          <div className="form-floating mb-3">
-            <input
-              type="password"
-              className={`form-control ${errors.pass ? "is-invalid" : ""}`}
-              id="floatingPassword"
-              placeholder="Password"
-              {...register("pass", {
-                required: "Mật khẩu không được bỏ trống",
-                minLength: {
-                  value: 6,
-                  message: "Mật khẩu phải có ít nhất 6 ký tự",
-                },
-              })}
-            />
-            <label htmlFor="floatingPassword">Mật khẩu</label>
-            {errors.pass && (
-              <span className="text-danger">{errors.pass.message}</span>
-            )}
-          </div>
-
-          <button
-            type="submit"
-            className="w-100 py-3 rounded mb-3"
-            style={{ backgroundColor: "#FFE08B", color: "#324B4D" }}
-          >
-            Tạo tài khoản
-          </button>
-
-          {isLoadingSubmit && (
-            <div className="text-center text-success py-2">
-              <div className="spinner-border"></div>
-              <span> Đang tạo tài khoản...</span>
-            </div>
-          )}
-        </form>
-
-        {showAlert && (
-          <Alert
-            message="Bạn đã đăng ký thành công tài khoản."
-            countdown={countdown}
-            onClose={() => setShowAlert(false)}
-          />
-        )}
-
-        <div className="row mb-3">
-          <div className="col">
-            <hr />
-          </div>
-          <div className="col-auto text-secondary">hoặc</div>
-          <div className="col">
-            <hr />
           </div>
         </div>
-        <a type="submit" className="w-100 py-3 rounded mb-3 border">
-          Tôi đã có tài khoản
-        </a>
+        <button
+          className="carousel-control-prev"
+          type="button"
+          data-bs-target="#carouselExampleInterval"
+          data-bs-slide="prev"
+        >
+          <span
+            className="carousel-control-prev-icon"
+            aria-hidden="true"
+          ></span>
+          <span className="visually-hidden">Previous</span>
+        </button>
+        <button
+          className="carousel-control-next"
+          type="button"
+          data-bs-target="#carouselExampleInterval"
+          data-bs-slide="next"
+        >
+          <span
+            className="carousel-control-next-icon"
+            aria-hidden="true"
+          ></span>
+          <span className="visually-hidden">Next</span>
+        </button>
       </div>
-      <div className="col border border-dark d-none d-md-flex ">
-        <img src="/images/logo4x.png" alt="" className="w-50 m-auto" />
+
+      {/* product-category */}
+      <div className="container mt-5">
+        <div className="row product-category">
+          <div className="col-md-3">
+            <div className="card text-bg-dark">
+              <img alt="T-Shirt" className="card-img" src="./images/dm_1.jpg" />
+              <div className="card-img-overlay">
+                <h5 className="card-title">T-SHIRT</h5>
+              </div>
+            </div>
+          </div>
+          <div className="col-md-3">
+            <div className="card text-bg-dark">
+              <img alt="Pants" className="card-img" src="./images/dm_2.jpg" />
+              <div className="card-img-overlay">
+                <h5 className="card-title">PANTS</h5>
+              </div>
+            </div>
+          </div>
+          <div className="col-md-3">
+            <div className="card text-bg-dark">
+              <img alt="Hoodie" className="card-img" src="./images/dm_3.jpg" />
+              <div className="card-img-overlay">
+                <h5 className="card-title">HOODIE</h5>
+              </div>
+            </div>
+          </div>
+          <div className="col-md-3">
+            <div className="card text-bg-dark">
+              <img
+                alt="Sport"
+                className="card-img"
+                src="./images/dm_4.jpg"
+              />
+              <div className="card-img-overlay">
+                <h5 className="card-title">SPORT</h5>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
-    </div>
+
+      {/* featured-products */}
+      <div className="container mt-5">
+        <h3 className="product-title">Sản Phẩm Nổi Bật</h3>
+        <div className="row featured-products">
+          <div className="col-md-3">
+            <div className="card">
+              <img
+                alt="Product 1"
+                className="card-img-top"
+                src="./images/sp1.jpg"
+              />
+              <div className="card-body">
+                <h5 className="card-title">D22-T6 Tee Riot Devil</h5>
+                <p className="card-text">
+                  249.000đ <del>349.000đ</del>
+                </p>
+                <div className="d-flex justify-content-between">
+                  <button className="btn btn-warning">MUA NGAY</button>
+                  <button className="btn btn-outline-secondary">
+                    Xem chi tiết
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="col-md-3">
+            <div className="card">
+              <img
+                alt="Product 2"
+                className="card-img-top"
+                src="./images/sp2.jpg"
+              />
+              <div className="card-body">
+                <h5 className="card-title">D22-T6 Tee Riot Devil</h5>
+                <p className="card-text">
+                  199.000đ <del>299.000đ</del>
+                </p>
+                <div className="d-flex justify-content-between">
+                  <button className="btn btn-warning">MUA NGAY</button>
+                  <button className="btn btn-outline-secondary">
+                    Xem chi tiết
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="col-md-3">
+            <div className="card">
+              <img
+                alt="Product 3"
+                className="card-img-top"
+                src="./images/sp3.jpg"
+              />
+              <div className="card-body">
+                <h5 className="card-title">D22-T6 Tee Riot Devil</h5>
+                <p className="card-text">
+                  199.000đ <del>299.000đ</del>
+                </p>
+                <div className="d-flex justify-content-between">
+                  <button className="btn btn-warning">MUA NGAY</button>
+                  <button className="btn btn-outline-secondary">
+                    Xem chi tiết
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="col-md-3">
+            <div className="card">
+              <img
+                alt="Product 4"
+                className="card-img-top"
+                src="./images/sp4.jpg"
+              />
+              <div className="card-body">
+                <h5 className="card-title">D22-T6 Tee Riot Devil</h5>
+                <p className="card-text">
+                  199.000đ <del>299.000đ</del>
+                </p>
+                <div className="d-flex justify-content-between">
+                  <button className="btn btn-warning">MUA NGAY</button>
+                  <button className="btn btn-outline-secondary">
+                    Xem chi tiết
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        {/* ----------- */}
+        <div className="row featured-products">
+          <div className="col-md-3">
+            <div className="card">
+              <img
+                alt="Product 1"
+                className="card-img-top"
+                src="./images/sp5.jpg"
+              />
+              <div className="card-body">
+                <h5 className="card-title">D22-T6 Tee Riot Devil</h5>
+                <p className="card-text">
+                  249.000đ <del>349.000đ</del>
+                </p>
+                <div className="d-flex justify-content-between">
+                  <button className="btn btn-warning">MUA NGAY</button>
+                  <button className="btn btn-outline-secondary">
+                    Xem chi tiết
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="col-md-3">
+            <div className="card">
+              <img
+                alt="Product 2"
+                className="card-img-top"
+                src="./images/sp6.jpg"
+              />
+              <div className="card-body">
+                <h5 className="card-title">D22-T6 Tee Riot Devil</h5>
+                <p className="card-text">
+                  199.000đ <del>299.000đ</del>
+                </p>
+                <div className="d-flex justify-content-between">
+                  <button className="btn btn-warning">MUA NGAY</button>
+                  <button className="btn btn-outline-secondary">
+                    Xem chi tiết
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="col-md-3">
+            <div className="card">
+              <img
+                alt="Product 3"
+                className="card-img-top"
+                src="./images/sp7.jpg"
+              />
+              <div className="card-body">
+                <h5 className="card-title">D22-T6 Tee Riot Devil</h5>
+                <p className="card-text">
+                  199.000đ <del>299.000đ</del>
+                </p>
+                <div className="d-flex justify-content-between">
+                  <button className="btn btn-warning">MUA NGAY</button>
+                  <button className="btn btn-outline-secondary">
+                    Xem chi tiết
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="col-md-3">
+            <div className="card">
+              <img
+                alt="Product 4"
+                className="card-img-top"
+                src="./images/sp8.jpg"
+              />
+              <div className="card-body">
+                <h5 className="card-title">D22-T6 Tee Riot Devil</h5>
+                <p className="card-text">
+                  199.000đ <del>299.000đ</del>
+                </p>
+                <div className="d-flex justify-content-between">
+                  <button className="btn btn-warning">MUA NGAY</button>
+                  <button className="btn btn-outline-secondary">
+                    Xem chi tiết
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Thẻ Sản Phẩm */}
+      <div className="container mt-5">
+        <div className="cardt mb-3">
+          <div className="row g-0">
+            <div className="col-md-6">
+              <div className="card-body">
+                <h5 className="card-title">
+                  Vòng Cổ Bạc Nữ Đính Đá CZ Hình Bông Hoa Hướng Dương
+                </h5>
+                <p className="card-text">
+                  399.000đ <del>499.000đ</del>
+                </p>
+                <p className="card-text">
+                  Chịu trách nhiệm đảm bảo sản phẩm đạt tiêu chuẩn chất lượng.
+                </p>
+                <div className="d-flex justify-content-between">
+                  <button className="btn btn-warning btn-custom">
+                    MUA NGAY
+                  </button>
+                  <button className="btn btn-outline-secondary btn-custom">
+                    Xem chi tiết
+                  </button>
+                </div>
+              </div>
+            </div>
+            <div className="col-md-6">
+              <img
+                alt="Vòng Cổ Bạc Nữ Đính Đá"
+                className="img-fluid rounded-start"
+                src="./images/sp_the.png"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+
+       {/* sell-products */}
+       <div className="container mt-5">
+        <h3 className="product-title">Sản Phẩm Bán Chạy</h3>
+        <div className="row featured-products">
+          <div className="col-md-3">
+            <div className="card">
+              <img
+                alt="Product 1"
+                className="card-img-top"
+                src="./images/sp9.jpg"
+              />
+              <div className="card-body">
+                <h5 className="card-title">D22-T6 Tee Riot Devil</h5>
+                <p className="card-text">
+                  249.000đ <del>349.000đ</del>
+                </p>
+                <div className="d-flex justify-content-between">
+                  <button className="btn btn-warning">MUA NGAY</button>
+                  <button className="btn btn-outline-secondary">
+                    Xem chi tiết
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="col-md-3">
+            <div className="card">
+              <img
+                alt="Product 2"
+                className="card-img-top"
+                src="./images/sp8.jpg"
+              />
+              <div className="card-body">
+                <h5 className="card-title">D22-T6 Tee Riot Devil</h5>
+                <p className="card-text">
+                  199.000đ <del>299.000đ</del>
+                </p>
+                <div className="d-flex justify-content-between">
+                  <button className="btn btn-warning">MUA NGAY</button>
+                  <button className="btn btn-outline-secondary">
+                    Xem chi tiết
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="col-md-3">
+            <div className="card">
+              <img
+                alt="Product 3"
+                className="card-img-top"
+                src="./images/sp7.jpg"
+              />
+              <div className="card-body">
+                <h5 className="card-title">D22-T6 Tee Riot Devil</h5>
+                <p className="card-text">
+                  199.000đ <del>299.000đ</del>
+                </p>
+                <div className="d-flex justify-content-between">
+                  <button className="btn btn-warning">MUA NGAY</button>
+                  <button className="btn btn-outline-secondary">
+                    Xem chi tiết
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="col-md-3">
+            <div className="card">
+              <img
+                alt="Product 4"
+                className="card-img-top"
+                src="./images/sp6.jpg"
+              />
+              <div className="card-body">
+                <h5 className="card-title">D22-T6 Tee Riot Devil</h5>
+                <p className="card-text">
+                  199.000đ <del>299.000đ</del>
+                </p>
+                <div className="d-flex justify-content-between">
+                  <button className="btn btn-warning">MUA NGAY</button>
+                  <button className="btn btn-outline-secondary">
+                    Xem chi tiết
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        {/* ----------- */}
+        <div className="row featured-products">
+          <div className="col-md-3">
+            <div className="card">
+              <img
+                alt="Product 1"
+                className="card-img-top"
+                src="./images/sp5.jpg"
+              />
+              <div className="card-body">
+                <h5 className="card-title">D22-T6 Tee Riot Devil</h5>
+                <p className="card-text">
+                  249.000đ <del>349.000đ</del>
+                </p>
+                <div className="d-flex justify-content-between">
+                  <button className="btn btn-warning">MUA NGAY</button>
+                  <button className="btn btn-outline-secondary">
+                    Xem chi tiết
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="col-md-3">
+            <div className="card">
+              <img
+                alt="Product 2"
+                className="card-img-top"
+                src="./images/sp4.jpg"
+              />
+              <div className="card-body">
+                <h5 className="card-title">D22-T6 Tee Riot Devil</h5>
+                <p className="card-text">
+                  199.000đ <del>299.000đ</del>
+                </p>
+                <div className="d-flex justify-content-between">
+                  <button className="btn btn-warning">MUA NGAY</button>
+                  <button className="btn btn-outline-secondary">
+                    Xem chi tiết
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="col-md-3">
+            <div className="card">
+              <img
+                alt="Product 3"
+                className="card-img-top"
+                src="./images/sp3.jpg"
+              />
+              <div className="card-body">
+                <h5 className="card-title">D22-T6 Tee Riot Devil</h5>
+                <p className="card-text">
+                  199.000đ <del>299.000đ</del>
+                </p>
+                <div className="d-flex justify-content-between">
+                  <button className="btn btn-warning">MUA NGAY</button>
+                  <button className="btn btn-outline-secondary">
+                    Xem chi tiết
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="col-md-3">
+            <div className="card">
+              <img
+                alt="Product 4"
+                className="card-img-top"
+                src="./images/sp2.jpg"
+              />
+              <div className="card-body">
+                <h5 className="card-title">D22-T6 Tee Riot Devil</h5>
+                <p className="card-text">
+                  199.000đ <del>299.000đ</del>
+                </p>
+                <div className="d-flex justify-content-between">
+                  <button className="btn btn-warning">MUA NGAY</button>
+                  <button className="btn btn-outline-secondary">
+                    Xem chi tiết
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <script src="/bootstrap/js/bootstrap.bundle.js"></script>
+    </>
   );
 }
