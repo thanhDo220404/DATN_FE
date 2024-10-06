@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import useSWR from "swr";
 import Overlay from "../components/overlay";
+import Link from "next/link";
 
 const fetcher = (...args) => fetch(...args).then((res) => res.json());
 const apiUrl = process.env.NEXT_PUBLIC_API_URL;
@@ -228,9 +229,13 @@ export default function Register() {
             <hr />
           </div>
         </div>
-        <a type="submit" className="w-100 py-3 rounded mb-3 border">
+        <Link
+          href="dang-nhap"
+          type="submit"
+          className="w-100 py-3 rounded mb-3 border"
+        >
           Tôi đã có tài khoản
-        </a>
+        </Link>
       </div>
       <div className="col border border-dark d-none d-md-flex">
         <img src="/images/logo4x.png" alt="Logo" className="w-50 m-auto" />
