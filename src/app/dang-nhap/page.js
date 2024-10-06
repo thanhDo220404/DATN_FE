@@ -101,8 +101,8 @@ export default function Login() {
   };
 
   return (
-    <div className="row m-auto w-75 text-center position-relative my-5">
-      <div className="col border border-dark p-5">
+    <div className="container row m-auto text-center position-relative my-5 p-sm-5">
+      <div className="col border border-dark p-sm-5 p-3">
         <h1>Đăng nhập</h1>
         <form onSubmit={handleSubmit(onSubmit)}>
           {/* Email */}

@@ -36,7 +36,7 @@ const Alert = ({ message, countdown, onClose }) => (
         className="fs-4 ms-2 text-light position-absolute top-0 start-100"
         onClick={onClose}
       >
-        <i class="bi bi-x-lg"></i>
+        <i className="bi bi-x-lg"></i>
       </div>
     </div>
   </div>
@@ -111,10 +111,10 @@ export default function Register() {
   };
 
   return (
-    <div className="row m-auto w-75 text-center position-relative my-5">
+    <div className="container row m-auto text-center position-relative my-5 p-sm-5">
       {/* Overlay làm mờ khi hiển thị Alert */}
       {showAlert && <Overlay />}
-      <div className="col border border-dark p-5">
+      <div className="col border border-dark p-sm-5 p-3">
         <h1>Đăng ký</h1>
         <form onSubmit={handleSubmit(onSubmit)}>
           {/* Tên */}
