@@ -276,11 +276,159 @@ th, td {
 
 
 
+/* Nhung:giao diện trang thanh toán */
+
+
+/* Khung chứa thông tin giao hàng và giỏ hàng */
+.checkout-page .col-md-6 {
+  border: 3px solid #ccc; /* Thêm viền 3px */
+  padding: 20px;
+  margin: 0 15px; /* Khoảng cách giữa hai khung */
+  border-radius: 8px;
+  flex: 1; /* Đảm bảo hai khung có chiều rộng bằng nhau */
+}
+
+/* Các input form */
+.form-group {
+  margin-bottom: 15px;
+}
+
+/* Sắp xếp mã giảm giá và phương thức thanh toán cùng hàng */
+.form-group-inline {
+  display: flex;
+  justify-content: space-between;
+  gap: 15px;
+}
+
+/* Sắp xếp ghi chú và đơn vị vận chuyển cùng hàng */
+.notes-shipping-group {
+  display: flex;
+  justify-content: space-between;
+  gap: 15px;
+}
+
+/* Các khung thông tin trong giỏ hàng */
+.cart-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.cart-item img {
+  width: 100px; /* Chiều rộng hình ảnh sản phẩm */
+  height: auto; /* Tự động điều chỉnh chiều cao */
+}
+
+.quantity-control {
+  display: flex;
+  align-items: center;
+}
+
+/* Tổng tiền */
+.cart-total {
+  font-weight: bold;
+  margin-top: 20px;
+}
+/* styles/checkout.css */
+
+/* Nút "Tiến hành thanh toán" */
+.btn-primary {
+  background-color:yellow; /* Màu nền nút */
+  color: black; /* Màu chữ */
+  border: none; /* Không viền */
+  padding: 10px 20px; /* Khoảng cách bên trong */
+  font-size: 16px; /* Kích thước chữ */
+  border-radius: 5px; 
+  cursor: pointer; /* Con trỏ chuột */
+  transition: background-color 0.3s ease, transform 0.2s ease; 
+  width: 500px;
+  margin-left: 19px;
+  margin-top: 50px;
+ 
+}
+
+/* Thay đổi màu khi di chuột */
+.btn-primary:hover {
+  background-color: #324B4D; /* Màu nền khi di chuột */
+}
+
+/* Hiệu ứng khi nhấn nút */
+.btn-primary:active {
+  transform: scale(0.95); /* Nhỏ lại khi nhấn */
+}
+
+/* Định dạng cho nhóm phương thức thanh toán và đơn vị vận chuyển */
+.payment-method-group,
+.shipping-method-group {
+    position: relative; /* Thiết lập vị trí tương đối cho phần tử cha */
+    
+}
+.btn-link{
+  border: 1px solid #ccc;
+  text-decoration: none;
+  color: #333;
+
+}
+.btn-link:hover{
+  color: #333;
+}
+.note1{
+  margin-top: 10px;
+}
+.submenu {
+  display: none;
+  position: absolute; 
+  background-color: #fff;
+  border: 1px solid #ccc;
+  z-index: 10;
+  margin-left: -34px;
+}
+.submenu1 {
+  display: none;
+  position: absolute; 
+  background-color: #fff;
+  border: 1px solid #ccc;
+  z-index: 10;
+  margin-left: -70px;
+  width: 250px;
+  text-align: center;
+}
+
+.payment-method-group.open .submenu,
+.shipping-method-group.open .submenu {
+  display: block; /* Hiện menu con khi mở */
+}
+.payment-method-group.open .submenu1,
+.shipping-method-group.open .submenu1 {
+  display: block; /* Hiện menu con khi mở */
+}
+
+
+/* Định dạng cho menu con */
+.submenu-item button {
+  background-color: transparent; 
+  border: none;
+  color: black; 
+  text-align: left; 
+  padding: 5px 0px; 
+  cursor: pointer;
+  width: 220px;
+  text-align: center;
+ 
+  
+}
+
+/* Định dạng cho các nút khi hover */
+.submenu-item button:hover {
+  background-color:#324B4D; /* Đặt màu nền cho nút khi hover */
+  color: yellow; /* Thay đổi màu chữ khi hover */
+}
 
 
 
-
-
-
-
-
+/* Định dạng cho nút khi focus */
+.submenu-item button:focus {
+  outline: none; 
+  background-color: transparent; 
+  color: black; 
+}
