@@ -275,6 +275,304 @@ th, td {
 }
 
 
+/* ----------------------------------trung chitietsp */
+.product-image img {
+  /* Đảm bảo ảnh chính chiếm toàn bộ chiều rộng của phần tử chứa */
+  width: 100%;
+}
+
+.thumbnail-images {
+  /* Sắp xếp các ảnh phụ theo chiều ngang và cách đều nhau */
+  display: flex;
+  justify-content: space-between;
+  margin-top: 15px;
+}
+
+.thumbnail-images img {
+  /* Đặt chiều rộng cho mỗi ảnh phụ là 18% để vừa khít hàng ngang */
+  width: 18%;
+  cursor: pointer;  
+  border: 1px solid #ddd;   
+  border-radius: 5px; 
+  transition: all 0.3s ease-in-out;   
+}
+
+.thumbnail-images img:hover {
+  /* Khi hover vào ảnh phụ, đổi màu viền */
+  border-color: #000;   
+}
+
+.details-section {
+  /* Thiết lập đường viền trên cùng và khoảng cách với các thành phần khác */
+  border-top: 1px solid #ddd;
+  margin-top: 20px;   
+  padding-top: 20px;  
+}
+
+.price {
+  /* Định dạng cho giá sản phẩm */
+  font-size: 1.5rem; /* Kích thước chữ lớn cho giá hiện tại */
+  font-weight: bold;  
+  color: #ff0000;   
+}
+
+.old-price {
+  /* Định dạng cho giá gạch bỏ (giá cũ) */
+  text-decoration: line-through;  
+  color: #888;  
+}
+
+.btn-custom {
+  /* Định dạng cho các nút 'MUA NGAY' và 'Thêm vào giỏ hàng' */
+  width: 100%;  
+  margin-bottom: 10px;  
+}
+
+.product-options label {
+  /* Định dạng cho các tiêu đề phần tùy chọn sản phẩm */
+  margin-bottom: 5px;   
+  font-weight: bold;  
+}
+
+.product-options button {
+  /* Định dạng cho các nút tùy chọn sản phẩm (màu sắc, kích thước) */
+  margin: 5px 0;  
+}
+
+/* -----------  ảnh thực tế sản phẩm */
+.feedback-section {
+  /* Khoảng cách giữa phần feedback và các phần khác */
+  margin: 30px 0;
+}
+
+.feedback-section h3 {
+  /* Kích thước chữ cho tiêu đề của phần feedback */
+  font-size: 1.5rem;
+  margin-bottom: 15px; /* Khoảng cách giữa tiêu đề và nội dung */
+}
+
+.feedback-images {
+  /* Canh giữa các ảnh feedback */
+  display: flex;
+  justify-content: center; /* Đưa các ảnh ra giữa */
+  flex-wrap: wrap; /* Cho phép ảnh xuống dòng nếu không đủ chỗ */
+  gap: 10px; /* Khoảng cách giữa các ảnh */
+}
+
+.feedback-images img {
+  /* Chiều rộng của mỗi ảnh feedback là 30% */
+  width: 30%;
+  border-radius: 5px; /* Bo tròn góc của ảnh */
+  cursor: pointer; /* Thay đổi con trỏ khi hover vào ảnh */
+  transition: transform 0.3s ease; /* Hiệu ứng phóng to khi hover */
+}
+
+.feedback-images img:hover {
+  /* Tạo hiệu ứng phóng to khi hover vào ảnh */
+  transform: scale(1.05);
+}
+
+/* ------------đánh giá và bình luận  */
+
+.rating-section {
+  /* Khoảng cách giữa phần đánh giá và các phần khác */
+  margin: 30px 0;
+  padding: 20px; /* Thêm khoảng cách bên trong phần đánh giá */
+  border: 1px solid #ddd; /* Thêm viền nhạt xung quanh phần đánh giá */
+  border-radius: 5px; /* Bo tròn góc viền */
+  background-color: #f9f9f9; /* Màu nền nhẹ cho phần đánh giá */
+}
+
+.rating-summary {
+  /* Sắp xếp nội dung phần tổng quan đánh giá theo hàng ngang */
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 20px; /* Khoảng cách dưới cho phần tổng quan đánh giá */
+  border-bottom: 1px solid #ddd; /* Thêm viền dưới phân chia phần tóm tắt */
+}
+
+.average-rating h4 {
+  /* Kích thước chữ cho điểm trung bình của sản phẩm */
+  font-size: 2rem;
+  color: #ff0000; /* Màu đỏ nổi bật cho điểm trung bình */
+}
+
+.rating-bars {
+  /* Chiều rộng của cột chứa các thanh đánh giá */
+  width: 60%;
+}
+
+.rating-bar {
+  /* Sắp xếp các thành phần của mỗi thanh đánh giá theo hàng ngang */
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 5px; /* Khoảng cách giữa các thanh đánh giá */
+}
+
+.progress-bar {
+  /* Kiểu dáng cho thanh tiến trình của mỗi đánh giá */
+  width: 70%;
+  background-color: #ddd; /* Màu nền mặc định */
+  height: 10px; /* Chiều cao của thanh tiến trình */
+  border-radius: 5px; /* Bo tròn góc của thanh tiến trình */
+  overflow: hidden;
+}
+
+.progress-bar .filled {
+  /* Phần đã được lấp đầy trong thanh tiến trình */
+  height: 100%;
+  background-color: #ffcc00; /* Màu vàng cho phần đã lấp đầy */
+}
+
+.btn-rate {
+  /* Kiểu dáng cho nút "Đánh giá" */
+  padding: 10px 20px;
+  background-color: #ffcc00; /* Màu nền vàng */
+  border: none; /* Bỏ viền */
+  cursor: pointer; /* Thay đổi con trỏ khi hover vào nút */
+  border-radius: 5px; /* Bo tròn góc của nút */
+  transition: background-color 0.3s ease; /* Hiệu ứng đổi màu nền khi hover */
+}
+
+.btn-rate:hover {
+  /* Màu nền mới khi hover vào nút "Đánh giá" */
+  background-color: #ff9900;
+}
+
+
+.pagination-dots {
+  /* Sắp xếp các chấm phân trang ở giữa và cách đều nhau */
+  display: flex;
+  justify-content: center;
+  margin-top: 10px; /* Khoảng cách trên phần phân trang */
+}
+
+.pagination-dots .dot {
+  /* Kích thước và kiểu dáng cho chấm phân trang */
+  height: 10px;
+  width: 10px;
+  margin: 0 5px; /* Khoảng cách giữa các chấm */
+  background-color: #ddd; /* Màu nền mặc định */
+  border-radius: 50%; /* Bo tròn thành hình tròn */
+  display: inline-block;
+}
+
+.pagination-dots .dot.active {
+  /* Màu sắc cho chấm đang được chọn */
+  background-color: #333;
+}
+
+.rating-section {
+  /* Khoảng cách giữa phần đánh giá và các phần khác */
+  margin: 30px 0;
+}
+
+.rating-summary {
+  /* Sắp xếp nội dung phần tổng quan đánh giá theo hàng ngang */
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 100px;
+}
+
+.average-rating h4 {
+  /* Kích thước chữ cho điểm trung bình của sản phẩm */
+  font-size: 2rem;
+  color: #ff0000; /* Màu đỏ nổi bật cho điểm trung bình */
+}
+
+.rating-bars {
+  /* Chiều rộng của cột chứa các thanh đánh giá */
+  width: 60%;
+}
+
+.rating-bar {
+  /* Sắp xếp các thành phần của mỗi thanh đánh giá theo hàng ngang */
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 5px; /* Khoảng cách giữa các thanh đánh giá */
+}
+
+.progress-bar {
+  /* Kiểu dáng cho thanh tiến trình của mỗi đánh giá */
+  width: 70%;
+  background-color: #ddd; /* Màu nền mặc định */
+  height: 10px; /* Chiều cao của thanh tiến trình */
+  border-radius: 5px; /* Bo tròn góc của thanh tiến trình */
+  overflow: hidden;
+}
+
+.progress-bar .filled {
+  /* Phần đã được lấp đầy trong thanh tiến trình */
+  height: 100%;
+  background-color: #ffcc00; /* Màu vàng cho phần đã lấp đầy */
+}
+
+.btn-rate {
+  /* Kiểu dáng cho nút "Đánh giá" */
+  padding: 10px 20px;
+  background-color: #ffcc00; /* Màu nền vàng */
+  border: none; /* Bỏ viền */
+  cursor: pointer; /* Thay đổi con trỏ khi hover vào nút */
+  border-radius: 5px; /* Bo tròn góc của nút */
+  transition: background-color 0.3s ease; /* Hiệu ứng đổi màu nền khi hover */
+}
+
+.btn-rate:hover {
+  /* Màu nền mới khi hover vào nút "Đánh giá" */
+  background-color: #ff9900;
+}
+
+.customer-reviews {
+  /* Khoảng cách trên của phần đánh giá khách hàng */
+  margin-top: 20px;
+}
+
+.review {
+  /* Sắp xếp phần đánh giá của khách hàng theo hàng ngang */
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 15px; /* Khoảng cách giữa các đánh giá */
+}
+
+.initials {
+  /* Kiểu dáng cho vòng tròn chứa chữ cái đầu của khách hàng */
+  font-size: 1.5rem;
+  background-color: #ddd; /* Màu nền cho vòng tròn */
+  width: 40px;
+  height: 40px;
+  border-radius: 50%; /* Bo tròn thành hình tròn */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-right: 10px; /* Khoảng cách giữa vòng tròn và nội dung đánh giá */
+}
+
+.review-content h5 {
+  /* Kích thước và kiểu chữ cho tên khách hàng */
+  font-size: 1.2rem;
+  margin: 0; /* Loại bỏ khoảng cách mặc định trên dưới của tiêu đề */
+}
+
+.rating-stars {
+  /* Màu sắc cho các ngôi sao đánh giá */
+  color: #ffcc00;
+}
+
+
+
+
+
+
+
+
+
+
+
+
 
 /* Nhung:giao diện trang thanh toán */
 
