@@ -7,20 +7,24 @@ export default function Header() {
   const pathname = usePathname();
   const isAdminPage = pathname.includes("/admin");
 
+  // Nếu là trang admin, không render header
   if (isAdminPage) return null;
 
   return (
     <header className="menu-header">
       <div className="container">
         <nav className="navbar navbar-expand-lg navbar-dark">
+          {/* Icons cho mobile */}
           <div className="nav-icons d-flex d-lg-none align-items-center">
-            <Link href="/dang-nhap" passHref>
+            <Link href="/dang-nhap">
               <FaUser className="nav-icon text-light fs-5 me-3" />
             </Link>
-            <Link href="/gio-hang" passHref>
+            <Link href="/gio-hang">
               <FaShoppingCart className="nav-icon text-light fs-5" />
             </Link>
           </div>
+
+          {/* Logo */}
           <Link className="navbar-brand" href="/">
             <img
               src="/images/logo1x.png"
@@ -28,6 +32,8 @@ export default function Header() {
               style={{ width: "70px", height: "70px" }}
             />
           </Link>
+
+          {/* Toggler cho mobile */}
           <button
             className="navbar-toggler"
             type="button"
@@ -39,10 +45,11 @@ export default function Header() {
           >
             <span className="navbar-toggler-icon"></span>
           </button>
+
           <div className="collapse navbar-collapse" id="navbarSupportedContent">
             <ul className="navbar-nav me-auto mb-2 mb-lg-0">
               <li className="nav-item">
-                <Link className="nav-link" aria-current="page" href="/">
+                <Link className="nav-link" href="/">
                   Trang chủ
                 </Link>
               </li>
@@ -82,7 +89,11 @@ export default function Header() {
               <li className="nav-item">
                 <a className="nav-link d-flex" href="#">
                   Flash Sale
-                  <img src="./images/fireFlashSale.png" width="20px" alt="" />
+                  <img
+                    src="./images/fireFlashSale.png"
+                    width="20px"
+                    alt="Flash Sale"
+                  />
                 </a>
               </li>
               <li className="nav-item">
@@ -96,6 +107,8 @@ export default function Header() {
                 </Link>
               </li>
             </ul>
+
+            {/* Form tìm kiếm */}
             <form className="d-flex me-2" role="search">
               <input
                 className="form-control me-2"
@@ -107,11 +120,13 @@ export default function Header() {
                 <FaSearch />
               </button>
             </form>
+
+            {/* Icons cho desktop */}
             <div className="nav-icons d-none d-lg-flex align-items-center">
-              <Link href="/dang-nhap" passHref>
+              <Link href="/dang-nhap">
                 <FaUser className="nav-icon text-light fs-5 me-3" />
               </Link>
-              <Link href="/gio-hang" passHref>
+              <Link href="/gio-hang">
                 <FaShoppingCart className="nav-icon text-light fs-5" />
               </Link>
             </div>
