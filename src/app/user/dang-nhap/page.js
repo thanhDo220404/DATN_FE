@@ -2,12 +2,12 @@
 import Link from "next/link";
 import { useForm } from "react-hook-form";
 import useSWR from "swr";
-import bcrypt from "bcryptjs"; // Thêm bcrypt để so sánh mật khẩu
-import { setCookie } from "../lib/CookieManager"; // Import CookieManager
-import { useState } from "react"; // Import useState
+import bcrypt from "bcryptjs";
+import { setCookie, getCookie } from "../../lib/CookieManager"; // Import CookieManager
+import { useState, useEffect } from "react"; // Import useEffect
+import { login } from "@/app/databases/users"; // Import the login function
 
 const fetcher = (...args) => fetch(...args).then((res) => res.json());
-
 const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
 // Hàm kiểm tra email tồn tại và đã xác thực
@@ -16,28 +16,6 @@ const checkEmailExists = (data, email) => {
   if (!user) return "Email không tồn tại";
   if (!user.isVerified) return "Tài khoản chưa xác thực email";
   return true;
-};
-
-// Hàm đăng nhập API
-const login = async (data) => {
-  try {
-    // Gửi yêu cầu POST tới API đăng nhập
-    const response = await fetch(`${apiUrl}/users/login`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(data),
-    });
-
-    const result = await response.json();
-
-    // Kiểm tra kết quả trả về
-    if (!response.ok) {
-      throw new Error(result.message || "Lỗi đăng nhập");
-    }
-    return result;
-  } catch (error) {
-    throw new Error(error.message || "Lỗi kết nối tới server");
-  }
 };
 
 export default function Login() {
@@ -50,9 +28,23 @@ export default function Login() {
     handleSubmit,
     formState: { errors },
     setError,
+    reset,
   } = useForm();
 
   const [isLoadingSubmit, setIsLoadingSubmit] = useState(false); // State for loading spinner
+
+  // useEffect để kiểm tra cookie LOGIN_INFO
+  useEffect(() => {
+    const token = getCookie("LOGIN_INFO");
+    if (token) {
+      console.log("Người dùng đã đăng nhập, điều hướng về trang trước đó...");
+      if (window.history.length > 1) {
+        window.history.back(); // Nếu có lịch sử điều hướng, quay lại trang trước
+      } else {
+        window.location.href = "/"; // Nếu không có lịch sử, quay về trang chủ
+      }
+    }
+  }, []);
 
   if (error)
     return <div className="text-center text-danger">Lỗi load dữ liệu.</div>;
@@ -67,17 +59,13 @@ export default function Login() {
 
   const onSubmit = async (formData) => {
     try {
-      // Kiểm tra email trước
       const emailCheckResult = checkEmailExists(data, formData.email);
       if (emailCheckResult !== true) {
         setError("email", { type: "manual", message: emailCheckResult });
         return;
       }
 
-      // Lấy thông tin người dùng
       const user = data.Users.find((user) => user.email === formData.email);
-
-      // Kiểm tra mật khẩu
       const checkpass = bcrypt.compareSync(formData.pass, user.pass);
       if (!checkpass) {
         setError("pass", {
@@ -87,12 +75,16 @@ export default function Login() {
         return;
       }
 
-      // Gọi API đăng nhập
       setIsLoadingSubmit(true); // Start loading
-      const result = await login(formData);
-      setCookie("token", result.User.token, 1); // Lưu token với thời gian sống 1 ngày
-
-      console.log("Đăng nhập thành công:", result);
+      const result = await login(formData); // Call login function from users.js
+      setCookie("LOGIN_INFO", result.User.token, 1); // Lưu token với thời gian sống 1 ngày
+      reset(); // Xóa input
+      console.log("Đăng nhập thành công");
+      if (window.history.length > 1) {
+        window.history.back();
+      } else {
+        window.location.href = "/"; // Nếu không có lịch sử, quay về trang chủ
+      }
     } catch (error) {
       console.error("Error during login:", error);
     } finally {
@@ -199,7 +191,7 @@ export default function Login() {
         </div>
         <Link
           type="submit"
-          href="/dang-ky"
+          href="/user/dang-ky"
           className="w-100 py-3 rounded mb-3 border"
         >
           Tôi chưa có tài khoản
