@@ -2,6 +2,8 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { FaSearch, FaShoppingCart, FaUser } from "react-icons/fa";
+import { useState, useEffect } from "react";
+import { getCookie } from "../lib/CookieManager";
 
 export default function Header() {
   const pathname = usePathname();
@@ -9,6 +11,14 @@ export default function Header() {
 
   // Nếu là trang admin, không render header
   if (isAdminPage) return null;
+  const [isUserLoggedIn, setIsUserLoggedIn] = useState(false);
+
+  useEffect(() => {
+    const token = getCookie("LOGIN_INFO");
+    if (token) {
+      setIsUserLoggedIn(true);
+    }
+  }, []);
 
   return (
     <header className="menu-header">
@@ -90,7 +100,7 @@ export default function Header() {
                 <a className="nav-link d-flex" href="#">
                   Flash Sale
                   <img
-                    src="./images/fireFlashSale.png"
+                    src="/images/fireFlashSale.png"
                     width="20px"
                     alt="Flash Sale"
                   />
@@ -123,9 +133,40 @@ export default function Header() {
 
             {/* Icons cho desktop */}
             <div className="nav-icons d-none d-lg-flex align-items-center">
-              <Link href="/dang-nhap">
-                <FaUser className="nav-icon text-light fs-5 me-3" />
-              </Link>
+              {isUserLoggedIn ? (
+                <div className="nav-item dropdown position-relative">
+                  <Link
+                    className="nav-link "
+                    href="#"
+                    role="button"
+                    data-bs-toggle="dropdown"
+                    aria-expanded="false"
+                  >
+                    <FaUser className="nav-icon text-light fs-5 me-3" />
+                  </Link>
+                  <ul className="dropdown-menu position-absolute start-0">
+                    <li>
+                      <Link className="dropdown-item" href="/user/tai-khoan">
+                        Tài khoản của tôi
+                      </Link>
+                    </li>
+                    <li>
+                      <Link className="dropdown-item" href="/user/don-hang">
+                        Đơn hàng
+                      </Link>
+                    </li>
+                    <li>
+                      <Link className="dropdown-item" href="#">
+                        Đăng xuất
+                      </Link>
+                    </li>
+                  </ul>
+                </div>
+              ) : (
+                <Link href="/user/dang-nhap">
+                  <FaUser className="nav-icon text-light fs-5 me-3" />
+                </Link>
+              )}
               <Link href="/gio-hang">
                 <FaShoppingCart className="nav-icon text-light fs-5" />
               </Link>
