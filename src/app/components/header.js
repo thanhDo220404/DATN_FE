@@ -54,14 +54,46 @@ export default function Header() {
                 </Link>
               </li>
               <li className="nav-item dropdown">
-                <Link className="nav-link" href="/danhmucsanpham">
+                <Link
+                  className="nav-link dropdown-toggle"
+                  href="#"
+                  role="button"
+                  data-bs-toggle="dropdown"
+                  aria-expanded="false"
+                >
                   Sản phẩm
                 </Link>
+                <ul className="dropdown-menu">
+                  <li>
+                    <Link className="dropdown-item" href="#">
+                      ÁO THUN - T SHIRT
+                    </Link>
+                  </li>
+                  <li>
+                    <Link className="dropdown-item" href="#">
+                      QUẦN - PANTS
+                    </Link>
+                  </li>
+                  <li>
+                    <Link className="dropdown-item" href="#">
+                      ÁO KHOÁC - HOODIE
+                    </Link>
+                  </li>
+                  <li>
+                    <Link className="dropdown-item" href="#">
+                      PHỤ KIỆN - ACCESSORY
+                    </Link>
+                  </li>
+                </ul>
               </li>
               <li className="nav-item">
                 <a className="nav-link d-flex" href="#">
                   Flash Sale
-                  <img src="./images/fireFlashSale.png" width="20px" alt="Flash Sale" />
+                  <img
+                    src="./images/fireFlashSale.png"
+                    width="20px"
+                    alt="Flash Sale"
+                  />
                 </a>
               </li>
               <li className="nav-item">
