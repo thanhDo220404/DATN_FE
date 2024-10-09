@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import Link from 'next/link';
 
 export default function ProductCategoryPage() {
   const categories = [
@@ -11,15 +10,16 @@ export default function ProductCategoryPage() {
     { id: 4, name: "PHỤ KIỆN - ACCESSORY" }
   ];
 
-  const allProducts = Array(20).fill(null).map((_, index) => ({
-    id: index + 1,
-    name: `Sản phẩm ${index + 1}`,
-    price: Math.floor(Math.random() * 300000) + 100000,
-    originalPrice: Math.floor(Math.random() * 500000) + 300000,
-    image: `/images/sp${(index % 8) + 1}.jpg`,
-    categoryId: Math.floor(Math.random() * 4) + 1,
-    createdAt: new Date(Date.now() - Math.floor(Math.random() * 10000000000))
-  }));
+  const allProducts = [
+    { id: 1, name: "Sản phẩm 1", price: 250000, originalPrice: 300000, image: "/images/sp1.jpg", categoryId: 1, createdAt: new Date(2024, 9, 1) },
+    { id: 2, name: "Sản phẩm 2", price: 180000, originalPrice: 220000, image: "/images/sp2.jpg", categoryId: 2, createdAt: new Date(2024, 9, 2) },
+    { id: 3, name: "Sản phẩm 3", price: 350000, originalPrice: 400000, image: "/images/sp3.jpg", categoryId: 3, createdAt: new Date(2024, 9, 3) },
+    { id: 4, name: "Sản phẩm 4", price: 120000, originalPrice: 150000, image: "/images/sp4.jpg", categoryId: 4, createdAt: new Date(2024, 9, 4) },
+    { id: 5, name: "Sản phẩm 5", price: 280000, originalPrice: 320000, image: "/images/sp5.jpg", categoryId: 1, createdAt: new Date(2024, 9, 5) },
+    { id: 6, name: "Sản phẩm 6", price: 200000, originalPrice: 240000, image: "/images/sp6.jpg", categoryId: 2, createdAt: new Date(2024, 9, 6) },
+    { id: 7, name: "Sản phẩm 7", price: 400000, originalPrice: 450000, image: "/images/sp7.jpg", categoryId: 3, createdAt: new Date(2024, 9, 7) },
+    { id: 8, name: "Sản phẩm 8", price: 150000, originalPrice: 180000, image: "/images/sp8.jpg", categoryId: 4, createdAt: new Date(2024, 9, 8) },
+  ];
 
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [products, setProducts] = useState(allProducts);
