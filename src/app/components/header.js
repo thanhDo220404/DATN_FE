@@ -134,7 +134,7 @@ export default function Header() {
             {/* Icons cho desktop */}
             <div className="nav-icons d-none d-lg-flex align-items-center">
               {isUserLoggedIn ? (
-                <div className="nav-item dropdown position-relative">
+                <div className="dropdown">
                   <Link
                     className="nav-link "
                     href="#"
@@ -144,7 +144,7 @@ export default function Header() {
                   >
                     <FaUser className="nav-icon text-light fs-5 me-3" />
                   </Link>
-                  <ul className="dropdown-menu position-absolute start-0">
+                  <ul className="dropdown-menu">
                     <li>
                       <Link className="dropdown-item" href="/user/tai-khoan">
                         Tài khoản của tôi

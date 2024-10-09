@@ -80,14 +80,14 @@ th, td {
 
 /* Tạo các biến CSS */
 :root {
-  --primary-color: #324B4D;
+  --primary-color: #FEC90B;
   --secondary-color: #666;
   --border-radius: 4px;
   --font-size: 16px;
   
 }
 
-.bg-main-color{
+.my-bg-primary{
   background-color: var(--primary-color);
 }
 
@@ -125,7 +125,7 @@ th, td {
 
 /* Màu sắc của chữ khi rê chuột vào */
 .navbar-nav .nav-item .nav-link:hover {
-  color: yellow; /* Thay đổi màu sắc thành màu vàng khi rê chuột */
+  color: var(--primary-color); /* Thay đổi màu sắc thành màu vàng khi rê chuột */
 }
 
 /* Định dạng cho menu con */
@@ -145,7 +145,7 @@ th, td {
 }
 /* Thay đổi màu nền khi rê chuột vào các mục trong menu con */
 .dropdown-item:hover {
-  background-color: yellow; /* Màu nền khi rê chuột */
+  background-color: var(--primary-color); /* Màu nền khi rê chuột */
   color: black; /* Màu chữ khi rê chuột */
 }
 /* Nhung: sửa footer */
