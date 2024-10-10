@@ -239,7 +239,7 @@ export default function Register() {
           </div>
         </div>
         <Link
-          href="/user/dang-nhap"
+          href="/buyer/dang-nhap"
           type="submit"
           className="w-100 py-3 rounded mb-3 border"
         >
