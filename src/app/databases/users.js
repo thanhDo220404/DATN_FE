@@ -82,5 +82,53 @@ function parseJwt(token) {
 
   return JSON.parse(jsonPayload);
 }
+const getUserById = async (id) => {
+  try {
+    const response = await fetch(`${apiUrl}/users/${id}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
 
-export { login, register, update, parseJwt };
+    // Kiểm tra phản hồi từ API
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(
+        errorData.message || "Có lỗi xảy ra khi lấy thông tin người dùng."
+      );
+    }
+
+    return await response.json(); // Lấy dữ liệu người dùng từ phản hồi
+  } catch (error) {
+    console.error("Lỗi lấy thông tin người dùng:", error);
+    throw error; // Ném lỗi để xử lý ngoài hàm
+  }
+};
+const updatePassword = async (id, newPassword) => {
+  try {
+    const response = await fetch(`http://localhost:2204/users/update/${id}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ pass: newPassword }), // Gửi mật khẩu mới dưới dạng JSON
+    });
+
+    // Kiểm tra xem phản hồi có thành công hay không
+    if (!response.ok) {
+      const errorData = await response.json(); // Lấy dữ liệu lỗi từ phản hồi
+      throw new Error(
+        errorData.message || "Có lỗi xảy ra trong quá trình cập nhật."
+      );
+    }
+
+    const result = await response.json(); // Lấy kết quả phản hồi
+    // Cập nhật lại cookie với dữ liệu mới nếu cần
+    setCookie("LOGIN_INFO", JSON.stringify(result.userNew.token), 1);
+    return result; // Trả về kết quả để xử lý tiếp
+  } catch (error) {
+    console.error("Lỗi cập nhật mật khẩu:", error);
+    // Có thể xử lý thêm ở đây, như hiển thị thông báo cho người dùng
+  }
+};
+
+export { login, register, update, parseJwt, getUserById, updatePassword };
