@@ -170,7 +170,7 @@ export default function Login() {
             </div>
             <div className="col text-end">
               <Link
-                href="/user/quen-mat-khau"
+                href="/buyer/quen-mat-khau"
                 className="text-primary text-decoration-underline"
               >
                 Quên mật khẩu?
@@ -191,7 +191,7 @@ export default function Login() {
         </div>
         <Link
           type="submit"
-          href="/user/dang-ky"
+          href="/buyer/dang-ky"
           className="w-100 py-3 rounded mb-3 border"
         >
           Tôi chưa có tài khoản

@@ -146,7 +146,10 @@ export default function Header() {
                   </Link>
                   <ul className="dropdown-menu">
                     <li>
-                      <Link className="dropdown-item" href="/user/tai-khoan">
+                      <Link
+                        className="dropdown-item"
+                        href="/user/tai-khoan/ho-so"
+                      >
                         Tài khoản của tôi
                       </Link>
                     </li>
@@ -163,7 +166,7 @@ export default function Header() {
                   </ul>
                 </div>
               ) : (
-                <Link href="/user/dang-nhap">
+                <Link href="/buyer/dang-nhap">
                   <FaUser className="nav-icon text-light fs-5 me-3" />
                 </Link>
               )}
