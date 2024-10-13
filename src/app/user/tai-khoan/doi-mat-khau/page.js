@@ -13,21 +13,29 @@ export default function ChangePassword() {
     reset,
   } = useForm();
 
-  const token = getCookie("LOGIN_INFO");
-  const payload = parseJwt(token);
-
+  const [payload, setPayload] = useState(null);
   const [user, setUser] = useState(null); // State để lưu thông tin người dùng
   const [errorMessage, setErrorMessage] = useState(""); // State để lưu thông báo lỗi
   const [successMessage, setSuccessMessage] = useState(""); // State để lưu thông báo thành công
 
   useEffect(() => {
-    const fetchUser = async () => {
-      const userData = await getUserById(payload._id); // Gọi hàm lấy người dùng
-      setUser(userData.User); // Cập nhật state với thông tin người dùng
-    };
+    const token = getCookie("LOGIN_INFO");
+    const parsedPayload = parseJwt(token);
+    setPayload(parsedPayload);
 
-    fetchUser();
-  }, [payload._id]);
+    if (parsedPayload && parsedPayload._id) {
+      const fetchUser = async () => {
+        try {
+          const userData = await getUserById(parsedPayload._id); // Gọi hàm lấy người dùng
+          setUser(userData.User); // Cập nhật state với thông tin người dùng
+        } catch (error) {
+          console.error("Lỗi khi lấy thông tin người dùng:", error);
+        }
+      };
+
+      fetchUser();
+    }
+  }, []);
 
   const onSubmit = async (data) => {
     const { oldPassword, newPassword: pass } = data;
@@ -39,7 +47,6 @@ export default function ChangePassword() {
         // Mật khẩu cũ đúng, gọi hàm cập nhật mật khẩu mới
         try {
           const result = await updatePassword(user._id, pass);
-          console.log("Cập nhật mật khẩu thành công:", result);
           setSuccessMessage("Đổi mật khẩu thành công!"); // Cập nhật thông báo thành công
           reset();
         } catch (error) {
