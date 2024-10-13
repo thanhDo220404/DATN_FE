@@ -123,7 +123,7 @@ const updatePassword = async (id, newPassword) => {
 
     const result = await response.json(); // Lấy kết quả phản hồi
     // Cập nhật lại cookie với dữ liệu mới nếu cần
-    setCookie("LOGIN_INFO", JSON.stringify(result.userNew.token), 1);
+    await setCookie("LOGIN_INFO", JSON.stringify(result.userNew.token), 1);
     return result; // Trả về kết quả để xử lý tiếp
   } catch (error) {
     console.error("Lỗi cập nhật mật khẩu:", error);

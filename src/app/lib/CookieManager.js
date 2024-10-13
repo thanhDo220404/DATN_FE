@@ -1,5 +1,4 @@
 // lib/CookieManager.js
-
 // Đặt cookie
 export const setCookie = (name, value, days) => {
   let expires = "";

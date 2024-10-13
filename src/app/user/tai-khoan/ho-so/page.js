@@ -2,34 +2,30 @@
 import { getCookie } from "@/app/lib/CookieManager";
 import { useForm } from "react-hook-form";
 import { parseJwt, update } from "@/app/databases/users";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
 export default function Profile() {
-  // Lấy token từ cookie
-  const token = getCookie("LOGIN_INFO");
-
-  // Biến lưu thông tin người dùng từ token
-  let payload = {
-    _id: "",
-    name: "",
-    email: "",
-    phone: "",
-    image: "",
-  };
-
-  if (token) {
-    try {
-      // Giải mã payload từ JWT
-      payload = parseJwt(token);
-      console.log(payload);
-    } catch (error) {
-      console.error("Lỗi giải mã token:", error);
+  const [user, setUser] = useState({});
+  const getLoginInfo = () => {
+    const token = getCookie("LOGIN_INFO");
+    if (token) {
+      try {
+        // Giải mã payload từ JWT
+        const payload = parseJwt(token);
+        setUser(payload);
+      } catch (error) {
+        console.error("Lỗi giải mã token:", error);
+      }
+    } else {
+      console.error("Không tìm thấy token.");
+      // Có thể thêm logic chuyển hướng hoặc thông báo lỗi nếu cần
     }
-  } else {
-    console.error("Không tìm thấy token.");
-    // Có thể thêm logic chuyển hướng hoặc thông báo lỗi nếu cần
-  }
+  };
+  useEffect(() => {
+    // Lấy token từ cookie
+    getLoginInfo();
+  }, []);
 
   const {
     register,
@@ -66,7 +62,7 @@ export default function Profile() {
   const onSubmit = async (data) => {
     console.log(data);
 
-    const id = payload._id;
+    const id = user._id;
     if (!id) {
       console.error("ID không hợp lệ.");
       return;
@@ -82,6 +78,7 @@ export default function Profile() {
     try {
       const result = await update(id, formData); // Gửi FormData
       console.log("Cập nhật thành công:", result);
+      getLoginInfo();
       // Có thể thêm thông báo thành công cho người dùng
     } catch (error) {
       console.error("Lỗi trong quá trình cập nhật:", error);
@@ -113,7 +110,7 @@ export default function Profile() {
                     {...register("name", {
                       required: "Tên không được để trống",
                     })}
-                    defaultValue={payload.name || "Thành Đô"}
+                    defaultValue={user.name || "Thành Đô"}
                   />
                   {errors.name && (
                     <div className="invalid-feedback text-start">
@@ -127,7 +124,7 @@ export default function Profile() {
                   Email
                 </th>
                 <td className="text-start">
-                  <p>{payload.email || "ch********@gmail.com"}</p>
+                  <p>{user.email || "ch********@gmail.com"}</p>
                 </td>
               </tr>
               <tr>
@@ -135,7 +132,7 @@ export default function Profile() {
                   Số điện thoại
                 </th>
                 <td className="text-start">
-                  <p>{payload.phone || "*********48"}</p>
+                  <p>{user.phone || "*********48"}</p>
                 </td>
               </tr>
             </tbody>
@@ -148,9 +145,7 @@ export default function Profile() {
           <div className="text-center border-start h-auto">
             <div>
               <img
-                src={
-                  `${apiUrl}/img/${payload.image}` || "/images/profile-pic.png"
-                } // Hiển thị hình ảnh người dùng nếu có
+                src={`${apiUrl}/img/${user.image}` || "/images/profile-pic.png"} // Hiển thị hình ảnh người dùng nếu có
                 alt="Profile Picture"
                 width={100}
                 height={100}
