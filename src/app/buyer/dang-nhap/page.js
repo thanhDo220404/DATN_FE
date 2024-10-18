@@ -80,11 +80,7 @@ export default function Login() {
       setCookie("LOGIN_INFO", result.User.token, 1); // Lưu token với thời gian sống 1 ngày
       reset(); // Xóa input
       console.log("Đăng nhập thành công");
-      if (window.history.length > 1) {
-        window.history.back();
-      } else {
-        window.location.href = "/"; // Nếu không có lịch sử, quay về trang chủ
-      }
+      window.location.reload();
     } catch (error) {
       console.error("Error during login:", error);
     } finally {

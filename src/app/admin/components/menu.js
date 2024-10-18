@@ -1,4 +1,21 @@
+"use client";
+import { parseJwt } from "@/app/databases/users";
+import { getCookie } from "@/app/lib/CookieManager";
+import Link from "next/link";
+import { useEffect } from "react";
+
 export default function Menu() {
+  useEffect(() => {
+    const token = getCookie("LOGIN_INFO");
+    if (token) {
+      const payload = parseJwt(token);
+      if (payload.role !== 1) {
+        window.location.replace("/");
+      }
+    } else {
+      window.location.replace("/buyer/dang-nhap");
+    }
+  }, []);
   return (
     <>
       <div className="d-flex flex-column flex-shrink-0 p-3 bg-body-tertiary vh-100">
@@ -16,9 +33,9 @@ export default function Menu() {
             </a>
           </li>
           <li>
-            <a href="#" className="nav-link link-body-emphasis">
-              Dashboard
-            </a>
+            <Link href="/admin/media" className="nav-link link-body-emphasis">
+              Media
+            </Link>
           </li>
           <li>
             <a href="#" className="nav-link link-body-emphasis">

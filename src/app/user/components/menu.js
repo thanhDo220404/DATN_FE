@@ -19,7 +19,7 @@ export default function Menu() {
     } else {
       setIsOpen(false);
     }
-  }, [pathname, router]);
+  }, []);
 
   return (
     <ul className="list-group container">

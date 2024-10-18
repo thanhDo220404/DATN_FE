@@ -81,8 +81,10 @@ export default function UserAddress() {
   const [userId, setUserId] = useState(null);
   useEffect(() => {
     const token = getCookie("LOGIN_INFO");
-    const payload = parseJwt(token);
-    setUserId(payload._id);
+    if (token) {
+      const payload = parseJwt(token);
+      setUserId(payload._id);
+    }
     fetchCities();
     fetchUserAddresses();
   }, [userId]);
