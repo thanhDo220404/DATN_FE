@@ -75,7 +75,9 @@ export default function Media() {
                 </div>
               ))
             ) : (
-              <p>Chưa có media nào.</p>
+              <div className="text-center fs-1 text-primary">
+                Chưa có media nào.
+              </div>
             )}
           </div>
         </div>

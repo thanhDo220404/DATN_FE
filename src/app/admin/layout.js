@@ -1,7 +1,7 @@
 import Menu from "./components/menu";
 import Chart from "chart.js/auto"; // nhớ npm install chart.js
 
-import "../main.css";
+import "../admin-main.css";
 
 export const metadata = {
   title: "Admin",
