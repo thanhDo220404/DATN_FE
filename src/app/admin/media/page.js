@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 
 export default function Media() {
   const [dataMedia, setDataMedia] = useState([]);
+  const [dataOneMedia, setDataOneMedia] = useState({});
 
   // Hàm xử lý khi chọn file
   const handleFileSelect = async (event) => {
@@ -18,6 +19,9 @@ export default function Media() {
       console.error("Lỗi khi upload file:", error);
     }
   };
+  const handleSetDataOneMedia = (data) => {
+    setDataOneMedia(data);
+  };
 
   // Hàm lấy danh sách media
   const fetchMedia = async () => {
@@ -28,10 +32,11 @@ export default function Media() {
   useEffect(() => {
     fetchMedia();
   }, []);
+  console.log("thís is one media data", dataOneMedia);
 
   return (
     <>
-      <div className="py-3">
+      <div className="p-3">
         <div className="d-flex">
           <h3>Media</h3>
           {/* Input file ẩn */}
@@ -53,7 +58,7 @@ export default function Media() {
         </div>
 
         {/* Khu vực hiển thị danh sách media */}
-        <div className="rounded bg-white my-3">
+        <div className="rounded my-3">
           <div className="d-flex flex-wrap">
             {dataMedia.length > 0 ? (
               dataMedia.map((media, index) => (
@@ -61,6 +66,7 @@ export default function Media() {
                   key={index}
                   className="media-item"
                   style={{ width: "150px", height: "150px" }}
+                  onClick={() => handleSetDataOneMedia(media)}
                 >
                   <img
                     src={media.filePath} // Đường dẫn tới file ảnh
@@ -75,7 +81,10 @@ export default function Media() {
                 </div>
               ))
             ) : (
-              <div className="text-center fs-1 text-primary">
+              <div
+                className="m-auto fs-1 text-primary"
+                style={{ height: "500px" }}
+              >
                 Chưa có media nào.
               </div>
             )}

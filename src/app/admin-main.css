@@ -15671,3 +15671,35 @@ text-align:center;
   background-color: white;
   color: white;
 }
+/* Submenu */
+.app-menu {
+  list-style-type: none;
+  padding: 0;
+}
+
+.app-menu__item {
+  display: flex;
+  align-items: center;
+  padding: 10px;
+  text-decoration: none;
+}
+
+/* Màu nền cho item đang active */
+.app-submenu .app-menu__item.active {
+  background-color: #e0e0e0; /* Màu nền cho item đang active */
+}
+
+/* Màu nền cho item khi hover */
+.app-submenu .app-menu__item:hover {
+  background-color: #d0d0d0; /* Màu nền khi hover */
+}
+
+/* Màu nền cho item khi focus */
+.app-submenu .app-menu__item:focus {
+  background-color: #d0d0d0; /* Màu nền khi focus */
+}
+
+.app-submenu {
+  list-style-type: none;
+  padding: 0 0 0 20px; /* Thêm lề trái để indent */
+}
