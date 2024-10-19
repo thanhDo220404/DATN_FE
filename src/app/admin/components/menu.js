@@ -55,6 +55,17 @@ export default function Menu() {
           <li>
             <Link
               className={`app-menu__item ${
+                pathname === "/admin/mau-sac" ? "active" : ""
+              }`}
+              href="/admin/mau-sac"
+            >
+              <i className="bi bi-paint-bucket"></i>
+              <span className="app-menu__label">Màu sắc</span>
+            </Link>
+          </li>
+          <li>
+            <Link
+              className={`app-menu__item ${
                 pathname === "/admin/media" ? "active" : ""
               }`}
               href="/admin/media"
