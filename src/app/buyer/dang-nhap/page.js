@@ -80,11 +80,7 @@ export default function Login() {
       setCookie("LOGIN_INFO", result.User.token, 1); // Lưu token với thời gian sống 1 ngày
       reset(); // Xóa input
       console.log("Đăng nhập thành công");
-      if (window.history.length > 1) {
-        window.history.back();
-      } else {
-        window.location.href = "/"; // Nếu không có lịch sử, quay về trang chủ
-      }
+      window.location.reload();
     } catch (error) {
       console.error("Error during login:", error);
     } finally {
@@ -170,7 +166,7 @@ export default function Login() {
             </div>
             <div className="col text-end">
               <Link
-                href="/user/quen-mat-khau"
+                href="/buyer/quen-mat-khau"
                 className="text-primary text-decoration-underline"
               >
                 Quên mật khẩu?
@@ -191,7 +187,7 @@ export default function Login() {
         </div>
         <Link
           type="submit"
-          href="/user/dang-ky"
+          href="/buyer/dang-ky"
           className="w-100 py-3 rounded mb-3 border"
         >
           Tôi chưa có tài khoản

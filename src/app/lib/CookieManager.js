@@ -1,5 +1,4 @@
 // lib/CookieManager.js
-
 // Đặt cookie
 export const setCookie = (name, value, days) => {
   let expires = "";
@@ -43,9 +42,7 @@ export const getAllCookies = () => {
 
 // Kiểm tra xem cookie có tồn tại không
 export const hasCookie = (name) => {
-  return document.cookie
-    .split(";")
-    .some((cookie) => cookie.trim().startsWith(name + "="));
+  return document.cookie.includes(`${name}=`);
 };
 
 // Xóa tất cả cookies

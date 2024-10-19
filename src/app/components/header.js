@@ -3,7 +3,9 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { FaSearch, FaShoppingCart, FaUser } from "react-icons/fa";
 import { useState, useEffect } from "react";
-import { getCookie } from "../lib/CookieManager";
+import { eraseCookie, getCookie } from "../lib/CookieManager";
+import { parseJwt } from "../databases/users";
+const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
 export default function Header() {
   const pathname = usePathname();
@@ -11,12 +13,29 @@ export default function Header() {
 
   // Nếu là trang admin, không render header
   if (isAdminPage) return null;
-  const [isUserLoggedIn, setIsUserLoggedIn] = useState(false);
+  const [userLoginInfo, setUserLoginInfo] = useState({});
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
+  //đăng xuất
+  const handleLogout = () => {
+    eraseCookie("LOGIN_INFO");
+    setUserLoginInfo("");
+    setIsLoggedIn(false);
+    window.location.reload();
+  };
 
   useEffect(() => {
     const token = getCookie("LOGIN_INFO");
     if (token) {
-      setIsUserLoggedIn(true);
+      const payload = parseJwt(token);
+      setUserLoginInfo(payload);
+      setIsLoggedIn(true); // Cập nhật trạng thái đã đăng nhập
+      if (payload.role === 1) {
+        setIsAdmin(true);
+      }
+    } else {
+      setUserLoginInfo({});
+      setIsLoggedIn(false);
     }
   }, []);
 
@@ -133,8 +152,8 @@ export default function Header() {
 
             {/* Icons cho desktop */}
             <div className="nav-icons d-none d-lg-flex align-items-center">
-              {isUserLoggedIn ? (
-                <div className="nav-item dropdown position-relative">
+              {isLoggedIn ? (
+                <div className="dropdown">
                   <Link
                     className="nav-link "
                     href="#"
@@ -142,11 +161,39 @@ export default function Header() {
                     data-bs-toggle="dropdown"
                     aria-expanded="false"
                   >
-                    <FaUser className="nav-icon text-light fs-5 me-3" />
+                    {userLoginInfo ? (
+                      <img
+                        width="32"
+                        height="32"
+                        className="rounded-circle me-2"
+                        src={`${apiUrl}/img/${userLoginInfo.image}`}
+                        alt=""
+                      />
+                    ) : (
+                      <FaUser className="nav-icon text-light fs-5 me-3" />
+                    )}
                   </Link>
-                  <ul className="dropdown-menu position-absolute start-0">
+                  <ul
+                    className="dropdown-menu"
+                    style={{
+                      position: "absolute",
+                      inset: "0px 0px auto auto",
+                      margin: "0px",
+                      transform: "translate3d(0px, 34.4px, 0px)",
+                    }}
+                  >
+                    {isAdmin && (
+                      <li>
+                        <Link className="dropdown-item" href="/admin">
+                          Quản lý website
+                        </Link>
+                      </li>
+                    )}
                     <li>
-                      <Link className="dropdown-item" href="/user/tai-khoan">
+                      <Link
+                        className="dropdown-item"
+                        href="/user/tai-khoan/ho-so"
+                      >
                         Tài khoản của tôi
                       </Link>
                     </li>
@@ -156,14 +203,14 @@ export default function Header() {
                       </Link>
                     </li>
                     <li>
-                      <Link className="dropdown-item" href="#">
+                      <button className="dropdown-item" onClick={handleLogout}>
                         Đăng xuất
-                      </Link>
+                      </button>
                     </li>
                   </ul>
                 </div>
               ) : (
-                <Link href="/user/dang-nhap">
+                <Link href="/buyer/dang-nhap">
                   <FaUser className="nav-icon text-light fs-5 me-3" />
                 </Link>
               )}
