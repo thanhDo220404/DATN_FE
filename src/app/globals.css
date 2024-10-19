@@ -711,3 +711,33 @@ table {
   background-color: transparent; 
   color: black; 
 }
+
+/* ----------------------------tri css trang gio hàng */
+.kShopping{
+  margin-bottom: 80px;
+  border: 2px solid #ddd; /* Thêm đường viền */
+  border-radius: 20px; /* Bo tròn viền */
+  padding: 20px; /* Thêm khoảng cách bên trong để nội dung không dính vào viền */
+}
+.cart-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid #ddd;
+}
+.cart-item img {
+  width: 50px;
+  height: auto;
+}
+.cart-summary {
+  background-color: #f8f9fa;
+  padding: 20px;
+}
+.cart-summary .btn {
+  width: 100%;
+}
+.Shopping-Cart{
+  padding: 10px 0;
+  border-bottom: 1px solid #ddd;
+}
