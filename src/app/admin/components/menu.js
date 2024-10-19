@@ -18,7 +18,7 @@ export default function Menu() {
   }, []);
   return (
     <>
-      <div className="d-flex flex-column flex-shrink-0 p-3 bg-body-tertiary vh-100">
+      <div className="d-flex flex-column flex-shrink-0 p-3 bg-white vh-100">
         <a
           href="/"
           className="d-flex align-items-center mb-3 mb-md-0 me-md-auto link-body-emphasis text-decoration-none"
