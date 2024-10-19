@@ -18,7 +18,7 @@ export default function Menu() {
   }, []);
   return (
     <>
-      <div className="d-flex flex-column flex-shrink-0 p-3 bg-white vh-100">
+      {/* <div className="d-flex flex-column flex-shrink-0 p-3 bg-white vh-100">
         <a
           href="/"
           className="d-flex align-items-center mb-3 mb-md-0 me-md-auto link-body-emphasis text-decoration-none"
@@ -96,7 +96,83 @@ export default function Menu() {
             </li>
           </ul>
         </div>
-      </div>
+      </div> */}
+      {/* thanh nav */}
+      <aside className="app-sidebar">
+        <div className="app-sidebar__user">
+          <img
+            className="app-sidebar__user-avatar"
+            src="/images/hay.jpg"
+            width="50px"
+            alt="User Image"
+          />
+          <div>
+            <p className="app-sidebar__user-name">
+              <b>Võ Trường</b>
+            </p>
+            <p className="app-sidebar__user-designation">
+              Chào mừng bạn trở lại
+            </p>
+          </div>
+        </div>
+        <hr />
+        <ul className="app-menu">
+          <li>
+            <Link className="app-menu__item active" href="/admin">
+              <i className="bi bi-speedometer2" />
+              <span className="app-menu__label">Dashboard</span>
+            </Link>
+          </li>
+          <li>
+            <Link className="app-menu__item active" href="/admin/media">
+              <i className="bi bi-speedometer2" />
+              <span className="app-menu__label">Media</span>
+            </Link>
+          </li>
+          <li>
+            <Link className="app-menu__item" href="/admin/users">
+              <i className="bi bi-person" />
+              <span className="app-menu__label">Quản lý người dùng</span>
+            </Link>
+          </li>
+          <li>
+            <Link className="app-menu__item" href="/admin/danh-muc">
+              <i className="bi bi-list-task" />
+              <span className="app-menu__label">Quản lý danh mục</span>
+            </Link>
+          </li>
+          <li>
+            <Link className="app-menu__item" href="/admin/san-pham">
+              <i className="bi bi-tag" />
+              <span className="app-menu__label">Quản lý sản phẩm</span>
+            </Link>
+          </li>
+          <li>
+            <Link className="app-menu__item" href="/admin/don-hang">
+              <i className="bi bi-list-task" />
+              <span className="app-menu__label">Quản lý đơn hàng</span>
+            </Link>
+          </li>
+          {/* <li>
+            <a className="app-menu__item" href="table-data-money.html">
+              <i className="bi bi-currency-dollar" />
+              <span className="app-menu__label">Quản lý kho hàng</span>
+            </a>
+          </li> */}
+          <li>
+            <Link className="app-menu__item" href="/admin/bao-cao">
+              <i className="bi bi-bar-chart-line" />
+              <span className="app-menu__label">Báo cáo doanh thu</span>
+            </Link>
+          </li>
+          <li>
+            <a className="app-menu__item" href="#">
+              <i className="bi bi-gear" />
+              <span className="app-menu__label">Cài đặt hệ thống</span>
+            </a>
+          </li>
+        </ul>
+      </aside>
     </>
   );
 }

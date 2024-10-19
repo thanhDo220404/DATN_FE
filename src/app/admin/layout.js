@@ -1,4 +1,7 @@
 import Menu from "./components/menu";
+import Chart from "chart.js/auto"; // nhớ npm install chart.js
+
+import "../main.css";
 
 export const metadata = {
   title: "Admin",
@@ -8,12 +11,8 @@ export const metadata = {
 export default function AdminLayout({ children }) {
   return (
     <>
-      <div className="row w-100">
-        <div className="col-md-2">
-          <Menu></Menu>
-        </div>
-        <div className="col-md-10 bg-body-secondary">{children}</div>
-      </div>
+      <Menu></Menu>
+      <main className="app-content">{children}</main>
     </>
   );
 }
