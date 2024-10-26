@@ -1,4 +1,18 @@
+"use client";
+import "@/app/san-pham/style.css";
+import { useEffect, useState } from "react";
+import ProductCard from "../components/productCard";
+import { getAllProducts } from "../databases/products";
+
 export default function HomePage() {
+  const [products, setProducts] = useState([]);
+  const fetchProducts = async () => {
+    const result = await getAllProducts();
+    setProducts(result);
+  };
+  useEffect(() => {
+    fetchProducts();
+  }, []);
   return (
     <>
       {/* Carousel */}
@@ -80,31 +94,9 @@ export default function HomePage() {
       <div className="container mt-5">
         <h3 className="product-title">Sản Phẩm Nổi Bật</h3>
         <div className="row featured-products">
-          {Array(8)
-            .fill(null)
-            .map((_, index) => (
-              <div className="col-md-3" key={index}>
-                <div className="card">
-                  <img
-                    alt={`Product ${index + 1}`}
-                    className="card-img-top"
-                    src={`/images/sp${index + 1}.jpg`}
-                  />
-                  <div className="card-body">
-                    <h5 className="card-title">D22-T6 Tee Riot Devil</h5>
-                    <p className="card-text">
-                      199.000đ <del>299.000đ</del>
-                    </p>
-                    <div className="d-flex justify-content-between">
-                      <button className="btn btn-warning">MUA NGAY</button>
-                      <button className="btn btn-outline-secondary">
-                        Xem chi tiết
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ))}
+          {products.map((product) => (
+            <ProductCard key={product._id} product={product} />
+          ))}
         </div>
       </div>
 

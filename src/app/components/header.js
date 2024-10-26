@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { FaSearch, FaShoppingCart, FaUser } from "react-icons/fa";
 import { useState, useEffect } from "react";
 import { eraseCookie, getCookie } from "../lib/CookieManager";
@@ -9,14 +9,17 @@ const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
 export default function Header() {
   const pathname = usePathname();
+  const router = useRouter();
   const isAdminPage = pathname.includes("/admin");
 
-  // Nếu là trang admin, không render header
   if (isAdminPage) return null;
+
   const [userLoginInfo, setUserLoginInfo] = useState({});
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
-  //đăng xuất
+  const [searchKeyword, setSearchKeyword] = useState(""); // State lưu từ khóa tìm kiếm
+
+  // Đăng xuất
   const handleLogout = () => {
     eraseCookie("LOGIN_INFO");
     setUserLoginInfo("");
@@ -29,7 +32,7 @@ export default function Header() {
     if (token) {
       const payload = parseJwt(token);
       setUserLoginInfo(payload);
-      setIsLoggedIn(true); // Cập nhật trạng thái đã đăng nhập
+      setIsLoggedIn(true);
       if (payload.role === 1) {
         setIsAdmin(true);
       }
@@ -38,6 +41,14 @@ export default function Header() {
       setIsLoggedIn(false);
     }
   }, []);
+
+  // Xử lý sự kiện tìm kiếm
+  const handleSearchSubmit = (e) => {
+    e.preventDefault();
+    if (searchKeyword.trim()) {
+      router.push(`/tim-kiem?keywords=${encodeURIComponent(searchKeyword)}`);
+    }
+  };
 
   return (
     <header className="menu-header">
@@ -56,9 +67,9 @@ export default function Header() {
           {/* Logo */}
           <Link className="navbar-brand" href="/">
             <img
-              src="/images/logo1x.png"
+              src="/images/logo.png"
               alt="Logo"
-              style={{ width: "70px", height: "70px" }}
+              style={{ width: "150px", height: "70px" }}
             />
           </Link>
 
@@ -82,38 +93,10 @@ export default function Header() {
                   Trang chủ
                 </Link>
               </li>
-              <li className="nav-item dropdown">
-                <Link
-                  className="nav-link dropdown-toggle"
-                  href="#"
-                  role="button"
-                  data-bs-toggle="dropdown"
-                  aria-expanded="false"
-                >
+              <li className="nav-item">
+                <Link className="nav-link" href="/san-pham">
                   Sản phẩm
                 </Link>
-                <ul className="dropdown-menu">
-                  <li>
-                    <Link className="dropdown-item" href="#">
-                      ÁO THUN - T SHIRT
-                    </Link>
-                  </li>
-                  <li>
-                    <Link className="dropdown-item" href="#">
-                      QUẦN - PANTS
-                    </Link>
-                  </li>
-                  <li>
-                    <Link className="dropdown-item" href="#">
-                      ÁO KHOÁC - HOODIE
-                    </Link>
-                  </li>
-                  <li>
-                    <Link className="dropdown-item" href="#">
-                      PHỤ KIỆN - ACCESSORY
-                    </Link>
-                  </li>
-                </ul>
               </li>
               <li className="nav-item">
                 <a className="nav-link d-flex" href="#">
@@ -138,12 +121,14 @@ export default function Header() {
             </ul>
 
             {/* Form tìm kiếm */}
-            <form className="d-flex me-2" role="search">
+            <form className="d-flex me-2" onSubmit={handleSearchSubmit}>
               <input
                 className="form-control me-2"
                 type="search"
                 placeholder="Tìm kiếm sản phẩm..."
                 aria-label="Search"
+                value={searchKeyword}
+                onChange={(e) => setSearchKeyword(e.target.value)}
               />
               <button className="btn btn-outline-light" type="submit">
                 <FaSearch />
@@ -155,7 +140,7 @@ export default function Header() {
               {isLoggedIn ? (
                 <div className="dropdown">
                   <Link
-                    className="nav-link "
+                    className="nav-link"
                     href="#"
                     role="button"
                     data-bs-toggle="dropdown"
@@ -173,15 +158,7 @@ export default function Header() {
                       <FaUser className="nav-icon text-light fs-5 me-3" />
                     )}
                   </Link>
-                  <ul
-                    className="dropdown-menu"
-                    style={{
-                      position: "absolute",
-                      inset: "0px 0px auto auto",
-                      margin: "0px",
-                      transform: "translate3d(0px, 34.4px, 0px)",
-                    }}
-                  >
+                  <ul className="dropdown-menu">
                     {isAdmin && (
                       <li>
                         <Link className="dropdown-item" href="/admin">

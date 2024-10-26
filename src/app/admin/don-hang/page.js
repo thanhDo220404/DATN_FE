@@ -67,15 +67,6 @@ export default function donhang() {
                     <i className="bi bi-file-earmark-pdf" /> Xuất PDF
                   </a>
                 </div>
-                <div className="col-sm-2">
-                  <a
-                    className="btn btn-delete btn-sm"
-                    type="button"
-                    title="Xóa"
-                  >
-                    <i className="bi bi-trash" /> Xóa tất cả
-                  </a>
-                </div>
               </div>
               <table
                 className="table table-hover table-bordered js-copytextarea"
@@ -90,7 +81,7 @@ export default function donhang() {
                       <input type="checkbox" id="all" />
                     </th>
                     <th>ID đơn hàng</th>
-                    <th width={300}>khách hàng</th>
+                    <th width={300}>Khách hàng</th>
                     <th width={450}>Đơn hàng</th>
                     <th width={130}>Số lượng</th>
                     <th width={200}>Tổng tiền</th>

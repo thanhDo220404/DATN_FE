@@ -1,0 +1,40 @@
+.image-container {
+  position: relative;
+  display: inline-block;
+  overflow: hidden; /* Đảm bảo hình ảnh không tràn ra ngoài */
+  border-radius: 8px; /* Bo góc cho hình ảnh */
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); /* Đổ bóng cho hình ảnh */
+}
+
+.img-thumbnail {
+  transition: transform 0.3s ease; /* Hiệu ứng thu phóng cho hình ảnh */
+}
+
+.image-container:hover .img-thumbnail {
+  transform: scale(1.05); /* Phóng to khi hover */
+}
+
+.hover-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%; /* Chỉ chiếm nửa trên */
+  background-color: rgba(0, 0, 0, 0.7); /* Nền mờ tối */
+  opacity: 0; /* Ban đầu ẩn */
+  transition: opacity 0.3s ease; /* Hiệu ứng chuyển tiếp */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.image-container:hover .hover-overlay {
+  opacity: 1; /* Hiển thị khi hover */
+}
+
+.hover-text {
+  color: white; /* Màu chữ */
+  padding: 5px 10px; /* Khoảng cách bên trong */
+  border-radius: 5px; /* Bo góc */
+  font-weight: bold; /* Chữ đậm */
+}
