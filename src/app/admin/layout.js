@@ -12,7 +12,7 @@ export default function AdminLayout({ children }) {
   return (
     <>
       <Menu></Menu>
-      <main className="app-content">{children}</main>
+      <main className="app-content overflow-auto">{children}</main>
     </>
   );
 }

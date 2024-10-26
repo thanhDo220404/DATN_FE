@@ -2,7 +2,7 @@
 import { insertMedia, getAllMedia } from "@/app/databases/media";
 import { useEffect, useState } from "react";
 
-export default function Media() {
+export default function Media({ handleSelectMedia }) {
   const [dataMedia, setDataMedia] = useState([]);
   const [dataOneMedia, setDataOneMedia] = useState({});
 
@@ -21,6 +21,9 @@ export default function Media() {
   };
   const handleSetDataOneMedia = (data) => {
     setDataOneMedia(data);
+    if (handleSelectMedia) {
+      handleSelectMedia(data);
+    }
   };
 
   // Hàm lấy danh sách media
@@ -69,7 +72,7 @@ export default function Media() {
                   onClick={() => handleSetDataOneMedia(media)}
                 >
                   <img
-                    src={media.filePath} // Đường dẫn tới file ảnh
+                    src={media.filePath} // Đường d ẫn tới file ảnh
                     alt={media.fileName}
                     className="img-thumbnail"
                     style={{

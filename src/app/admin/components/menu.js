@@ -26,13 +26,13 @@ export default function Menu() {
         <div className="app-sidebar__user">
           <img
             className="app-sidebar__user-avatar"
-            src="/images/hay.jpg"
+            src="/images/profile-pic.png"
             width="50px"
             alt="User Image"
           />
           <div>
             <p className="app-sidebar__user-name">
-              <b>Võ Trường</b>
+              <b>Đô Đô</b>
             </p>
             <p className="app-sidebar__user-designation">
               Chào mừng bạn trở lại
@@ -50,6 +50,28 @@ export default function Menu() {
             >
               <i className="bi bi-speedometer2" />
               <span className="app-menu__label">Dashboard</span>
+            </Link>
+          </li>
+          <li>
+            <Link
+              className={`app-menu__item ${
+                pathname === "/admin/mau-sac" ? "active" : ""
+              }`}
+              href="/admin/mau-sac"
+            >
+              <i className="bi bi-paint-bucket"></i>
+              <span className="app-menu__label">Màu sắc</span>
+            </Link>
+          </li>
+          <li>
+            <Link
+              className={`app-menu__item ${
+                pathname === "/admin/kich-thuoc" ? "active" : ""
+              }`}
+              href="/admin/kich-thuoc"
+            >
+              <i className="bi bi-paint-bucket"></i>
+              <span className="app-menu__label">Kích thước</span>
             </Link>
           </li>
           <li>
@@ -120,6 +142,21 @@ export default function Menu() {
               <i className="bi bi-tag" />
               <span className="app-menu__label">Quản lý sản phẩm</span>
             </Link>
+            {/* Hiển thị submenu nếu pathname chứa "/admin/san-pham" */}
+            {pathname.includes("/admin/san-pham") && (
+              <ul className="app-submenu">
+                <li>
+                  <Link
+                    className={`app-menu__item ${
+                      pathname === "/admin/san-pham/them" ? "active" : ""
+                    }`}
+                    href="/admin/san-pham/them"
+                  >
+                    <span className="app-menu__label">Thêm</span>
+                  </Link>
+                </li>
+              </ul>
+            )}
           </li>
           <li>
             <Link
