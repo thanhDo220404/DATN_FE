@@ -1,7 +1,7 @@
 import Link from "next/link";
 import React, { useState } from "react";
 
-export default function ProductCard({ product }) {
+export default function ProductCard({ product, col }) {
   const [selectedItem, setSelectedItem] = useState(product.items?.[0]); // Khởi tạo item được chọn là item đầu tiên
   const [selectedColorId, setSelectedColorId] = useState(
     selectedItem.color._id
@@ -14,9 +14,11 @@ export default function ProductCard({ product }) {
   };
 
   console.log(selectedItem);
+  const discountedPrice =
+    selectedItem.price * (1 - selectedItem.discount / 100);
 
   return (
-    <div className="col-md-4 mb-3">
+    <div className={`col-md-${col} mb-3`}>
       <div className="card">
         <div className="my-card-header my-relative">
           <Link href={`/san-pham/${product._id}`}>
@@ -29,13 +31,15 @@ export default function ProductCard({ product }) {
 
           <div className="my-absolute w-100 p-2">
             <div className="w-100 my-backdrop-filter">
-              {selectedItem.variations.map((variation, index) => (
-                <div key={index} className="my-size-items">
-                  {/* Hiển thị tên kích thước */}
-                  {variation.size.sizeName}
-                  {/* Nếu cần có thể thêm các thuộc tính khác */}
-                </div>
-              ))}
+              {selectedItem.variations
+                .filter((variation) => variation.quantity > 0) // Lọc các variation có quantity > 0
+                .map((variation, index) => (
+                  <div key={index} className="my-size-items">
+                    {/* Hiển thị tên kích thước */}
+                    {variation.size.sizeName}
+                    {/* Nếu cần có thể thêm các thuộc tính khác */}
+                  </div>
+                ))}
             </div>
           </div>
         </div>
@@ -63,25 +67,27 @@ export default function ProductCard({ product }) {
             ))}
           </div>
           <Link href={`/san-pham/${product._id}`}>
-            <h5 className="card-title">{product.name}</h5>
+            <h5 className="card-title fs-6">{product.name}</h5>
           </Link>
-          <p className="card-text">
-            {selectedItem?.price?.toLocaleString("vi-VN", {
-              style: "currency",
-              currency: "VND",
-            })}{" "}
-            {selectedItem?.discount && (
+          <div className="card-text fs-6 d-flex gap-1 align-items-center">
+            <span className="fw-bold">
+              {discountedPrice.toLocaleString("vi-VN", {
+                style: "currency",
+                currency: "VND",
+              })}
+            </span>
+            {selectedItem.discount > 0 && (
+              <div className="badge bg-primary">- {selectedItem.discount}%</div>
+            )}
+            {selectedItem.discount > 0 && (
               <del>
-                {(
-                  selectedItem.price *
-                  (1 + selectedItem.discount / 100)
-                ).toLocaleString("vi-VN", {
+                {selectedItem.price.toLocaleString("vi-VN", {
                   style: "currency",
                   currency: "VND",
                 })}
               </del>
             )}
-          </p>
+          </div>
           <div className="d-flex justify-content-between">
             <button className="btn btn-warning">MUA NGAY</button>
             <a

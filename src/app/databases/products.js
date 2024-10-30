@@ -97,6 +97,40 @@ const deleteProduct = async (id) => {
     throw error;
   }
 };
+// Tìm kiếm sản phẩm theo tên
+const searchProduct = async (keyword) => {
+  try {
+    const response = await fetch(`${API_URL}/search/${keyword}`);
+
+    if (!response.ok) {
+      throw new Error("Network response was not ok");
+    }
+
+    const data = await response.json();
+    return data; // Trả về danh sách sản phẩm tìm thấy
+  } catch (error) {
+    console.error("Lỗi khi tìm kiếm sản phẩm:", error);
+    throw error;
+  }
+};
+// Tăng lượt xem cho sản phẩm
+const increaseViewCount = async (id) => {
+  try {
+    const response = await fetch(`${API_URL}/increaseview/${id}`, {
+      method: "GET", // Hoặc "POST" nếu bạn muốn sử dụng phương thức POST
+    });
+
+    if (!response.ok) {
+      throw new Error("Network response was not ok");
+    }
+
+    const data = await response.json();
+    return data; // Trả về kết quả từ server
+  } catch (error) {
+    console.error("Lỗi khi tăng lượt xem sản phẩm:", error);
+    throw error;
+  }
+};
 
 export {
   insertProduct,
@@ -104,4 +138,6 @@ export {
   getProductById,
   updateProduct,
   deleteProduct,
+  searchProduct,
+  increaseViewCount,
 };

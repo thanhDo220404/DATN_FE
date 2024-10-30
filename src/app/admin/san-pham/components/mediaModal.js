@@ -18,14 +18,14 @@ export default function MediaModal({ onSelectMedia, onClose }) {
           zIndex: 1000,
         }}
       >
-        <div className="w-100 bg-white shadow-lg d-flex flex-wrap p-2">
+        <div className="w-100 bg-white shadow-lg d-flex flex-wrap p-2 ">
           <div className="fs-4 w-100">
             <div className="fs-3 float-start">Hình ảnh</div>
             <button className="float-end" onClick={onClose}>
               <i class="bi bi-x-lg"></i>
             </button>
           </div>
-          <div className="w-100">
+          <div className="w-100 overflow-scroll">
             <Media handleSelectMedia={handleSelectMedia}></Media>
           </div>
         </div>

@@ -14,7 +14,6 @@ const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 const checkEmailExists = (data, email) => {
   const user = data.Users.find((user) => user.email === email);
   if (!user) return "Email không tồn tại";
-  if (!user.isVerified) return "Tài khoản chưa xác thực email";
   return true;
 };
 

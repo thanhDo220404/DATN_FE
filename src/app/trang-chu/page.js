@@ -93,10 +93,41 @@ export default function HomePage() {
       {/* Featured Products */}
       <div className="container mt-5">
         <h3 className="product-title">Sản Phẩm Nổi Bật</h3>
+
         <div className="row featured-products">
-          {products.map((product) => (
-            <ProductCard key={product._id} product={product} />
-          ))}
+          {products.length === 0 ? (
+            // Hiển thị 3 placeholder khi không có sản phẩm
+            <>
+              {Array.from({ length: 4 }).map((_, index) => (
+                <div className="col-3" key={index}>
+                  <div className="card" aria-hidden="true">
+                    <img src="" className="card-img-top" alt="..." />
+                    <div className="card-body">
+                      <h5 className="card-title placeholder-glow">
+                        <span className="placeholder col-6"></span>
+                      </h5>
+                      <p className="card-text placeholder-glow">
+                        <span className="placeholder col-7"></span>
+                        <span className="placeholder col-4"></span>
+                        <span className="placeholder col-4"></span>
+                        <span className="placeholder col-6"></span>
+                        <span className="placeholder col-8"></span>
+                      </p>
+                      <a
+                        className="btn btn-primary disabled placeholder col-6"
+                        aria-disabled="true"
+                      ></a>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </>
+          ) : (
+            // Hiển thị danh sách sản phẩm khi đã tải
+            products.map((product) => (
+              <ProductCard col={3} key={product._id} product={product} />
+            ))
+          )}
         </div>
       </div>
 

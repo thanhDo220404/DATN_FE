@@ -2,7 +2,7 @@
 import "@/app/san-pham/style.css";
 
 import { useEffect, useState } from "react";
-import { getAllProducts } from "../databases/products";
+import { searchProduct } from "../databases/products";
 import { getAllColors } from "../databases/color";
 import { getAllSizes } from "../databases/size";
 import ProductCard from "../components/productCard";
@@ -21,12 +21,10 @@ export default function Search() {
   const [selectedSizes, setSelectedSizes] = useState([]);
   const [sortOrder, setSortOrder] = useState(""); // Trạng thái cho sắp xếp
 
-  const fetchProducts = async () => {
-    let result = await getAllProducts();
-    result = result.filter((product) =>
-      product.name.toLowerCase().includes(keywords.toLowerCase())
-    );
+  const fetchProducts = async (keywords) => {
+    const result = await searchProduct(keywords);
     setProducts(result);
+    console.log("this is result: ", result);
   };
 
   const fetchColors = async () => {
@@ -40,10 +38,11 @@ export default function Search() {
   };
 
   useEffect(() => {
-    fetchProducts();
+    fetchProducts(keywords);
     fetchColors();
     fetchSizes();
   }, [keywords]);
+  console.log(products);
 
   // Hàm xử lý khi chọn màu
   const handleColorSelect = (color) => {
@@ -182,9 +181,39 @@ export default function Search() {
               </div>
             </div>
             <div className="row featured-products">
-              {sortedProducts.map((product) => (
-                <ProductCard key={product._id} product={product} />
-              ))}
+              {products.length === 0 ? (
+                // Hiển thị 3 placeholder khi không có sản phẩm
+                <>
+                  {Array.from({ length: 3 }).map((_, index) => (
+                    <div className="col-4" key={index}>
+                      <div className="card" aria-hidden="true">
+                        <img src="" className="card-img-top" alt="..." />
+                        <div className="card-body">
+                          <h5 className="card-title placeholder-glow">
+                            <span className="placeholder col-6"></span>
+                          </h5>
+                          <p className="card-text placeholder-glow">
+                            <span className="placeholder col-7"></span>
+                            <span className="placeholder col-4"></span>
+                            <span className="placeholder col-4"></span>
+                            <span className="placeholder col-6"></span>
+                            <span className="placeholder col-8"></span>
+                          </p>
+                          <a
+                            className="btn btn-primary disabled placeholder col-6"
+                            aria-disabled="true"
+                          ></a>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </>
+              ) : (
+                // Hiển thị danh sách sản phẩm khi đã tải
+                sortedProducts.map((product) => (
+                  <ProductCard col={4} key={product._id} product={product} />
+                ))
+              )}
             </div>
           </div>
         </div>

@@ -112,7 +112,7 @@ export default function AddProduct() {
     };
     const result = await insertProduct(productData);
     window.location.replace(`/admin/san-pham/sua/${result._id}`);
-    console.log("Product Data:", result); // Log dữ liệu sản phẩm ra console
+    // console.log("Product Data:", result); // Log dữ liệu sản phẩm ra console
   };
 
   return (
@@ -241,6 +241,24 @@ export default function AddProduct() {
                         required
                       />
                       <label htmlFor={`price-${itemIndex}`}>Giá</label>
+                    </div>
+
+                    <div className="form-floating mb-3">
+                      <input
+                        type="text"
+                        className="form-control"
+                        id={`discount-${itemIndex}`}
+                        placeholder="Giảm giá (%)"
+                        value={item.discount}
+                        onChange={(e) => {
+                          const newItems = [...items];
+                          newItems[itemIndex].discount = e.target.value || 0; // Cập nhật discount
+                          setItems(newItems);
+                        }}
+                      />
+                      <label htmlFor={`discount-${itemIndex}`}>
+                        Giảm giá (%)
+                      </label>
                     </div>
 
                     {item.variations.map((variation, variationIndex) => (

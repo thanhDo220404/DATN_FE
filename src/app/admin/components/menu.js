@@ -48,7 +48,7 @@ export default function Menu() {
               }`}
               href="/admin"
             >
-              <i className="bi bi-speedometer2" />
+              <i className="bi bi-speedometer2 me-1" />
               <span className="app-menu__label">Dashboard</span>
             </Link>
           </li>
@@ -59,18 +59,18 @@ export default function Menu() {
               }`}
               href="/admin/mau-sac"
             >
-              <i className="bi bi-paint-bucket"></i>
+              <i className="bi bi-paint-bucket me-1"></i>
               <span className="app-menu__label">Màu sắc</span>
             </Link>
           </li>
           <li>
             <Link
               className={`app-menu__item ${
-                pathname === "/admin/kich-thuoc" ? "active" : ""
+                pathname === "/admin/kich-thuoc me-1" ? "active" : ""
               }`}
               href="/admin/kich-thuoc"
             >
-              <i className="bi bi-paint-bucket"></i>
+              <i className="bi bi-paint-bucket me-1"></i>
               <span className="app-menu__label">Kích thước</span>
             </Link>
           </li>
@@ -81,7 +81,7 @@ export default function Menu() {
               }`}
               href="/admin/media"
             >
-              <i className="bi bi-card-image"></i>
+              <i className="bi bi-card-image me-1"></i>
               <span className="app-menu__label">Media</span>
             </Link>
             {/* Hiển thị submenu nếu pathname chứa "/admin/media" */}
@@ -117,7 +117,7 @@ export default function Menu() {
               }`}
               href="/admin/users"
             >
-              <i className="bi bi-person" />
+              <i className="bi bi-person me-1" />
               <span className="app-menu__label">Quản lý người dùng</span>
             </Link>
           </li>
@@ -128,7 +128,7 @@ export default function Menu() {
               }`}
               href="/admin/danh-muc"
             >
-              <i className="bi bi-list-task" />
+              <i className="bi bi-list-task me-1" />
               <span className="app-menu__label">Quản lý danh mục</span>
             </Link>
           </li>
@@ -139,7 +139,7 @@ export default function Menu() {
               }`}
               href="/admin/san-pham"
             >
-              <i className="bi bi-tag" />
+              <i className="bi bi-tag me-1" />
               <span className="app-menu__label">Quản lý sản phẩm</span>
             </Link>
             {/* Hiển thị submenu nếu pathname chứa "/admin/san-pham" */}
@@ -165,7 +165,7 @@ export default function Menu() {
               }`}
               href="/admin/don-hang"
             >
-              <i className="bi bi-list-task" />
+              <i className="bi bi-list-task me-1" />
               <span className="app-menu__label">Quản lý đơn hàng</span>
             </Link>
           </li>
@@ -176,13 +176,13 @@ export default function Menu() {
               }`}
               href="/admin/bao-cao"
             >
-              <i className="bi bi-bar-chart-line" />
+              <i className="bi bi-bar-chart-line me-1" />
               <span className="app-menu__label">Báo cáo doanh thu</span>
             </Link>
           </li>
           <li>
             <a className="app-menu__item" href="#">
-              <i className="bi bi-gear" />
+              <i className="bi bi-gear me-1" />
               <span className="app-menu__label">Cài đặt hệ thống</span>
             </a>
           </li>

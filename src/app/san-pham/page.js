@@ -83,22 +83,6 @@ export default function Products() {
 
     return hasColor && hasSize; // Chỉ hiển thị sản phẩm nếu có màu và kích thước được chọn
   });
-  // const filteredProducts = products.filter((product) => {
-  //   // Kiểm tra xem sản phẩm có ít nhất một item với màu và kích thước đã chọn
-  //   const hasValidItem = product.items.some((item) => {
-  //     const colorMatches = selectedColors.length === 0 ||
-  //       selectedColors.some((selectedColor) => selectedColor._id === item.color._id);
-
-  //     const sizeMatches = selectedSizes.length === 0 ||
-  //       item.variations.some((variation) =>
-  //         selectedSizes.some((selectedSize) => selectedSize._id === variation.size._id)
-  //       );
-
-  //     return colorMatches && sizeMatches; // Trả về true nếu item có cả màu và kích thước phù hợp
-  //   });
-
-  //   return hasValidItem; // Chỉ hiển thị sản phẩm nếu có ít nhất một item hợp lệ
-  // });
 
   // Sắp xếp sản phẩm theo giá
   const sortedProducts = [...filteredProducts].sort((a, b) => {
@@ -176,9 +160,39 @@ export default function Products() {
               </div>
             </div>
             <div className="row featured-products">
-              {sortedProducts.map((product) => (
-                <ProductCard key={product._id} product={product} />
-              ))}
+              {products.length === 0 ? (
+                // Hiển thị 3 placeholder khi không có sản phẩm
+                <>
+                  {Array(3).map((_, index) => (
+                    <div className="col-4" key={index}>
+                      <div className="card" aria-hidden="true">
+                        <img src="" className="card-img-top" alt="..." />
+                        <div className="card-body">
+                          <h5 className="card-title placeholder-glow">
+                            <span className="placeholder col-6"></span>
+                          </h5>
+                          <div className="card-text placeholder-glow">
+                            <span className="placeholder col-7"></span>
+                            <span className="placeholder col-4"></span>
+                            <span className="placeholder col-4"></span>
+                            <span className="placeholder col-6"></span>
+                            <span className="placeholder col-8"></span>
+                          </div>
+                          <a
+                            className="btn btn-primary disabled placeholder col-6"
+                            aria-disabled="true"
+                          ></a>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </>
+              ) : (
+                // Hiển thị danh sách sản phẩm khi đã tải
+                sortedProducts.map((product) => (
+                  <ProductCard col={4} key={product._id} product={product} />
+                ))
+              )}
             </div>
           </div>
         </div>

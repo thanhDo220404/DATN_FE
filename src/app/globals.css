@@ -294,19 +294,6 @@ table {
   padding-top: 20px;  
 }
 
-.price {
-  /* Định dạng cho giá sản phẩm */
-  font-size: 1.5rem; /* Kích thước chữ lớn cho giá hiện tại */
-  font-weight: bold;  
-  color: #ff0000;   
-}
-
-.old-price {
-  /* Định dạng cho giá gạch bỏ (giá cũ) */
-  text-decoration: line-through;  
-  color: #888;  
-}
-
 .btn-custom {
   /* Định dạng cho các nút 'MUA NGAY' và 'Thêm vào giỏ hàng' */
   width: 100%;  

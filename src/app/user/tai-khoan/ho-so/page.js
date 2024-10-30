@@ -110,7 +110,7 @@ export default function Profile() {
                     {...register("name", {
                       required: "Tên không được để trống",
                     })}
-                    defaultValue={user.name || "Thành Đô"}
+                    defaultValue={user.name}
                   />
                   {errors.name && (
                     <div className="invalid-feedback text-start">
@@ -124,7 +124,7 @@ export default function Profile() {
                   Email
                 </th>
                 <td className="text-start">
-                  <p>{user.email || "ch********@gmail.com"}</p>
+                  <p>{user.email}</p>
                 </td>
               </tr>
               <tr>
@@ -132,7 +132,7 @@ export default function Profile() {
                   Số điện thoại
                 </th>
                 <td className="text-start">
-                  <p>{user.phone || "*********48"}</p>
+                  <p>{user.phone}</p>
                 </td>
               </tr>
             </tbody>
@@ -145,7 +145,7 @@ export default function Profile() {
           <div className="text-center border-start h-auto">
             <div>
               <img
-                src={`${apiUrl}/img/${user.image}` || "/images/profile-pic.png"} // Hiển thị hình ảnh người dùng nếu có
+                src={`${apiUrl}/img/${user.image}`} // Hiển thị hình ảnh người dùng nếu có
                 alt="Profile Picture"
                 width={100}
                 height={100}

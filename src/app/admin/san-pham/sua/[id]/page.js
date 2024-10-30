@@ -261,6 +261,21 @@ export default function UpdateProduct({ params }) {
                       />
                       <label htmlFor={`price-${itemIndex}`}>Giá</label>
                     </div>
+                    <div className="form-floating mb-3">
+                      <input
+                        type="text"
+                        className="form-control"
+                        id={`discount-${itemIndex}`}
+                        placeholder="Giảm giá"
+                        value={item.discount}
+                        onChange={(e) => {
+                          const newItems = [...items];
+                          newItems[itemIndex].discount = e.target.value; // Cập nhật discount
+                          setItems(newItems);
+                        }}
+                      />
+                      <label htmlFor={`discount-${itemIndex}`}>Giảm giá</label>
+                    </div>
 
                     {item.variations.map((variation, variationIndex) => (
                       <div key={variationIndex} className="mb-3">
