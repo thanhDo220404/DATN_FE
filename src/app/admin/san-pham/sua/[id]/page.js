@@ -7,6 +7,7 @@ import { getAllCategories } from "@/app/databases/categories";
 import { getAllColors } from "@/app/databases/color";
 import { getAllSizes } from "@/app/databases/size";
 import { getProductById, updateProduct } from "@/app/databases/products";
+import { ToastContainer, toast } from "react-toastify"; // Import toast
 
 export default function UpdateProduct({ params }) {
   const { id } = params; // Lấy ID từ router
@@ -120,11 +121,17 @@ export default function UpdateProduct({ params }) {
       items,
     };
     const result = await updateProduct(id, productData); // Gọi hàm updateProduct để cập nhật sản phẩm
-    console.log(result);
+    if (result) {
+      toast.success("Cập nhật sản phẩm thành công!"); // Hiển thị toast thành công
+      // Có thể điều hướng đến trang khác hoặc cập nhật lại dữ liệu
+    } else {
+      toast.error("Cập nhật sản phẩm thất bại!"); // Hiển thị toast lỗi
+    }
   };
 
   return (
     <>
+      <ToastContainer /> {/* Thêm ToastContainer vào đây */}
       {showMedia && (
         <>
           <MediaModal

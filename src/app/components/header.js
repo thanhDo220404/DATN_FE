@@ -5,6 +5,7 @@ import { FaSearch, FaShoppingCart, FaUser } from "react-icons/fa";
 import { useState, useEffect } from "react";
 import { eraseCookie, getCookie } from "../lib/CookieManager";
 import { parseJwt } from "../databases/users";
+import { getCartByUserId } from "../databases/cart";
 const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
 export default function Header() {
@@ -18,6 +19,7 @@ export default function Header() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const [searchKeyword, setSearchKeyword] = useState(""); // State lưu từ khóa tìm kiếm
+  const [carts, setCarts] = useState([]);
 
   // Đăng xuất
   const handleLogout = () => {
@@ -26,6 +28,11 @@ export default function Header() {
     setIsLoggedIn(false);
     window.location.reload();
   };
+  const fetchCart = async (userId) => {
+    const result = await getCartByUserId(userId);
+    setCarts(result);
+    console.log("Dữ liệu giỏ hàng: ", result);
+  };
 
   useEffect(() => {
     const token = getCookie("LOGIN_INFO");
@@ -33,6 +40,7 @@ export default function Header() {
       const payload = parseJwt(token);
       setUserLoginInfo(payload);
       setIsLoggedIn(true);
+      fetchCart(payload._id);
       if (payload.role === 1) {
         setIsAdmin(true);
       }
@@ -175,8 +183,8 @@ export default function Header() {
                       </Link>
                     </li>
                     <li>
-                      <Link className="dropdown-item" href="/user/don-hang">
-                        Đơn hàng
+                      <Link className="dropdown-item" href="/user/don-mua">
+                        Đơn mua
                       </Link>
                     </li>
                     <li>
@@ -187,12 +195,18 @@ export default function Header() {
                   </ul>
                 </div>
               ) : (
-                <Link href="/buyer/dang-nhap">
+                <Link href={`/buyer/dang-nhap?next=${pathname}`}>
                   <FaUser className="nav-icon text-light fs-5 me-3" />
                 </Link>
               )}
-              <Link href="/gio-hang">
+              <Link href="/gio-hang" className="position-relative">
                 <FaShoppingCart className="nav-icon text-light fs-5" />
+                <span
+                  style={{ fontSize: "12px" }}
+                  className="position-absolute top-0 start-100 translate-middle badge border border-light rounded-circle bg-danger p-2"
+                >
+                  {carts.length}
+                </span>
               </Link>
             </div>
           </div>

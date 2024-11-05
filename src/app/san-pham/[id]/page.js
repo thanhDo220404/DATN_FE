@@ -5,9 +5,12 @@ import { getProductById, increaseViewCount } from "@/app/databases/products";
 import { getCookie } from "@/app/lib/CookieManager";
 import { parseJwt } from "@/app/databases/users";
 import { addToCart } from "@/app/databases/cart";
+import { usePathname } from "next/navigation";
+import { ToastContainer, toast } from "react-toastify";
 
 export default function ProductDetail({ params }) {
   const { id } = params;
+  const pathname = usePathname();
   const [product, setProduct] = useState(null);
   const [selectedItem, setSelectedItem] = useState(null); // State để lưu item được chọn
   const [selectedVariation, setSelectedVariation] = useState(null); // State để lưu variation được chọn
@@ -20,13 +23,40 @@ export default function ProductDetail({ params }) {
     const result = await getProductById(id);
     setProduct(result.product);
     const initialItem = result.product.items[0];
-    const initialVariation = {
-      ...initialItem.variations[0],
-      quantity: quantity,
-    };
+
+    const initialVariation = (() => {
+      // Kiểm tra nếu quantity của biến thể đầu tiên nhỏ hơn 0
+      if (initialItem.variations[0].quantity <= 0) {
+        // Tìm biến thể đầu tiên có quantity >= 0
+        const validVariation = initialItem.variations.find(
+          (variation) => variation.quantity > 0
+        );
+
+        // Nếu tìm thấy biến thể hợp lệ, sử dụng nó
+        return validVariation
+          ? { ...validVariation, quantity: quantity }
+          : null; // Hoặc một giá trị mặc định khác
+      }
+
+      // Nếu không có vấn đề gì với biến thể đầu tiên, trả về nó
+      return { ...initialItem.variations[0], quantity: quantity };
+    })();
 
     setSelectedItem(initialItem);
-    setSelectedVariation(initialItem.variations[0]);
+
+    if (initialItem.variations[0].quantity <= 0) {
+      const availableVariation = initialItem.variations.find(
+        (variation) => variation.quantity > 0
+      );
+
+      if (availableVariation) {
+        setSelectedVariation(availableVariation);
+      } else {
+        console.log("Không có variation nào khả dụng.");
+      }
+    } else {
+      setSelectedVariation(initialItem.variations[0]);
+    }
 
     // Thiết lập productData dựa trên product nhưng với selectedItem và selectedVariation có quantity là 1
     setProductData({
@@ -70,84 +100,91 @@ export default function ProductDetail({ params }) {
 
   // Hàm xử lý khi chọn màu
   const handleColorSelect = (item) => {
-    setSelectedItem(item); // Cập nhật item được chọn
-    setSelectedVariation(item.variations[0]); // Cập nhật variation đầu tiên của item
+    setSelectedItem(item);
+    setSelectedVariation(item.variations[0]);
     setQuantity(1); // Đặt lại số lượng về 1
+
     // Cập nhật productData với selectedItem và selectedVariation
     setProductData((prevData) => ({
       ...prevData,
       items: [
         {
           ...item,
-          variations: [
-            {
-              ...item.variations[0],
-              quantity: quantity,
-            },
-          ],
+          variations: [item.variations[0]], // Giữ nguyên variation đầu tiên
         },
       ],
     }));
   };
   // Hàm xử lý khi chọn kích thước
   const handleSizeSelect = (variation) => {
-    setQuantity(1); // Đặt lại số lượng về 1
     setSelectedVariation(variation); // Gán variation đã chọn
+    setQuantity(1); // Đặt lại số lượng về 1
 
     // Cập nhật productData chỉ với selectedVariation
     setProductData((prevData) => ({
       ...prevData,
       items: prevData.items.map((item) => ({
         ...item,
-        variations: [
-          {
-            ...variation,
-            quantity: quantity, // Số lượng khởi tạo là 1
-          },
-        ],
+        variations: [variation], // Chỉ giữ variation đã chọn
       })),
     }));
   };
 
+  // Hàm xử lý thay đổi số lượng
+  const handleQuantityChange = (value) => {
+    const parsedValue = Math.max(1, Math.min(value, totalQuantity));
+    setQuantity(parsedValue);
+  };
+
   const handleAddToCart = async () => {
-    const newCartItem = {
-      user: {
-        _id: payload._id, // ID của người dùng
-      },
-      product: {
-        _id: productData._id, // ID của sản phẩm
-        name: productData.name, // Tên sản phẩm
-        description: productData.description, // Mô tả sản phẩm
-        category: productData.category, // Thể loại sản phẩm
-        items: {
-          _id: productData.items[0]._id,
-          // Chỉ định item đầu tiên trong productData
-          color: {
-            _id: productData.items[0].color._id, // ID của màu sắc
-            colorName: productData.items[0].color.colorName, // Tên màu sắc
-            colorHexCode: productData.items[0].color.colorHexCode, // Mã màu sắc
-          },
-          image: {
-            _id: productData.items[0].image._id, // ID của hình ảnh
-            mediaFilePath: productData.items[0].image.mediaFilePath, // Đường dẫn hình ảnh
-          },
-          price: productData.items[0].price, // Giá sản phẩm
-          discount: productData.items[0].discount, // Giảm giá
-          variations: {
-            id: productData.items[0].variations[0]._id,
-            size: {
-              _id: productData.items[0].variations[0].size._id, // ID của kích thước
-              sizeName: productData.items[0].variations[0].size.sizeName, // Tên kích thước
-              sizeValue: productData.items[0].variations[0].size.sizeValue, // Giá trị kích thước
-            },
-            quantity: quantity, // Số lượng
-          },
+    if (payload && payload._id) {
+      const newCartItem = {
+        user: {
+          _id: payload._id, // ID của người dùng
         },
-      },
-    };
-    const result = await addToCart(newCartItem);
-    setAddToCartData(newCartItem); // Cập nhật state với dữ liệu giỏ hàng mới
-    console.log(result); // In ra dữ liệu mới để kiểm tra
+        product: {
+          _id: productData._id, // ID của sản phẩm
+          name: productData.name, // Tên sản phẩm
+          description: productData.description, // Mô tả sản phẩm
+          category: productData.category, // Thể loại sản phẩm
+          items: {
+            _id: productData.items[0]._id,
+            // Chỉ định item đầu tiên trong productData
+            color: {
+              _id: productData.items[0].color._id, // ID của màu sắc
+              colorName: productData.items[0].color.colorName, // Tên màu sắc
+              colorHexCode: productData.items[0].color.colorHexCode, // Mã màu sắc
+            },
+            image: {
+              _id: productData.items[0].image._id, // ID của hình ảnh
+              mediaFilePath: productData.items[0].image.mediaFilePath, // Đường dẫn hình ảnh
+            },
+            price: productData.items[0].price, // Giá sản phẩm
+            discount: productData.items[0].discount, // Giảm giá
+            variations: {
+              _id: productData.items[0].variations[0]._id,
+              size: {
+                _id: productData.items[0].variations[0].size._id, // ID của kích thước
+                sizeName: productData.items[0].variations[0].size.sizeName, // Tên kích thước
+                sizeValue: productData.items[0].variations[0].size.sizeValue, // Giá trị kích thước
+              },
+            },
+          },
+          quantity: quantity, // Số lượng
+        },
+      };
+      const result = await addToCart(newCartItem);
+      setAddToCartData(newCartItem); // Cập nhật state với dữ liệu giỏ hàng mới
+      console.log(result); // In ra dữ liệu mới để kiểm tra
+      if (result) {
+        toast.success("Thêm giỏ hàng thành công!"); // Hiển thị toast thành công
+        // Có thể điều hướng đến trang khác hoặc cập nhật lại dữ liệu
+      } else {
+        toast.error("Thêm giỏ hàng thất bại!"); // Hiển thị toast lỗi
+      }
+    } else {
+      window.location.href = `/buyer/dang-nhap?next=${pathname}`;
+    }
   };
 
   // Tính tổng số lượng từ variation đã chọn hoặc từ tất cả các variations
@@ -164,6 +201,7 @@ export default function ProductDetail({ params }) {
 
   return (
     <div className="container mt-5">
+      <ToastContainer /> {/* Thêm ToastContainer vào đây */}
       <div className="row">
         <div className="col-md-6">
           <div className="product-image">
@@ -229,9 +267,10 @@ export default function ProductDetail({ params }) {
                     }`} // Thêm class sortActive nếu màu được chọn
                     style={{
                       backgroundColor: item.color.colorHexCode,
-                      width: "50px",
+                      width: "30px",
                       height: "30px",
                       cursor: "pointer",
+                      borderRadius: 20,
                     }}
                     onClick={() => handleColorSelect(item)} // Gọi hàm khi nhấp vào màu
                   ></div>
@@ -274,19 +313,7 @@ export default function ProductDetail({ params }) {
                 <input
                   type="text"
                   value={quantity}
-                  onChange={(e) =>
-                    setQuantity(
-                      Math.max(
-                        1,
-                        Math.min(
-                          selectedVariation
-                            ? selectedVariation.quantity
-                            : totalQuantity,
-                          e.target.value
-                        )
-                      )
-                    )
-                  }
+                  onChange={(e) => handleQuantityChange(Number(e.target.value))}
                   className="my-input text-center"
                   min="1"
                   max={totalQuantity}
@@ -324,7 +351,6 @@ export default function ProductDetail({ params }) {
           </button>
         </div>
       </div>
-
       <div className="details-section row mt-4">
         <div className="col-md-6">
           <h5>DETAILS</h5>

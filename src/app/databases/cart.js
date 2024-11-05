@@ -85,7 +85,7 @@ const getCartItemById = async (id) => {
 const updateCartItemById = async (id, body) => {
   try {
     const response = await fetch(`${apiUrl}/${id}`, {
-      method: "PATCH", // Sử dụng PATCH để cập nhật
+      method: "PUT",
       headers: {
         "Content-Type": "application/json",
       },
@@ -105,10 +105,33 @@ const updateCartItemById = async (id, body) => {
   }
 };
 
+const updateCartQuantity = async (id, quantity) => {
+  try {
+    const response = await fetch(`${apiUrl}/${id}/quantity`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ quantity }), // Gửi số lượng dưới dạng JSON
+    });
+
+    if (!response.ok) {
+      throw new Error(`Lỗi: ${response.statusText}`);
+    }
+
+    const updatedCart = await response.json(); // Phân tích dữ liệu JSON
+    return updatedCart; // Trả về giỏ hàng đã được cập nhật
+  } catch (error) {
+    console.error("Lỗi khi cập nhật số lượng sản phẩm trong giỏ hàng:", error);
+    throw error; // Ném lỗi lên để xử lý ở nơi khác nếu cần
+  }
+};
+
 export {
   addToCart,
   getCartByUserId,
   deleteCart,
   getCartItemById,
   updateCartItemById,
+  updateCartQuantity,
 };

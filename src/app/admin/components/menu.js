@@ -52,28 +52,7 @@ export default function Menu() {
               <span className="app-menu__label">Dashboard</span>
             </Link>
           </li>
-          <li>
-            <Link
-              className={`app-menu__item ${
-                pathname === "/admin/mau-sac" ? "active" : ""
-              }`}
-              href="/admin/mau-sac"
-            >
-              <i className="bi bi-paint-bucket me-1"></i>
-              <span className="app-menu__label">Màu sắc</span>
-            </Link>
-          </li>
-          <li>
-            <Link
-              className={`app-menu__item ${
-                pathname === "/admin/kich-thuoc me-1" ? "active" : ""
-              }`}
-              href="/admin/kich-thuoc"
-            >
-              <i className="bi bi-paint-bucket me-1"></i>
-              <span className="app-menu__label">Kích thước</span>
-            </Link>
-          </li>
+
           <li>
             <Link
               className={`app-menu__item ${
@@ -153,6 +132,26 @@ export default function Menu() {
                     href="/admin/san-pham/them"
                   >
                     <span className="app-menu__label">Thêm</span>
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    className={`app-menu__item ${
+                      pathname === "/admin/mau-sac" ? "active" : ""
+                    }`}
+                    href="/admin/mau-sac"
+                  >
+                    <span className="app-menu__label">Màu sắc</span>
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    className={`app-menu__item ${
+                      pathname === "/admin/kich-thuoc me-1" ? "active" : ""
+                    }`}
+                    href="/admin/kich-thuoc"
+                  >
+                    <span className="app-menu__label">Kích thước</span>
                   </Link>
                 </li>
               </ul>

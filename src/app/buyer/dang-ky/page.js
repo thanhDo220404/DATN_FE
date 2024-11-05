@@ -77,11 +77,7 @@ export default function Register() {
     const token = getCookie("LOGIN_INFO");
     if (token) {
       console.log("Người dùng đã đăng nhập, điều hướng về trang trước đó...");
-      if (window.history.length > 1) {
-        window.history.back(); // Nếu có lịch sử điều hướng, quay lại trang trước
-      } else {
-        window.location.href = "/"; // Nếu không có lịch sử, quay về trang chủ
-      }
+      window.location.href = "/user/tai-khoan"; // Nếu không có lịch sử, quay về trang chủ
     }
   }, []);
 
@@ -244,7 +240,7 @@ export default function Register() {
         </Link>
       </div>
       <div className="col border border-dark d-none d-md-flex">
-        <img src="/images/logo4x.png" alt="Logo" className="w-50 m-auto" />
+        <img src="/images/logocolor.png" alt="Logo" className="w-50 m-auto" />
       </div>
     </div>
   );

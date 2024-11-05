@@ -103,7 +103,7 @@ export default function Products() {
 
   return (
     <>
-      <div className="container mt-5">
+      <div className="container my-5">
         <div className="row">
           <h3 className="product-title">Sản Phẩm</h3>
 
@@ -127,7 +127,7 @@ export default function Products() {
                     <>
                       <div className="fs-5 w-100">Đang dùng bộ lọc:</div>
                       {selectedColors.map((color, index) => (
-                        <div className="border p-3 me-2 d-flex" key={index}>
+                        <div className="border p-2 me-2 d-flex" key={index}>
                           {color.name}
                           <div
                             className="btn-close"
@@ -136,7 +136,7 @@ export default function Products() {
                         </div>
                       ))}
                       {selectedSizes.map((size, index) => (
-                        <div className="border p-3 me-2 d-flex" key={index}>
+                        <div className="border p-2 me-2 d-flex" key={index}>
                           {size.name}
                           <div
                             className="btn-close"

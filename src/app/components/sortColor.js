@@ -16,8 +16,9 @@ const SortColor = ({ colors, selectedColors, onColorSelect }) => {
               style={{
                 backgroundColor: color.hexCode,
                 height: "30px",
-                width: "30%",
+                width: "30px",
                 cursor: "pointer",
+                borderRadius: 20,
               }}
               onClick={() => onColorSelect(color)}
             ></div>

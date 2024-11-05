@@ -1,6 +1,7 @@
 // import "../../public/bootstrap/css/bootstrap.min.css";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap-icons/font/bootstrap-icons.css";
+import "react-toastify/dist/ReactToastify.css";
 import "./globals.css";
 import Header from "./components/header";
 import Footer from "./components/footer";

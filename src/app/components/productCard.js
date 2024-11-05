@@ -34,11 +34,11 @@ export default function ProductCard({ product, col }) {
               {selectedItem.variations
                 .filter((variation) => variation.quantity > 0) // Lọc các variation có quantity > 0
                 .map((variation, index) => (
-                  <div key={index} className="my-size-items">
+                  <button key={index} className="my-size-items">
                     {/* Hiển thị tên kích thước */}
                     {variation.size.sizeName}
                     {/* Nếu cần có thể thêm các thuộc tính khác */}
-                  </div>
+                  </button>
                 ))}
             </div>
           </div>
