@@ -128,5 +128,37 @@ const updatePassword = async (id, newPassword) => {
     // Có thể xử lý thêm ở đây, như hiển thị thông báo cho người dùng
   }
 };
+// Hàm lấy danh sách tất cả người dùng
+const getAllUsers = async () => {
+  try {
+    const response = await fetch(`${apiUrl}/users`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
 
-export { login, register, update, parseJwt, getUserById, updatePassword };
+    // Kiểm tra phản hồi từ API
+    if (!response) {
+      const errorData = await response.json();
+      throw new Error(
+        errorData.message || "Có lỗi xảy ra khi lấy danh sách người dùng."
+      );
+    }
+
+    return await response.json(); // Trả về dữ liệu danh sách người dùng
+  } catch (error) {
+    console.error("Lỗi lấy danh sách người dùng:", error);
+    throw error; // Ném lỗi để xử lý ngoài hàm
+  }
+};
+
+export {
+  getAllUsers,
+  login,
+  register,
+  update,
+  parseJwt,
+  getUserById,
+  updatePassword,
+};

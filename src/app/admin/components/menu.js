@@ -2,16 +2,18 @@
 import { parseJwt } from "@/app/databases/users";
 import { getCookie } from "@/app/lib/CookieManager";
 import Link from "next/link";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 
 export default function Menu() {
   const pathname = usePathname();
+  const [userInfo, setUserInfo] = useState({});
 
   useEffect(() => {
     const token = getCookie("LOGIN_INFO");
     if (token) {
       const payload = parseJwt(token);
+      setUserInfo(payload);
       if (payload.role !== 1) {
         window.location.replace("/");
       }
@@ -26,13 +28,13 @@ export default function Menu() {
         <div className="app-sidebar__user">
           <img
             className="app-sidebar__user-avatar"
-            src="/images/profile-pic.png"
+            src={`http://localhost:2204/img/${userInfo.image}`}
             width="50px"
             alt="User Image"
           />
           <div>
             <p className="app-sidebar__user-name">
-              <b>Đô Đô</b>
+              <b>{userInfo.name}</b>
             </p>
             <p className="app-sidebar__user-designation">
               Chào mừng bạn trở lại
@@ -118,11 +120,13 @@ export default function Menu() {
               }`}
               href="/admin/san-pham"
             >
-              <i className="bi bi-tag me-1" />
-              <span className="app-menu__label">Quản lý sản phẩm</span>
+              <i className="bi bi-box-seam-fill"></i>
+              <span className="app-menu__label ms-1">Quản lý sản phẩm</span>
             </Link>
             {/* Hiển thị submenu nếu pathname chứa "/admin/san-pham" */}
-            {pathname.includes("/admin/san-pham") && (
+            {pathname.includes("/admin/san-pham") ||
+            pathname.includes("/admin/mau-sac") ||
+            pathname.includes("/admin/kich-thuoc") ? (
               <ul className="app-submenu">
                 <li>
                   <Link
@@ -147,7 +151,7 @@ export default function Menu() {
                 <li>
                   <Link
                     className={`app-menu__item ${
-                      pathname === "/admin/kich-thuoc me-1" ? "active" : ""
+                      pathname === "/admin/kich-thuoc" ? "active" : ""
                     }`}
                     href="/admin/kich-thuoc"
                   >
@@ -155,7 +159,7 @@ export default function Menu() {
                   </Link>
                 </li>
               </ul>
-            )}
+            ) : null}
           </li>
           <li>
             <Link
@@ -164,8 +168,8 @@ export default function Menu() {
               }`}
               href="/admin/don-hang"
             >
-              <i className="bi bi-list-task me-1" />
-              <span className="app-menu__label">Quản lý đơn hàng</span>
+              <i className="bi bi-bag-fill"></i>
+              <span className="app-menu__label ms-1">Quản lý đơn hàng</span>
             </Link>
           </li>
           <li>
@@ -180,9 +184,9 @@ export default function Menu() {
             </Link>
           </li>
           <li>
-            <a className="app-menu__item" href="#">
-              <i className="bi bi-gear me-1" />
-              <span className="app-menu__label">Cài đặt hệ thống</span>
+            <a className="app-menu__item" href="/">
+              <i className="bi bi-house-door-fill"></i>
+              <span className="app-menu__label ms-1">Trang Chủ</span>
             </a>
           </li>
         </ul>

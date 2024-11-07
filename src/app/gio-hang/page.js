@@ -9,8 +9,11 @@ import { getCookie } from "../lib/CookieManager";
 import { parseJwt } from "../databases/users";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { getAllProducts } from "../databases/products";
+import { ToastContainer, toast } from "react-toastify";
 
 export default function Cart() {
+  const [listProducts, setListProducts] = useState([]);
   const [carts, setCarts] = useState([]);
   const [payload, setPayload] = useState();
   const [listCheckout, setListCheckout] = useState([]);
@@ -19,12 +22,19 @@ export default function Cart() {
 
   const router = useRouter();
 
+  const fetchProducts = async () => {
+    const result = await getAllProducts();
+    setListProducts(result);
+    console.log(result);
+  };
+
   const fetchCart = async (userId) => {
     const result = await getCartByUserId(userId);
     setCarts(result);
   };
 
   useEffect(() => {
+    fetchProducts();
     const token = getCookie("LOGIN_INFO");
     if (token) {
       setPayload(parseJwt(token));
@@ -44,34 +54,66 @@ export default function Cart() {
     }
   };
 
-  const handleQuantityChange = async (id, newQuantity) => {
+  const handleQuantityChange = async (cartId, newQuantity) => {
+    // Tìm cartItem trong giỏ hàng theo cartId
+    const cartItem = carts.find((item) => item._id === cartId);
+
+    // Tìm sản phẩm trong listProducts
+    const productInList = listProducts.find(
+      (product) => product._id === cartItem.product._id
+    );
+
+    // Tìm item tương ứng trong sản phẩm
+    const itemInProduct = productInList.items.find(
+      (item) => item._id === cartItem.product.items._id
+    );
+
+    // Tìm variation tương ứng trong item
+    const variationInItem = itemInProduct.variations.find(
+      (variation) => variation._id === cartItem.product.items.variations._id
+    );
+
+    // Lấy số lượng tối đa từ variation
+    const maxQuantity = variationInItem.quantity || 0;
+
+    // Kiểm tra xem newQuantity có vượt quá maxQuantity không
+    if (newQuantity > maxQuantity) {
+      // Hiển thị thông báo lỗi nếu số lượng vượt quá
+      toast.error(`Bạn chỉ có thể mua tối đa ${maxQuantity} sản phẩm`);
+      return; // Ngừng thực hiện các bước tiếp theo nếu số lượng không hợp lệ
+    }
+
+    // Giới hạn số lượng tối đa
+    newQuantity = Math.min(newQuantity, maxQuantity);
+
     // Cập nhật giỏ hàng
     setCarts((prevCarts) => {
-      return prevCarts.map((cartItem) =>
-        cartItem._id === id
+      return prevCarts.map((item) =>
+        item._id === cartId
           ? {
-              ...cartItem,
-              product: { ...cartItem.product, quantity: newQuantity },
+              ...item,
+              quantity: newQuantity, // Cập nhật số lượng giỏ hàng
             }
-          : cartItem
+          : item
       );
     });
 
-    // Cập nhật lại listCheckout mà không làm mất đi các sản phẩm đã chọn
+    // Cập nhật lại listCheckout
     setListCheckout((prevList) => {
       return prevList.map((checkoutItem) =>
-        checkoutItem._id === id
+        checkoutItem._id === cartId
           ? {
               ...checkoutItem,
-              product: { ...checkoutItem.product, quantity: newQuantity },
+              quantity: newQuantity, // Cập nhật số lượng trong listCheckout
             }
           : checkoutItem
       );
     });
 
     try {
-      const updatedCart = await updateCartQuantity(id, newQuantity);
+      const updatedCart = await updateCartQuantity(cartId, newQuantity);
       console.log("Giỏ hàng đã được cập nhật:", updatedCart);
+      toast.success("Giỏ hàng đã được cập nhật!");
       if (payload && payload._id) {
         fetchCart(payload._id);
       }
@@ -140,6 +182,7 @@ export default function Cart() {
   return (
     <>
       <div className="container my-5">
+        <ToastContainer></ToastContainer>
         <div className="row position-relative">
           <div className="col-md-12 bg-white p-3">
             <div className="d-flex justify-content-between align-items-center mb-4">

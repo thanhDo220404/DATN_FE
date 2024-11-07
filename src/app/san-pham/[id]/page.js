@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { getProductById, increaseViewCount } from "@/app/databases/products";
 import { getCookie } from "@/app/lib/CookieManager";
 import { parseJwt } from "@/app/databases/users";
-import { addToCart } from "@/app/databases/cart";
+import { addToCart, getCartByUserId } from "@/app/databases/cart";
 import { usePathname } from "next/navigation";
 import { ToastContainer, toast } from "react-toastify";
 
@@ -18,6 +18,12 @@ export default function ProductDetail({ params }) {
   const [productData, setProductData] = useState({});
   const [payload, setPayload] = useState({});
   const [addToCartData, setAddToCartData] = useState({});
+  const [listCarts, setListCarts] = useState([]);
+
+  const fetchCarts = async (userId) => {
+    const result = await getCartByUserId(userId);
+    setListCarts(result);
+  };
 
   const fetchProduct = async (id) => {
     const result = await getProductById(id);
@@ -74,6 +80,8 @@ export default function ProductDetail({ params }) {
     const token = getCookie("LOGIN_INFO");
     if (token) {
       setPayload(parseJwt(token));
+      const LOGIN_INFO = parseJwt(token);
+      fetchCarts(LOGIN_INFO._id);
     }
   }, [id]);
 
@@ -182,6 +190,52 @@ export default function ProductDetail({ params }) {
       } else {
         toast.error("Thêm giỏ hàng thất bại!"); // Hiển thị toast lỗi
       }
+    } else {
+      window.location.href = `/buyer/dang-nhap?next=${pathname}`;
+    }
+  };
+  const handleCheckout = async () => {
+    if (payload && payload._id) {
+      const newCartItem = [
+        {
+          user: {
+            _id: payload._id, // ID của người dùng
+          },
+          product: {
+            _id: productData._id, // ID của sản phẩm
+            name: productData.name, // Tên sản phẩm
+            description: productData.description, // Mô tả sản phẩm
+            category: productData.category, // Thể loại sản phẩm
+            items: {
+              _id: productData.items[0]._id,
+              // Chỉ định item đầu tiên trong productData
+              color: {
+                _id: productData.items[0].color._id, // ID của màu sắc
+                colorName: productData.items[0].color.colorName, // Tên màu sắc
+                colorHexCode: productData.items[0].color.colorHexCode, // Mã màu sắc
+              },
+              image: {
+                _id: productData.items[0].image._id, // ID của hình ảnh
+                mediaFilePath: productData.items[0].image.mediaFilePath, // Đường dẫn hình ảnh
+              },
+              price: productData.items[0].price, // Giá sản phẩm
+              discount: productData.items[0].discount, // Giảm giá
+              variations: {
+                _id: productData.items[0].variations[0]._id,
+                size: {
+                  _id: productData.items[0].variations[0].size._id, // ID của kích thước
+                  sizeName: productData.items[0].variations[0].size.sizeName, // Tên kích thước
+                  sizeValue: productData.items[0].variations[0].size.sizeValue, // Giá trị kích thước
+                },
+              },
+            },
+            quantity: quantity, // Số lượng
+          },
+        },
+      ];
+      const data = encodeURIComponent(JSON.stringify(newCartItem));
+      window.location.href = `/thanh-toan?data=${data}`;
+      console.log(newCartItem);
     } else {
       window.location.href = `/buyer/dang-nhap?next=${pathname}`;
     }
@@ -342,9 +396,14 @@ export default function ProductDetail({ params }) {
               </div>
             </div>
           </div>
-          <button className="btn btn-warning btn-lg">MUA NGAY</button>
           <button
-            className="btn btn-outline-secondary btn-lg"
+            className="btn btn-warning btn-lg"
+            onClick={() => handleCheckout()}
+          >
+            MUA NGAY
+          </button>
+          <button
+            className="btn btn-outline-secondary btn-lg ms-3"
             onClick={() => handleAddToCart()}
           >
             Thêm vào giỏ hàng

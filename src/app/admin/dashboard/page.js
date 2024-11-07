@@ -1,13 +1,40 @@
 "use client"; // Thêm dòng này ở đầu file
 
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import Chart from "chart.js/auto"; // nhớ npm install chart.js
+import { getAllUsers } from "@/app/databases/users";
+import { getAllProducts } from "@/app/databases/products";
+import { getAllOrders } from "@/app/databases/order";
 
 export default function Dashboard() {
   const lineChartRef = useRef(null); // Tham chiếu cho biểu đồ đường
   const barChartRef = useRef(null); // Tham chiếu cho biểu đồ cột
 
+  const [listUsers, setListUsers] = useState([]);
+  const [listProducts, setListProducts] = useState([]);
+  const [listOrders, setListOrders] = useState([]);
+
+  const fetchOrders = async () => {
+    const result = await getAllOrders();
+    setListOrders(result);
+  };
+
+  const fetchUsers = async () => {
+    const result = await getAllUsers();
+    const filteredUsers = result.Users.filter((user) => user.role === 0);
+    setListUsers(filteredUsers);
+    console.log(filteredUsers);
+  };
+
+  const fetchProducts = async () => {
+    const result = await getAllProducts();
+    setListProducts(result);
+  };
+
   useEffect(() => {
+    fetchUsers();
+    fetchProducts();
+    fetchOrders();
     // Biểu đồ đường - Line Chart
     const lineChartCtx = document
       .getElementById("lineChartDemo")
@@ -111,7 +138,7 @@ export default function Dashboard() {
                 <div className="info">
                   <h4>Tổng khách hàng</h4>
                   <p>
-                    <b>56 khách hàng</b>
+                    <b>{listUsers.length}</b>
                   </p>
                   <p className="info-tong">Tổng số khách hàng được quản lý.</p>
                 </div>
@@ -124,7 +151,7 @@ export default function Dashboard() {
                 <div className="info">
                   <h4>Tổng sản phẩm</h4>
                   <p>
-                    <b>1850 sản phẩm</b>
+                    <b>{listProducts.length}</b>
                   </p>
                   <p className="info-tong">Tổng số sản phẩm được quản lý.</p>
                 </div>
@@ -137,7 +164,7 @@ export default function Dashboard() {
                 <div className="info">
                   <h4>Tổng đơn hàng</h4>
                   <p>
-                    <b>247 đơn hàng</b>
+                    <b>{listOrders.length}</b>
                   </p>
                   <p className="info-tong">
                     Tổng số hóa đơn bán hàng trong tháng.

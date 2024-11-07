@@ -107,7 +107,7 @@ export default function Products() {
         <div className="row">
           <h3 className="product-title">Sản Phẩm</h3>
 
-          <div className="col-3">
+          <div className="col-3 d-sm-block d-none">
             <SortColor
               colors={colors}
               selectedColors={selectedColors}
@@ -119,7 +119,7 @@ export default function Products() {
               onSizeSelect={handleSizeSelect}
             />
           </div>
-          <div className="col-9">
+          <div className="col-sm-9">
             <div className="row">
               <div className="col-9">
                 <div className="d-flex flex-wrap gap-1">

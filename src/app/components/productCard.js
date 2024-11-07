@@ -18,7 +18,7 @@ export default function ProductCard({ product, col }) {
     selectedItem.price * (1 - selectedItem.discount / 100);
 
   return (
-    <div className={`col-md-${col} mb-3`}>
+    <div className={`col-sm-${col} col-6 mb-3`}>
       <div className="card">
         <div className="my-card-header my-relative">
           <Link href={`/san-pham/${product._id}`}>
@@ -87,15 +87,6 @@ export default function ProductCard({ product, col }) {
                 })}
               </del>
             )}
-          </div>
-          <div className="d-flex justify-content-between">
-            <button className="btn btn-warning">MUA NGAY</button>
-            <a
-              href={`/san-pham/${product._id}`}
-              className="btn btn-outline-secondary"
-            >
-              Xem chi tiết
-            </a>
           </div>
         </div>
       </div>
