@@ -2,30 +2,32 @@
 import "@/app/san-pham/style.css";
 
 import { useEffect, useState } from "react";
-import { searchProduct } from "../databases/products";
-import { getAllColors } from "../databases/color";
-import { getAllSizes } from "../databases/size";
-import ProductCard from "../components/productCard";
-import SortColor from "../components/sortColor";
-import SortSize from "../components/sortSize";
-import { useSearchParams } from "next/navigation";
+import SortColor from "@/app/components/sortColor";
+import SortSize from "@/app/components/sortSize";
 import Link from "next/link";
+import { getAllProducts } from "@/app/databases/products";
+import { getAllColors } from "@/app/databases/color";
+import { getAllSizes } from "@/app/databases/size";
+import ProductCard from "@/app/components/productCard";
+import { getCategoryById } from "@/app/databases/categories";
 import { ToastContainer } from "react-toastify";
-export default function Search() {
-  const searchParams = useSearchParams();
-  const keywords = searchParams.get("keywords");
-  console.log(keywords);
+
+export default function Products({ params }) {
+  const { id } = params;
   const [products, setProducts] = useState([]);
+  const [category, setCategory] = useState();
   const [colors, setColors] = useState([]);
   const [sizes, setSizes] = useState([]);
   const [selectedColors, setSelectedColors] = useState([]); // Lưu nhiều màu đã chọn
   const [selectedSizes, setSelectedSizes] = useState([]);
   const [sortOrder, setSortOrder] = useState(""); // Trạng thái cho sắp xếp
 
-  const fetchProducts = async (keywords) => {
-    const result = await searchProduct(keywords);
-    setProducts(result);
-    console.log("this is result: ", result);
+  const fetchProducts = async (category_id) => {
+    const result = await getAllProducts();
+    const filteredProducts = result.filter(
+      (product) => product.category._id === category_id
+    );
+    setProducts(filteredProducts);
   };
 
   const fetchColors = async () => {
@@ -38,12 +40,17 @@ export default function Search() {
     setSizes(result);
   };
 
+  const fetchCategory = async (id) => {
+    const result = await getCategoryById(id);
+    setCategory(result);
+  };
+
   useEffect(() => {
-    fetchProducts(keywords);
+    fetchProducts(id);
     fetchColors();
     fetchSizes();
-  }, [keywords]);
-  console.log(products);
+    fetchCategory(id);
+  }, [id]);
 
   // Hàm xử lý khi chọn màu
   const handleColorSelect = (color) => {
@@ -89,22 +96,6 @@ export default function Search() {
 
     return hasColor && hasSize; // Chỉ hiển thị sản phẩm nếu có màu và kích thước được chọn
   });
-  // const filteredProducts = products.filter((product) => {
-  //   // Kiểm tra xem sản phẩm có ít nhất một item với màu và kích thước đã chọn
-  //   const hasValidItem = product.items.some((item) => {
-  //     const colorMatches = selectedColors.length === 0 ||
-  //       selectedColors.some((selectedColor) => selectedColor._id === item.color._id);
-
-  //     const sizeMatches = selectedSizes.length === 0 ||
-  //       item.variations.some((variation) =>
-  //         selectedSizes.some((selectedSize) => selectedSize._id === variation.size._id)
-  //       );
-
-  //     return colorMatches && sizeMatches; // Trả về true nếu item có cả màu và kích thước phù hợp
-  //   });
-
-  //   return hasValidItem; // Chỉ hiển thị sản phẩm nếu có ít nhất một item hợp lệ
-  // });
 
   // Sắp xếp sản phẩm theo giá
   const sortedProducts = [...filteredProducts].sort((a, b) => {
@@ -132,12 +123,12 @@ export default function Search() {
 
   return (
     <>
-      <div className="container mt-5">
+      <div className="container my-5">
         <ToastContainer></ToastContainer>
         <div className="row">
-          <h3 className="product-title">Sản Phẩm</h3>
+          {category && <h3 className="product-title">{category.name}</h3>}
 
-          <div className="col-3 d-sm-block d-none position-relative py-5  ">
+          <div className="col-3 d-sm-block d-none position-relative py-5">
             <div className="position-sticky top-0">
               <SortColor
                 colors={colors}
@@ -151,15 +142,15 @@ export default function Search() {
               />
             </div>
           </div>
-          <div className="col-9">
+          <div className="col-sm-9">
             <div className="row">
-              <div className="col-6">
-                <div className="d-flex flex-wrap">
+              <div className="col-9">
+                <div className="d-flex flex-wrap gap-1">
                   {(selectedColors.length > 0 || selectedSizes.length > 0) && (
                     <>
                       <div className="fs-5 w-100">Đang dùng bộ lọc:</div>
                       {selectedColors.map((color, index) => (
-                        <div className="border p-3 me-2 d-flex" key={index}>
+                        <div className="border p-2 me-2 d-flex" key={index}>
                           {color.name}
                           <div
                             className="btn-close"
@@ -168,7 +159,7 @@ export default function Search() {
                         </div>
                       ))}
                       {selectedSizes.map((size, index) => (
-                        <div className="border p-3 me-2 d-flex" key={index}>
+                        <div className="border p-2 me-2 d-flex" key={index}>
                           {size.name}
                           <div
                             className="btn-close"
@@ -180,7 +171,7 @@ export default function Search() {
                   )}
                 </div>
               </div>
-              <div className="col-6">
+              <div className="col-3">
                 <select
                   className="form-select w-auto float-end"
                   onChange={(e) => setSortOrder(e.target.value)} // Cập nhật giá trị sắp xếp
@@ -195,7 +186,7 @@ export default function Search() {
               {products.length === 0 ? (
                 // Hiển thị 3 placeholder khi không có sản phẩm
                 <>
-                  {Array.from({ length: 3 }).map((_, index) => (
+                  {Array(3).map((_, index) => (
                     <div className="col-4" key={index}>
                       <div className="card" aria-hidden="true">
                         <img src="" className="card-img-top" alt="..." />
@@ -203,13 +194,13 @@ export default function Search() {
                           <h5 className="card-title placeholder-glow">
                             <span className="placeholder col-6"></span>
                           </h5>
-                          <p className="card-text placeholder-glow">
+                          <div className="card-text placeholder-glow">
                             <span className="placeholder col-7"></span>
                             <span className="placeholder col-4"></span>
                             <span className="placeholder col-4"></span>
                             <span className="placeholder col-6"></span>
                             <span className="placeholder col-8"></span>
-                          </p>
+                          </div>
                           <a
                             className="btn btn-primary disabled placeholder col-6"
                             aria-disabled="true"

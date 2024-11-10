@@ -9,6 +9,7 @@ import ProductCard from "../components/productCard";
 import SortColor from "../components/sortColor";
 import SortSize from "../components/sortSize";
 import Link from "next/link";
+import { ToastContainer } from "react-toastify";
 
 export default function Products() {
   const [products, setProducts] = useState([]);
@@ -87,7 +88,14 @@ export default function Products() {
   // Sắp xếp sản phẩm theo giá
   const sortedProducts = [...filteredProducts].sort((a, b) => {
     const getLowestPrice = (product) => {
-      return Math.min(...product.items.map((item) => item.price));
+      return Math.min(
+        ...product.items.map((item) => {
+          // Tính giá sau khi áp dụng discount
+          const discountedPrice =
+            item.price - item.price * (item.discount / 100);
+          return discountedPrice;
+        })
+      );
     };
 
     const priceA = getLowestPrice(a);
@@ -104,20 +112,23 @@ export default function Products() {
   return (
     <>
       <div className="container my-5">
+        <ToastContainer></ToastContainer>
         <div className="row">
           <h3 className="product-title">Sản Phẩm</h3>
 
-          <div className="col-3 d-sm-block d-none">
-            <SortColor
-              colors={colors}
-              selectedColors={selectedColors}
-              onColorSelect={handleColorSelect}
-            />
-            <SortSize
-              sizes={sizes}
-              selectedSizes={selectedSizes}
-              onSizeSelect={handleSizeSelect}
-            />
+          <div className="col-3 d-sm-block d-none position-relative py-5  ">
+            <div className="position-sticky top-0">
+              <SortColor
+                colors={colors}
+                selectedColors={selectedColors}
+                onColorSelect={handleColorSelect}
+              />
+              <SortSize
+                sizes={sizes}
+                selectedSizes={selectedSizes}
+                onSizeSelect={handleSizeSelect}
+              />
+            </div>
           </div>
           <div className="col-sm-9">
             <div className="row">

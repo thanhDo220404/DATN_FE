@@ -27,19 +27,6 @@ export default function Categories() {
     const result = await getAllCategories(); // Gọi hàm lấy tất cả danh mục
     setListCategories(result);
   };
-  // Hàm để lấy tất cả danh mục con (đệ quy)
-  const getAllChildCategories = (categoryId, categories) => {
-    let childCategories = categories.filter(
-      (category) => category.parent && category.parent.categoryId === categoryId
-    );
-    childCategories.forEach((child) => {
-      childCategories = [
-        ...childCategories,
-        ...getAllChildCategories(child._id, categories),
-      ];
-    });
-    return childCategories;
-  };
   useEffect(() => {
     fetchCategories();
   }, []);
@@ -145,7 +132,6 @@ export default function Categories() {
                     <th width={300}>ID</th>
                     <th width={250}>Tên</th>
                     <th width={250}>Mô tả</th>
-                    <th width={150}>Trạng thái</th>{" "}
                     {/* Trường trạng thái cho danh mục */}
                     <th width={100}>Tính năng</th>
                   </tr>
@@ -163,15 +149,6 @@ export default function Categories() {
                       <td>{category._id}</td> {/* ID của danh mục */}
                       <td>{category.name}</td>
                       <td>{category.description}</td> {/* Mô tả của danh mục */}
-                      <td>
-                        <span
-                          className={`badge ${
-                            category.status ? "bg-success" : "bg-danger"
-                          }`}
-                        >
-                          {category.status ? "Hoạt động" : "Không hoạt động"}
-                        </span>
-                      </td>
                       <td className="table-td-center">
                         <button
                           className="btn btn-primary btn-sm trash"
@@ -251,32 +228,6 @@ export default function Categories() {
                   />
                   <label htmlFor="categoryDescription">Mô tả danh mục</label>
                 </div>
-                <div className="form-floating mb-3">
-                  <select
-                    className="form-select"
-                    id="categoryStatus"
-                    {...registerInsert("status", { required: true })}
-                  >
-                    <option value="true">Hoạt động</option>
-                    <option value="false">Không hoạt động</option>
-                  </select>
-                  <label htmlFor="categoryStatus">Trạng thái danh mục</label>
-                </div>
-                <div className="form-floating mb-3">
-                  <select
-                    className="form-select"
-                    id="categoryParent"
-                    {...registerInsert("parent")}
-                  >
-                    <option value="">Chọn danh mục cha</option>
-                    {listCategories.map((parent) => (
-                      <option key={parent._id} value={parent._id}>
-                        {parent.name}
-                      </option>
-                    ))}
-                  </select>
-                  <label htmlFor="categoryParent">Danh mục cha</label>
-                </div>
               </div>
               <div className="modal-footer">
                 <button
@@ -342,53 +293,6 @@ export default function Categories() {
                   <label htmlFor="categoryDescriptionUpdate">
                     Mô tả danh mục
                   </label>
-                </div>
-                <div className="form-floating mb-3">
-                  <select
-                    className="form-select"
-                    id="categoryStatusUpdate"
-                    {...registerUpdate("status", { required: true })}
-                  >
-                    <option value="true">Hoạt động</option>
-                    <option value="false">Không hoạt động</option>
-                  </select>
-                  <label htmlFor="categoryStatusUpdate">
-                    Trạng thái danh mục
-                  </label>
-                </div>
-                <div className="form-floating mb-3">
-                  <select
-                    className="form-select"
-                    id="updateCategoryParent"
-                    {...registerUpdate("parent")}
-                  >
-                    <option value="">Chọn danh mục cha</option>
-                    {listCategories
-                      .filter((parent) => {
-                        // Kiểm tra xem categorySelected có tồn tại không
-                        if (!categorySelected) return true;
-
-                        // Lấy tất cả các danh mục con của categorySelected
-                        const childCategories = getAllChildCategories(
-                          categorySelected._id,
-                          listCategories
-                        );
-
-                        // Loại bỏ danh mục hiện tại và tất cả danh mục con của nó
-                        return (
-                          parent._id !== categorySelected._id &&
-                          !childCategories.some(
-                            (child) => child._id === parent._id
-                          )
-                        );
-                      })
-                      .map((parent) => (
-                        <option key={parent._id} value={parent._id}>
-                          {parent.name}
-                        </option>
-                      ))}
-                  </select>
-                  <label htmlFor="updateCategoryParent">Danh mục cha</label>
                 </div>
               </div>
               <div className="modal-footer">

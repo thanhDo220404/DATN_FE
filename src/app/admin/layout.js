@@ -1,5 +1,4 @@
 import Menu from "./components/menu";
-import Chart from "chart.js/auto"; // nhớ npm install chart.js
 
 import "../admin-main.css";
 

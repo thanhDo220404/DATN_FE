@@ -107,15 +107,6 @@ export default function Products() {
                     <i className="bi bi-file-earmark-pdf" /> Xuất PDF
                   </a>
                 </div>
-                <div className="col-sm-2">
-                  <a
-                    className="btn btn-delete btn-sm"
-                    type="button"
-                    title="Xóa"
-                  >
-                    <i className="bi bi-trash" /> Xóa tất cả
-                  </a>
-                </div>
               </div>
               <table
                 className="table table-hover table-bordered js-copytextarea"
@@ -130,12 +121,12 @@ export default function Products() {
                       <input type="checkbox" id="all" />
                     </th>
                     <th>Mã sản phẩm</th>
-                    <th width={150}>tên</th>
+                    <th width={150}>Tên</th>
                     <th width={20}>Ảnh</th>
-                    <th width={100}>số lượng</th>
-                    <th>tình trạng</th>
-                    <th>giá tiền</th>
-                    <th>danh mục</th>
+                    <th width={100}>Số lượng</th>
+                    <th>Tình trạng</th>
+                    <th>Giá tiền</th>
+                    <th>Danh mục</th>
                     <th width={100}>Tính năng</th>
                   </tr>
                 </thead>

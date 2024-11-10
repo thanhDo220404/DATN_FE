@@ -5,13 +5,17 @@ import { FaSearch, FaShoppingCart, FaUser } from "react-icons/fa";
 import { useState, useEffect } from "react";
 import { eraseCookie, getCookie } from "../lib/CookieManager";
 import { parseJwt } from "../databases/users";
-import { getCartByUserId } from "../databases/cart";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchCartByUserId } from "../../../redux/slices/cartSlice";
+import { getAllCategories } from "../databases/categories";
 const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
 export default function Header() {
+  const dispatch = useDispatch();
   const pathname = usePathname();
   const router = useRouter();
   const isAdminPage = pathname.includes("/admin");
+  const [categories, setCategories] = useState([]);
 
   if (isAdminPage) return null;
 
@@ -19,7 +23,10 @@ export default function Header() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const [searchKeyword, setSearchKeyword] = useState(""); // State lưu từ khóa tìm kiếm
-  const [carts, setCarts] = useState([]);
+
+  // Lấy giỏ hàng từ Redux store
+  const carts = useSelector((state) => state.cart.items); // lấy từ cartSlice
+  const totalItems = carts.length; // tính tổng số lượng từ items trong giỏ hàng
 
   // Đăng xuất
   const handleLogout = () => {
@@ -28,19 +35,20 @@ export default function Header() {
     setIsLoggedIn(false);
     window.location.reload();
   };
-  const fetchCart = async (userId) => {
-    const result = await getCartByUserId(userId);
-    setCarts(result);
-    console.log("Dữ liệu giỏ hàng: ", result);
+
+  const fetchCategories = async () => {
+    const result = await getAllCategories();
+    setCategories(result);
   };
 
   useEffect(() => {
     const token = getCookie("LOGIN_INFO");
+    fetchCategories();
     if (token) {
       const payload = parseJwt(token);
       setUserLoginInfo(payload);
       setIsLoggedIn(true);
-      fetchCart(payload._id);
+      dispatch(fetchCartByUserId(payload._id)); // Dispatch action to fetch cart
       if (payload.role === 1) {
         setIsAdmin(true);
       }
@@ -55,6 +63,7 @@ export default function Header() {
     e.preventDefault();
     if (searchKeyword.trim()) {
       router.push(`/tim-kiem?keywords=${encodeURIComponent(searchKeyword)}`);
+      setSearchKeyword(""); // Xóa chữ trong ô input sau khi tìm kiếm
     }
   };
 
@@ -106,6 +115,30 @@ export default function Header() {
                   Sản phẩm
                 </Link>
               </li>
+              <div className="dropdown">
+                <Link
+                  className="nav-link"
+                  href="#"
+                  role="button"
+                  data-bs-toggle="dropdown"
+                  aria-expanded="false"
+                >
+                  Danh mục
+                  <i className="bi bi-caret-down-fill"></i>
+                </Link>
+                <ul className="dropdown-menu">
+                  {categories.map((category) => (
+                    <li key={category._id}>
+                      <Link
+                        className="dropdown-item"
+                        href={`/danh-muc/${category._id}`}
+                      >
+                        {category.name}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
               <li className="nav-item">
                 <a className="nav-link d-flex" href="#">
                   Flash Sale
@@ -159,7 +192,7 @@ export default function Header() {
                         width="32"
                         height="32"
                         className="rounded-circle me-2"
-                        src={`${apiUrl}/img/${userLoginInfo.image}`}
+                        src={`${apiUrl}/img/user/${userLoginInfo.image}`}
                         alt=""
                       />
                     ) : (
@@ -169,9 +202,9 @@ export default function Header() {
                   <ul className="dropdown-menu">
                     {isAdmin && (
                       <li>
-                        <Link className="dropdown-item" href="/admin">
+                        <a className="dropdown-item" href="/admin">
                           Quản lý website
-                        </Link>
+                        </a>
                       </li>
                     )}
                     <li>
@@ -203,9 +236,9 @@ export default function Header() {
                 <FaShoppingCart className="nav-icon text-light fs-5" />
                 <span
                   style={{ fontSize: "12px" }}
-                  className="position-absolute top-0 start-100 translate-middle badge border border-light rounded-circle bg-danger p-2"
+                  className="position-absolute top-0 start-100 translate-middle badge border border-light rounded-circle bg-danger p-1"
                 >
-                  {carts.length}
+                  {totalItems}
                 </span>
               </Link>
             </div>

@@ -1,21 +1,123 @@
 import Link from "next/link";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import { parseJwt } from "../databases/users";
+import { getCookie } from "../lib/CookieManager";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  addProductToCart,
+  fetchCartByUserId,
+} from "../../../redux/slices/cartSlice";
+import { toast, ToastContainer } from "react-toastify";
+import { usePathname } from "next/navigation";
 
 export default function ProductCard({ product, col }) {
+  let listCarts = useSelector((state) => state.cart.items);
+  const pathname = usePathname();
+  const dispatch = useDispatch();
+  const [payload, setPayload] = useState({});
   const [selectedItem, setSelectedItem] = useState(product.items?.[0]); // Khởi tạo item được chọn là item đầu tiên
   const [selectedColorId, setSelectedColorId] = useState(
     selectedItem.color._id
   ); // Khởi tạo màu đã chọn
+  const fetchCarts = async (userId) => {
+    const result = await dispatch(fetchCartByUserId(userId));
+    listCarts = result;
+  };
+
+  useEffect(() => {
+    const token = getCookie("LOGIN_INFO");
+    if (token) {
+      setPayload(parseJwt(token));
+    }
+  }, []);
 
   // Hàm xử lý khi chọn màu
   const handleItemSelect = (item) => {
     setSelectedItem(item); // Cập nhật item được chọn
     setSelectedColorId(item.color._id); // Cập nhật màu đã chọn
+    console.log("this is item: ", item);
   };
 
-  console.log(selectedItem);
+  // console.log(selectedItem);
   const discountedPrice =
     selectedItem.price * (1 - selectedItem.discount / 100);
+
+  const canAddToCart = (newCartItem, listCarts, maxQuantity) => {
+    const currentQuantityInCart = listCarts.reduce((total, cartItem) => {
+      const isSameProduct = cartItem.product._id === newCartItem.product._id;
+      const isSameVariation =
+        cartItem.product.items._id === newCartItem.product.items._id &&
+        cartItem.product.items.variations._id ===
+          newCartItem.product.items.variations._id;
+      if (isSameProduct && isSameVariation) {
+        return total + cartItem.product.quantity;
+      }
+      return total;
+    }, 0);
+
+    return currentQuantityInCart + newCartItem.product.quantity <= maxQuantity;
+  };
+
+  const handleVariationSelect = (variation) => {
+    if (payload && payload._id) {
+      fetchCarts(payload._id);
+      const newCartItem = {
+        user: { _id: payload._id },
+        product: {
+          _id: product._id,
+          name: product.name,
+          description: product.description,
+          category: product.category,
+          items: {
+            _id: selectedItem._id, // Lấy item đã chọn từ selectedItem
+            color: {
+              _id: selectedItem.color._id,
+              colorName: selectedItem.color.colorName,
+              colorHexCode: selectedItem.color.colorHexCode,
+            },
+            image: {
+              _id: selectedItem.image._id,
+              mediaFilePath: selectedItem.image.mediaFilePath,
+            },
+            price: selectedItem.price,
+            discount: selectedItem.discount,
+            variations: {
+              _id: variation._id, // Variation đã chọn
+              size: {
+                _id: variation.size._id,
+                sizeName: variation.size.sizeName,
+                sizeValue: variation.size.sizeValue,
+              },
+            },
+          },
+          quantity: 1, // Giả sử quantity là 1, có thể thay đổi tùy vào yêu cầu
+        },
+      };
+      const maxQuantity = variation.quantity;
+
+      // Kiểm tra xem có thể thêm sản phẩm vào giỏ hàng hay không
+      if (canAddToCart(newCartItem, listCarts, maxQuantity)) {
+        // const result = await addToCart(newCartItem);
+        const result = dispatch(addProductToCart(newCartItem));
+        if (result) {
+          fetchCarts(payload._id); // Cập nhật giỏ hàng sau khi thêm thành công
+          toast.success("Thêm giỏ hàng thành công!");
+        } else {
+          toast.error("Thêm giỏ hàng thất bại!");
+        }
+      } else {
+        // Nếu vượt quá số lượng tối đa, hiển thị thông báo lỗi
+        toast.error(
+          `Không thể thêm vào giỏ hàng! Bạn đã có ${maxQuantity} sản phẩm trong giỏ hàng với biến thể này.`
+        );
+      }
+
+      console.log("New Cart Item: ", newCartItem); // Log ra newCartItem
+    } else {
+      // Chuyển hướng đến trang đăng nhập nếu chưa đăng nhập
+      window.location.href = `/buyer/dang-nhap?next=${pathname}`;
+    }
+  };
 
   return (
     <div className={`col-sm-${col} col-6 mb-3`}>
@@ -34,7 +136,11 @@ export default function ProductCard({ product, col }) {
               {selectedItem.variations
                 .filter((variation) => variation.quantity > 0) // Lọc các variation có quantity > 0
                 .map((variation, index) => (
-                  <button key={index} className="my-size-items">
+                  <button
+                    key={index}
+                    className="my-size-items"
+                    onClick={() => handleVariationSelect(variation)}
+                  >
                     {/* Hiển thị tên kích thước */}
                     {variation.size.sizeName}
                     {/* Nếu cần có thể thêm các thuộc tính khác */}

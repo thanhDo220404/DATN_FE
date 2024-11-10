@@ -10,18 +10,19 @@ export default function OrderDetails({ params }) {
   const [order, setOrder] = useState(null);
   const [orderStatus, setOrderStatus] = useState([]);
   const [selectedStatus, setSelectedStatus] = useState({});
+  const [selectedStatusToDisabled, setSelectedStatusToDisabled] =
+    useState(null);
 
   const fetchOrder = async (id) => {
     const result = await getOrderById(id);
     setOrder(result);
     setSelectedStatus(result.order_status._id); // Set trạng thái hiện tại
-    console.log(result);
+    setSelectedStatusToDisabled(result.order_status._id);
   };
 
   const fetchOrderStatus = async () => {
     const result = await getOrderStatuses();
     setOrderStatus(result);
-    console.log(result);
   };
 
   useEffect(() => {
@@ -39,6 +40,46 @@ export default function OrderDetails({ params }) {
       toast.error("Cập nhật trạng thái đơn hàng thất bại!"); // Hiển thị thông báo lỗi
     }
   };
+
+  const disabledStatuses = [];
+
+  switch (selectedStatusToDisabled) {
+    case "6724f9c943ad843da1d31150": // Đã hủy
+      disabledStatuses.push(
+        "6724f9c943ad843da1d3114f", // Đã giao hàng
+        "6724f9c943ad843da1d3114c", // Chưa xác nhận
+        "6724f9c943ad843da1d3114d", // Đã xác nhận
+        "6724f9c943ad843da1d3114e" // Đang giao hàng)
+      );
+      break;
+
+    case "6724f9c943ad843da1d3114f": // Đã giao hàng
+      // Vô hiệu hóa tất cả các trạng thái còn lại
+      disabledStatuses.push(
+        "6724f9c943ad843da1d31150", // Đã hủy
+        "6724f9c943ad843da1d3114c", // Chưa xác nhận
+        "6724f9c943ad843da1d3114d", // Đã xác nhận
+        "6724f9c943ad843da1d3114e" // Đang giao hàng
+      );
+      break;
+
+    case "6724f9c943ad843da1d3114d": // Đã xác nhận
+      // Vô hiệu hóa Chưa xác nhận
+      disabledStatuses.push("6724f9c943ad843da1d3114c"); // Chưa xác nhận
+      break;
+
+    case "6724f9c943ad843da1d3114e": // Đang giao hàng
+      // Vô hiệu hóa Đã hủy, Đã xác nhận, Chưa xác nhận
+      disabledStatuses.push(
+        "6724f9c943ad843da1d31150", // Đã hủy
+        "6724f9c943ad843da1d3114d", // Đã xác nhận
+        "6724f9c943ad843da1d3114c" // Chưa xác nhận
+      );
+      break;
+
+    default:
+      break;
+  }
 
   if (!order) {
     return <div>Loading...</div>;
@@ -66,6 +107,49 @@ export default function OrderDetails({ params }) {
       <ToastContainer />
       <div className="row g-4">
         {/* Phần bên trái - Tổng quan đơn hàng */}
+        <div className="col-3 m-auto p-2 alert-success text-success">
+          <div className="d-flex align-items-center">
+            <div className="bg-success p-3 me-2">
+              <i className="bi bi-cart-fill"></i>
+            </div>
+            <div className="fs-5">
+              Ngày đặt
+              <small className="d-block">
+                {new Intl.DateTimeFormat("vi-VN", {
+                  year: "numeric",
+                  month: "2-digit",
+                  day: "2-digit",
+                  hour: "2-digit",
+                  minute: "2-digit",
+                }).format(new Date(order.createdAt))}
+              </small>
+            </div>
+          </div>
+        </div>
+
+        <div className="col-3 m-auto p-2 alert-info text-info">
+          <div className="d-flex align-items-center">
+            <div className="bg-info p-3 me-2 ">
+              <i class="bi bi-person-fill"></i>
+            </div>
+            <div className="fs-5">
+              Tên
+              <small className="d-block">{order.order_address.name}</small>
+            </div>
+          </div>
+        </div>
+        <div className="col-3 m-auto p-2 alert-danger text-danger">
+          <div className="d-flex align-items-center">
+            <div className="bg-danger p-3 me-2">
+              <i class="bi bi-telephone-fill"></i>
+            </div>
+            <div className="fs-5">
+              Số điện thoại
+              <small className="d-block">{order.order_address.phone}</small>
+            </div>
+          </div>
+        </div>
+
         <div className="col-lg-8">
           <div className="card border-0 shadow-sm">
             <div className="card-body">
@@ -193,7 +277,11 @@ export default function OrderDetails({ params }) {
                   onChange={(e) => setSelectedStatus(e.target.value)}
                 >
                   {orderStatus.map((status) => (
-                    <option key={status._id} value={status._id}>
+                    <option
+                      key={status._id}
+                      value={status._id}
+                      disabled={disabledStatuses.includes(status._id)}
+                    >
                       {status.name}
                     </option>
                   ))}

@@ -1,5 +1,6 @@
 "use client";
 import { getAllUsers } from "@/app/databases/users";
+import Link from "next/link";
 import { useEffect, useState } from "react";
 
 export default function Users() {
@@ -45,7 +46,7 @@ export default function Users() {
                 {/* Các button khác */}
               </div>
               <table
-                className="table table-hover table-bordered js-copytextarea"
+                className="table table-hover table-bordered js-copytextarea table-align-center"
                 cellPadding={0}
                 cellSpacing={0}
                 border={0}
@@ -58,7 +59,7 @@ export default function Users() {
                     <th width={20}>Ảnh</th>
                     <th>Email</th>
                     <th>SĐT</th>
-                    {/* <th width={100}>Tính năng</th> */}
+                    <th>Tính năng</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -70,13 +71,26 @@ export default function Users() {
                         <td>
                           <img
                             className="img-card-person"
-                            src={`http://localhost:2204/img/${user.image}`}
+                            src={`http://localhost:2204/img/user/${user.image}`}
                             alt="User Avatar"
                             width="50"
                           />
                         </td>
                         <td>{user.email}</td>
                         <td>{user.phone}</td>
+                        <td>
+                          <Link href={`/admin/users/${user._id}`}>
+                            <button
+                              className="btn btn-primary btn-sm edit"
+                              type="button"
+                              title="Sửa"
+                              id="show-emp"
+                              style={{ width: "20px", margin: "5px" }}
+                            >
+                              <i className="bi bi-pencil" />
+                            </button>
+                          </Link>
+                        </td>
                       </tr>
                     ))
                   ) : (

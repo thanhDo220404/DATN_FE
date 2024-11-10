@@ -17,6 +17,7 @@ export default function Dashboard() {
   const fetchOrders = async () => {
     const result = await getAllOrders();
     setListOrders(result);
+    console.log(result);
   };
 
   const fetchUsers = async () => {
@@ -31,58 +32,109 @@ export default function Dashboard() {
     setListProducts(result);
   };
 
+  function getLastSixMonths() {
+    const currentDate = new Date();
+    const months = [
+      "Tháng 1",
+      "Tháng 2",
+      "Tháng 3",
+      "Tháng 4",
+      "Tháng 5",
+      "Tháng 6",
+      "Tháng 7",
+      "Tháng 8",
+      "Tháng 9",
+      "Tháng 10",
+      "Tháng 11",
+      "Tháng 12",
+    ];
+    const result = [];
+    for (let i = 6; i >= 0; i--) {
+      const date = new Date(
+        currentDate.getFullYear(),
+        currentDate.getMonth() - i
+      );
+      result.push({
+        label: `${months[date.getMonth()]} ${date.getFullYear()}`,
+        month: date.getMonth(),
+        year: date.getFullYear(),
+      });
+    }
+    return result;
+  }
+
+  const lastSixMonths = getLastSixMonths();
+
+  // Tính tổng số lượng đơn hàng và doanh thu theo tháng
+  function calculateMonthlyData(orders) {
+    const monthlyOrderCount = Array(7).fill(0);
+    const monthlyRevenue = Array(7).fill(0);
+
+    orders.forEach((order) => {
+      const orderDate = new Date(order.createdAt);
+      lastSixMonths.forEach((month, index) => {
+        if (
+          orderDate.getMonth() === month.month &&
+          orderDate.getFullYear() === month.year
+        ) {
+          monthlyOrderCount[index] += 1;
+          // Kiểm tra trạng thái của đơn hàng trước khi tính vào doanh thu
+          if (order.order_status._id === "6724f9c943ad843da1d3114f") {
+            monthlyRevenue[index] += order.order_total;
+          }
+        }
+      });
+    });
+
+    return { monthlyOrderCount, monthlyRevenue };
+  }
+
   useEffect(() => {
     fetchUsers();
     fetchProducts();
     fetchOrders();
-    // Biểu đồ đường - Line Chart
+  }, []);
+
+  useEffect(() => {
+    if (listOrders.length === 0) return;
+
+    const { monthlyOrderCount, monthlyRevenue } =
+      calculateMonthlyData(listOrders);
+
+    // Cấu hình biểu đồ đường cho tổng số lượng đơn hàng
     const lineChartCtx = document
       .getElementById("lineChartDemo")
       .getContext("2d");
+    if (lineChartRef.current) lineChartRef.current.destroy();
     lineChartRef.current = new Chart(lineChartCtx, {
       type: "line",
       data: {
-        labels: [
-          "Tháng 1",
-          "Tháng 2",
-          "Tháng 3",
-          "Tháng 4",
-          "Tháng 5",
-          "Tháng 6",
-        ],
+        labels: lastSixMonths.map((month) => month.label),
         datasets: [
           {
-            label: "Dữ liệu đầu vào",
-            data: [12, 19, 3, 5, 2, 3],
+            label: "Tổng số lượng đơn hàng",
+            data: monthlyOrderCount,
             borderColor: "rgba(75, 192, 192, 1)",
             backgroundColor: "rgba(75, 192, 192, 0.2)",
           },
         ],
       },
-      options: {
-        responsive: true,
-      },
+      options: { responsive: true },
     });
 
-    // Biểu đồ cột - Bar Chart
+    // Cấu hình biểu đồ cột cho doanh thu
     const barChartCtx = document
       .getElementById("barChartDemo")
       .getContext("2d");
+    if (barChartRef.current) barChartRef.current.destroy();
     barChartRef.current = new Chart(barChartCtx, {
       type: "bar",
       data: {
-        labels: [
-          "Tháng 1",
-          "Tháng 2",
-          "Tháng 3",
-          "Tháng 4",
-          "Tháng 5",
-          "Tháng 6",
-        ],
+        labels: lastSixMonths.map((month) => month.label),
         datasets: [
           {
-            label: "Doanh thu",
-            data: [15000000, 20000000, 25000000, 30000000, 35000000, 40000000],
+            label: "Doanh thu (VND)",
+            data: monthlyRevenue,
             backgroundColor: "rgba(255, 99, 132, 0.2)",
             borderColor: "rgba(255, 99, 132, 1)",
             borderWidth: 1,
@@ -94,21 +146,19 @@ export default function Dashboard() {
         scales: {
           y: {
             beginAtZero: true,
+            ticks: {
+              callback: (value) => value.toLocaleString("vi-VN") + " đ",
+            },
           },
         },
       },
     });
 
     return () => {
-      // Cleanup biểu đồ khi component bị unmount
-      if (lineChartRef.current) {
-        lineChartRef.current.destroy();
-      }
-      if (barChartRef.current) {
-        barChartRef.current.destroy();
-      }
+      if (lineChartRef.current) lineChartRef.current.destroy();
+      if (barChartRef.current) barChartRef.current.destroy();
     };
-  }, []);
+  }, [listOrders]);
 
   return (
     <>
@@ -151,8 +201,28 @@ export default function Dashboard() {
                 <div className="info">
                   <h4>Tổng sản phẩm</h4>
                   <p>
-                    <b>{listProducts.length}</b>
+                    <b>
+                      {listProducts.length > 0 &&
+                        // Tính toán tổng số lượng của tất cả các variations
+                        listProducts.reduce((total, product) => {
+                          return (
+                            total +
+                            product.items.reduce(
+                              (itemTotal, item) =>
+                                itemTotal +
+                                item.variations.reduce(
+                                  (variationTotal, variation) => {
+                                    return variationTotal + variation.quantity; // Cộng quantity của từng variation
+                                  },
+                                  0
+                                ),
+                              0
+                            )
+                          );
+                        }, 0)}
+                    </b>
                   </p>
+
                   <p className="info-tong">Tổng số sản phẩm được quản lý.</p>
                 </div>
               </div>
@@ -166,9 +236,7 @@ export default function Dashboard() {
                   <p>
                     <b>{listOrders.length}</b>
                   </p>
-                  <p className="info-tong">
-                    Tổng số hóa đơn bán hàng trong tháng.
-                  </p>
+                  <p className="info-tong">Tổng số hóa đơn bán hàng.</p>
                 </div>
               </div>
             </div>
@@ -177,16 +245,28 @@ export default function Dashboard() {
               <div className="widget-small danger coloured-icon">
                 <i className="bi bi-exclamation-triangle-fill fa-3x" />
                 <div className="info">
-                  <h4>Sắp hết hàng</h4>
+                  <h4>Tổng doanh thu</h4>
                   <p>
-                    <b>4 sản phẩm</b>
+                    <b>
+                      {/* Tính tổng doanh thu của những đơn hàng có order_status._id là 6724f9c943ad843da1d3114f */}
+                      {listOrders
+                        .filter(
+                          (order) =>
+                            order.order_status._id ===
+                            "6724f9c943ad843da1d3114f"
+                        )
+                        .reduce((total, order) => total + order.order_total, 0)
+                        .toLocaleString()}{" "}
+                      {/* Hiển thị tổng doanh thu đã được định dạng */}
+                    </b>
                   </p>
                   <p className="info-tong">
-                    Số sản phẩm cảnh báo hết cần nhập thêm.
+                    Tổng số tiền thu được từ các đơn hàng.
                   </p>
                 </div>
               </div>
             </div>
+
             {/* col-12 */}
             <div className="col-md-12">
               <div className="tile">
@@ -202,42 +282,39 @@ export default function Dashboard() {
                       </tr>
                     </thead>
                     <tbody>
-                      <tr>
-                        <td>AL3947</td>
-                        <td>Phạm Thị Ngọc</td>
-                        <td>19.770.000 đ</td>
-                        <td>
-                          <span className="badge bg-info">Chờ xử lý</span>
-                        </td>
-                      </tr>
-                      <tr>
-                        <td>ER3835</td>
-                        <td>Nguyễn Thị Mỹ Yến</td>
-                        <td>16.770.000 đ</td>
-                        <td>
-                          <span className="badge bg-warning">
-                            Đang vận chuyển
-                          </span>
-                        </td>
-                      </tr>
-                      <tr>
-                        <td>MD0837</td>
-                        <td>Triệu Thanh Phú</td>
-                        <td>9.400.000 đ</td>
-                        <td>
-                          <span className="badge bg-success">
-                            Đã hoàn thành
-                          </span>
-                        </td>
-                      </tr>
-                      <tr>
-                        <td>MT9835</td>
-                        <td>Đặng Hoàng Phúc</td>
-                        <td>40.650.000 đ</td>
-                        <td>
-                          <span className="badge bg-danger">Đã hủy</span>
-                        </td>
-                      </tr>
+                      {listOrders
+                        .sort(
+                          (a, b) =>
+                            new Date(b.createdAt) - new Date(a.createdAt)
+                        ) // Sắp xếp đơn hàng theo thời gian từ mới đến cũ
+                        .slice(0, 4) // Lấy 4 đơn hàng mới nhất
+                        .map((order) => (
+                          <tr key={order._id}>
+                            <td>{order._id}</td>
+                            <td>{order.order_address.name}</td>
+                            <td>
+                              {order.order_total.toLocaleString("vi-VN")} đ
+                            </td>
+                            <td>
+                              <span
+                                className={`badge ${
+                                  order.order_status.name === "Chờ xử lý"
+                                    ? "bg-info" // Trạng thái "Chờ xử lý" -> màu bg-info
+                                    : order.order_status.name === "Đã xác nhận"
+                                    ? "bg-primary" // Trạng thái "Đã xác nhận" -> màu bg-primary
+                                    : order.order_status.name ===
+                                      "Đang giao hàng"
+                                    ? "bg-warning" // Trạng thái "Đang giao hàng" -> màu bg-warning
+                                    : order.order_status.name === "Đã giao hàng"
+                                    ? "bg-success" // Trạng thái "Đã giao hàng" -> màu bg-success
+                                    : "bg-danger" // Trạng thái "Đã hủy" -> màu bg-danger
+                                }`}
+                              >
+                                {order.order_status.name}
+                              </span>
+                            </td>
+                          </tr>
+                        ))}
                     </tbody>
                   </table>
                 </div>
@@ -253,43 +330,23 @@ export default function Dashboard() {
                       <tr>
                         <th>ID</th>
                         <th>Tên khách hàng</th>
-                        <th>Ngày sinh</th>
+                        <th>Email</th>
                         <th>Số điện thoại</th>
                       </tr>
                     </thead>
                     <tbody>
-                      <tr>
-                        <td>#183</td>
-                        <td>Hột vịt muối</td>
-                        <td>21/7/1992</td>
-                        <td>
-                          <span className="tag tag-success">0921387221</span>
-                        </td>
-                      </tr>
-                      <tr>
-                        <td>#219</td>
-                        <td>Bánh tráng trộn</td>
-                        <td>30/4/1975</td>
-                        <td>
-                          <span className="tag tag-warning">0912376352</span>
-                        </td>
-                      </tr>
-                      <tr>
-                        <td>#627</td>
-                        <td>Cút rang bơ</td>
-                        <td>12/3/1999</td>
-                        <td>
-                          <span className="tag tag-primary">01287326654</span>
-                        </td>
-                      </tr>
-                      <tr>
-                        <td>#175</td>
-                        <td>Hủ tiếu nam vang</td>
-                        <td>4/12/20000</td>
-                        <td>
-                          <span className="tag tag-danger">0912376763</span>
-                        </td>
-                      </tr>
+                      {listUsers.map((user) => (
+                        <tr key={user._id}>
+                          <td>{user._id}</td>
+                          <td>{user.name}</td>
+                          <td>{user.email}</td>
+                          <td>
+                            <span className={`tag tag-${user.status}`}>
+                              {user.phone}
+                            </span>
+                          </td>
+                        </tr>
+                      ))}
                     </tbody>
                   </table>
                 </div>
@@ -303,7 +360,7 @@ export default function Dashboard() {
           <div className="row">
             <div className="col-md-12">
               <div className="tile">
-                <h3 className="tile-title">Dữ liệu 6 tháng đầu vào</h3>
+                <h3 className="tile-title">THỐNG KÊ ĐƠN HÀNG</h3>
                 <div className="embed-responsive embed-responsive-16by9">
                   <canvas
                     className="embed-responsive-item"
@@ -314,7 +371,7 @@ export default function Dashboard() {
             </div>
             <div className="col-md-12">
               <div className="tile">
-                <h3 className="tile-title">Thống kê 6 tháng doanh thu</h3>
+                <h3 className="tile-title">BIỂU ĐỒ LỢI NHUẬN</h3>
                 <div className="embed-responsive embed-responsive-16by9">
                   <canvas className="embed-responsive-item" id="barChartDemo" />
                 </div>
@@ -325,9 +382,7 @@ export default function Dashboard() {
         {/*END right */}
       </div>
       <div className="text-center" style={{ fontSize: "13px" }}>
-        <p>
-          <b>Copyright Phần mềm quản lý bán hàng | Dev By Trường</b>
-        </p>
+        <p></p>
       </div>
     </>
   );

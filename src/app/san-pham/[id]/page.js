@@ -1,28 +1,45 @@
 "use client";
 import "../style.css";
 import { useEffect, useState } from "react";
-import { getProductById, increaseViewCount } from "@/app/databases/products";
+import {
+  getAllProducts,
+  getProductById,
+  increaseViewCount,
+} from "@/app/databases/products";
 import { getCookie } from "@/app/lib/CookieManager";
 import { parseJwt } from "@/app/databases/users";
-import { addToCart, getCartByUserId } from "@/app/databases/cart";
 import { usePathname } from "next/navigation";
 import { ToastContainer, toast } from "react-toastify";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  addProductToCart,
+  fetchCartByUserId,
+} from "../../../../redux/slices/cartSlice";
+import ProductCard from "@/app/components/productCard";
 
 export default function ProductDetail({ params }) {
+  const dispatch = useDispatch();
   const { id } = params;
   const pathname = usePathname();
   const [product, setProduct] = useState(null);
+  const [products, setProducts] = useState([]);
   const [selectedItem, setSelectedItem] = useState(null); // State để lưu item được chọn
   const [selectedVariation, setSelectedVariation] = useState(null); // State để lưu variation được chọn
   const [quantity, setQuantity] = useState(1); // Trạng thái để lưu số lượng
   const [productData, setProductData] = useState({});
   const [payload, setPayload] = useState({});
   const [addToCartData, setAddToCartData] = useState({});
-  const [listCarts, setListCarts] = useState([]);
+  // const [listCarts, setListCarts] = useState([]);
+  let listCarts = useSelector((state) => state.cart.items);
 
   const fetchCarts = async (userId) => {
-    const result = await getCartByUserId(userId);
-    setListCarts(result);
+    const result = await dispatch(fetchCartByUserId(userId));
+    listCarts = result;
+  };
+
+  const fetchAllProducts = async () => {
+    const result = await getAllProducts();
+    setProducts(result);
   };
 
   const fetchProduct = async (id) => {
@@ -76,12 +93,13 @@ export default function ProductDetail({ params }) {
     });
   };
   useEffect(() => {
+    fetchAllProducts();
     fetchProduct(id);
     const token = getCookie("LOGIN_INFO");
     if (token) {
       setPayload(parseJwt(token));
-      const LOGIN_INFO = parseJwt(token);
-      fetchCarts(LOGIN_INFO._id);
+      // const LOGIN_INFO = parseJwt(token);
+      // fetchCarts(LOGIN_INFO._id);
     }
   }, [id]);
 
@@ -144,56 +162,88 @@ export default function ProductDetail({ params }) {
     setQuantity(parsedValue);
   };
 
+  // Hàm kiểm tra số lượng sản phẩm có thể thêm vào giỏ hàng
+  const canAddToCart = (newCartItem, listCarts, maxQuantity) => {
+    const currentQuantityInCart = listCarts.reduce((total, cartItem) => {
+      const isSameProduct = cartItem.product._id === newCartItem.product._id;
+      const isSameVariation =
+        cartItem.product.items._id === newCartItem.product.items._id &&
+        cartItem.product.items.variations._id ===
+          newCartItem.product.items.variations._id;
+      if (isSameProduct && isSameVariation) {
+        return total + cartItem.product.quantity;
+      }
+      return total;
+    }, 0);
+
+    return currentQuantityInCart + newCartItem.product.quantity <= maxQuantity;
+  };
+
   const handleAddToCart = async () => {
     if (payload && payload._id) {
+      // Gọi API lấy giỏ hàng để có dữ liệu mới nhất
+      fetchCarts(payload._id);
+
+      // Chuẩn bị dữ liệu sản phẩm cần thêm vào giỏ hàng
       const newCartItem = {
-        user: {
-          _id: payload._id, // ID của người dùng
-        },
+        user: { _id: payload._id },
         product: {
-          _id: productData._id, // ID của sản phẩm
-          name: productData.name, // Tên sản phẩm
-          description: productData.description, // Mô tả sản phẩm
-          category: productData.category, // Thể loại sản phẩm
+          _id: productData._id,
+          name: productData.name,
+          description: productData.description,
+          category: productData.category,
           items: {
             _id: productData.items[0]._id,
-            // Chỉ định item đầu tiên trong productData
             color: {
-              _id: productData.items[0].color._id, // ID của màu sắc
-              colorName: productData.items[0].color.colorName, // Tên màu sắc
-              colorHexCode: productData.items[0].color.colorHexCode, // Mã màu sắc
+              _id: productData.items[0].color._id,
+              colorName: productData.items[0].color.colorName,
+              colorHexCode: productData.items[0].color.colorHexCode,
             },
             image: {
-              _id: productData.items[0].image._id, // ID của hình ảnh
-              mediaFilePath: productData.items[0].image.mediaFilePath, // Đường dẫn hình ảnh
+              _id: productData.items[0].image._id,
+              mediaFilePath: productData.items[0].image.mediaFilePath,
             },
-            price: productData.items[0].price, // Giá sản phẩm
-            discount: productData.items[0].discount, // Giảm giá
+            price: productData.items[0].price,
+            discount: productData.items[0].discount,
             variations: {
               _id: productData.items[0].variations[0]._id,
               size: {
-                _id: productData.items[0].variations[0].size._id, // ID của kích thước
-                sizeName: productData.items[0].variations[0].size.sizeName, // Tên kích thước
-                sizeValue: productData.items[0].variations[0].size.sizeValue, // Giá trị kích thước
+                _id: productData.items[0].variations[0].size._id,
+                sizeName: productData.items[0].variations[0].size.sizeName,
+                sizeValue: productData.items[0].variations[0].size.sizeValue,
               },
             },
           },
-          quantity: quantity, // Số lượng
+          quantity: quantity,
         },
       };
-      const result = await addToCart(newCartItem);
-      setAddToCartData(newCartItem); // Cập nhật state với dữ liệu giỏ hàng mới
-      console.log(result); // In ra dữ liệu mới để kiểm tra
-      if (result) {
-        toast.success("Thêm giỏ hàng thành công!"); // Hiển thị toast thành công
-        // Có thể điều hướng đến trang khác hoặc cập nhật lại dữ liệu
+
+      // Lấy số lượng tối đa từ selectedVariation
+      const maxQuantity = selectedVariation.quantity;
+
+      // Kiểm tra xem có thể thêm sản phẩm vào giỏ hàng hay không
+      if (canAddToCart(newCartItem, listCarts, maxQuantity)) {
+        // const result = await addToCart(newCartItem);
+        const result = dispatch(addProductToCart(newCartItem));
+        if (result) {
+          setAddToCartData(newCartItem);
+          fetchCarts(payload._id); // Cập nhật giỏ hàng sau khi thêm thành công
+          toast.success("Thêm giỏ hàng thành công!");
+        } else {
+          toast.error("Thêm giỏ hàng thất bại!");
+        }
       } else {
-        toast.error("Thêm giỏ hàng thất bại!"); // Hiển thị toast lỗi
+        // Nếu vượt quá số lượng tối đa, hiển thị thông báo lỗi
+        toast.error(
+          `Không thể thêm vào giỏ hàng! Bạn đã có ${maxQuantity} sản phẩm trong giỏ hàng với biến thể này.`
+        );
       }
     } else {
+      // Chuyển hướng đến trang đăng nhập nếu chưa đăng nhập
       window.location.href = `/buyer/dang-nhap?next=${pathname}`;
     }
   };
+
   const handleCheckout = async () => {
     if (payload && payload._id) {
       const newCartItem = [
@@ -251,7 +301,16 @@ export default function ProductDetail({ params }) {
   // console.log("this is product: ", product);
   // console.log("this is item: ", selectedItem);
   // console.log("this is variation: ", selectedVariation);
-  console.log("this is productData: ", productData);
+  // console.log("this is productData: ", productData);
+  // console.log("this is products : ", products);
+  // Lọc sản phẩm liên quan, loại bỏ sản phẩm hiện tại
+  const relatedProducts = products
+    .filter(
+      (relatedProduct) =>
+        relatedProduct.category._id === product.category._id &&
+        relatedProduct._id !== product._id
+    )
+    .slice(0, 4); // Giới hạn hiển thị 4 sản phẩm
 
   return (
     <div className="container mt-5">
@@ -391,7 +450,7 @@ export default function ProductDetail({ params }) {
                   {selectedVariation
                     ? selectedVariation.quantity
                     : totalQuantity}{" "}
-                  còn lại
+                  sản phẩm có sẳn
                 </span>
               </div>
             </div>
@@ -416,6 +475,18 @@ export default function ProductDetail({ params }) {
           <p>
             <strong>Mô tả:</strong> {product.description}
           </p>
+        </div>
+      </div>
+      <div>
+        <h4>Có thể bạn quan tâm</h4>
+        <div className="row featured-products">
+          {relatedProducts.map((relatedProduct) => (
+            <ProductCard
+              col={3}
+              key={relatedProduct._id}
+              product={relatedProduct}
+            />
+          ))}
         </div>
       </div>
     </div>

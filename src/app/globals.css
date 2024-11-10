@@ -143,7 +143,7 @@ table {
   width: 696px;
   height: 600px;
   object-fit: cover; /* Đảm bảo hình ảnh vừa khít khung */
-  margin: 20px auto; /* Thêm khoảng cách margin top và bottom */
+  margin: auto; /* Thêm khoảng cách margin top và bottom */
 }
 
 /* CSS cho danh mục và sản phẩm */

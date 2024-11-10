@@ -28,7 +28,7 @@ export default function Menu() {
         <div className="app-sidebar__user">
           <img
             className="app-sidebar__user-avatar"
-            src={`http://localhost:2204/img/${userInfo.image}`}
+            src={`http://localhost:2204/img/user/${userInfo.image}`}
             width="50px"
             alt="User Image"
           />

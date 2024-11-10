@@ -11,14 +11,22 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { getAllProducts } from "../databases/products";
 import { ToastContainer, toast } from "react-toastify";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  fetchCartByUserId,
+  removeProductFromCart,
+} from "../../../redux/slices/cartSlice";
 
 export default function Cart() {
+  const dispatch = useDispatch();
   const [listProducts, setListProducts] = useState([]);
-  const [carts, setCarts] = useState([]);
+  // const [carts, setCarts] = useState([]);
   const [payload, setPayload] = useState();
   const [listCheckout, setListCheckout] = useState([]);
   const [isAllChecked, setIsAllChecked] = useState(false);
   const [warningMessage, setWarningMessage] = useState("");
+
+  let carts = useSelector((state) => state.cart.items);
 
   const router = useRouter();
 
@@ -29,8 +37,54 @@ export default function Cart() {
   };
 
   const fetchCart = async (userId) => {
-    const result = await getCartByUserId(userId);
-    setCarts(result);
+    const res = await dispatch(fetchCartByUserId(userId));
+    const result = res.payload;
+
+    // Duyệt qua từng sản phẩm trong giỏ hàng
+    const updatedCarts = await Promise.all(
+      result.map(async (cartItem) => {
+        const productInList = listProducts.find(
+          (product) => product._id === cartItem.product._id
+        );
+
+        // Kiểm tra nếu sản phẩm tồn tại trong danh sách sản phẩm
+        if (productInList) {
+          const itemInProduct = productInList.items.find(
+            (item) => item._id === cartItem.product.items._id
+          );
+
+          const variationInItem = itemInProduct.variations.find(
+            (item) => item._id === cartItem.product.items.variations._id
+          );
+
+          if (!variationInItem) {
+            dispatch(removeProductFromCart(cartItem._id)); // Gọi hàm deleteCart để xóa sản phẩm khỏi giỏ hàng
+            // return null;
+            window.location.reload();
+          }
+
+          const availableQuantity = variationInItem?.quantity || 0;
+
+          // Nếu số lượng có sẵn nhỏ hơn hoặc bằng 0, xóa sản phẩm khỏi giỏ hàng
+          if (availableQuantity <= 0) {
+            if (cartItem._id) {
+              dispatch(removeProductFromCart(cartItem._id)); // Gọi hàm deleteCart để xóa sản phẩm khỏi giỏ hàng
+              // return null;
+              window.location.reload();
+            }
+          }
+
+          // Nếu số lượng trong giỏ hàng lớn hơn số lượng có sẵn, điều chỉnh lại số lượng
+          if (cartItem.product.quantity > availableQuantity) {
+            cartItem.product.quantity = availableQuantity;
+          }
+        }
+
+        return cartItem;
+      })
+    );
+
+    carts = updatedCarts; // Cập nhật lại giỏ hàng
   };
 
   useEffect(() => {
@@ -43,12 +97,15 @@ export default function Cart() {
 
   useEffect(() => {
     if (payload && payload._id) {
-      fetchCart(payload._id);
+      if (listProducts.length > 0) {
+        fetchCart(payload._id);
+      }
     }
-  }, [payload]);
+  }, [payload, listProducts]);
 
   const handleDelete = async (id) => {
-    await deleteCart(id);
+    // await deleteCart(id);
+    dispatch(removeProductFromCart(id));
     if (payload && payload._id) {
       fetchCart(payload._id);
     }
@@ -85,18 +142,6 @@ export default function Cart() {
 
     // Giới hạn số lượng tối đa
     newQuantity = Math.min(newQuantity, maxQuantity);
-
-    // Cập nhật giỏ hàng
-    setCarts((prevCarts) => {
-      return prevCarts.map((item) =>
-        item._id === cartId
-          ? {
-              ...item,
-              quantity: newQuantity, // Cập nhật số lượng giỏ hàng
-            }
-          : item
-      );
-    });
 
     // Cập nhật lại listCheckout
     setListCheckout((prevList) => {
@@ -150,13 +195,13 @@ export default function Cart() {
     setIsAllChecked(listCheckout.length === carts.length && carts.length > 0);
   }, [listCheckout, carts.length]);
 
-  const totalPrice = carts.reduce(
-    (total, item) =>
-      total +
-      (item.product.items.price - item.product.items.discount) *
-        item.product.quantity,
-    0
-  );
+  // const totalPrice = carts.reduce(
+  //   (total, item) =>
+  //     total +
+  //     (item.product.items.price - item.product.items.discount) *
+  //       item.product.quantity,
+  //   0
+  // );
 
   const totalCheckoutPrice = listCheckout.reduce(
     (total, item) =>

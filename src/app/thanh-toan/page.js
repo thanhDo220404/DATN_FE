@@ -7,10 +7,15 @@ import { getAllShippingMethods } from "../databases/shipping_methods";
 import { createOrder } from "../databases/order";
 import { deleteCart } from "../databases/cart";
 import { useForm } from "react-hook-form";
+import { useRouter } from "next/navigation";
+import { useDispatch } from "react-redux";
+import { removeProductFromCart } from "../../../redux/slices/cartSlice";
 
 const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
 export default function Checkout() {
+  const dispatch = useDispatch();
+  const router = useRouter();
   const {
     register: registerAddress,
     handleSubmit: handleSubmitAddress,
@@ -53,6 +58,7 @@ export default function Checkout() {
 
   const searchParams = useSearchParams();
   const data = JSON.parse(searchParams.get("data"));
+  console.log("this is data: ", data);
 
   const fetchAddress = async (userId) => {
     const result = await getAllByUserId(userId);
@@ -128,23 +134,39 @@ export default function Checkout() {
   };
 
   const handleOrder = async () => {
-    const newOrder = {
-      ...listCheckout,
-      shipping_method: selectedShippingMethod,
-      order_address: defaultAddress,
-      order_total: totalAmount, // Tổng tiền đã tính toán
-    };
-    setOrder(newOrder);
-    const result = await createOrder(newOrder);
-    if (result && result._id) {
-      for (const item of data) {
-        await deleteCart(item._id); // Xóa từng sản phẩm trong giỏ hàng theo `data_id`
+    try {
+      const newOrder = {
+        ...listCheckout,
+        shipping_method: selectedShippingMethod,
+        order_address: defaultAddress,
+        order_total: totalAmount, // Tổng tiền đã tính toán
+      };
+
+      setOrder(newOrder);
+
+      const result = await createOrder(newOrder);
+
+      if (result && result._id) {
+        // Xóa tất cả sản phẩm trong giỏ hàng song song
+        const deletePromises = data
+          .filter((item) => item._id) // Lọc các item có `_id` hợp lệ
+          .map((item) => dispatch(removeProductFromCart(item._id)));
+
+        await Promise.all(deletePromises);
+
+        router.push("/user/don-mua"); // Dùng router.push thay vì window.location.href
+      } else {
+        alert(result || "Không thể tạo đơn hàng."); // Hiển thị thông báo lỗi từ backend
+        router.push("/gio-hang");
       }
-      window.location.href = "/user/don-mua";
-    } else {
-      window.location.href = "/gio-hang";
+
+      console.log(newOrder);
+    } catch (error) {
+      // Xử lý lỗi trong trường hợp có lỗi ngoài ý muốn
+      console.error("Có lỗi xảy ra:", error);
+      alert("Có lỗi xảy ra. Vui lòng thử lại.");
+      router.push("/gio-hang");
     }
-    console.log(newOrder);
   };
 
   const totalAmount =

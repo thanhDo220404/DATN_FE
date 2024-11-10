@@ -145,7 +145,7 @@ export default function Profile() {
           <div className="text-center border-start h-auto">
             <div>
               <img
-                src={`${apiUrl}/img/${user.image}`} // Hiển thị hình ảnh người dùng nếu có
+                src={`${apiUrl}/img/user/${user.image}`} // Hiển thị hình ảnh người dùng nếu có
                 alt="Profile Picture"
                 width={100}
                 height={100}
