@@ -177,7 +177,7 @@ export default function Dashboard() {
                     <tbody>
                       <tr>
                         <td>AL3947</td>
-                        <td>Phạm Thị Ngọc</td>
+                        <td>Nguyễn Như Nam</td>
                         <td>19.770.000 đ</td>
                         <td>
                           <span className="badge bg-info">Chờ xử lý</span>
@@ -185,7 +185,7 @@ export default function Dashboard() {
                       </tr>
                       <tr>
                         <td>ER3835</td>
-                        <td>Nguyễn Thị Mỹ Yến</td>
+                        <td>Nguyễn Trần Thành Trung</td>
                         <td>16.770.000 đ</td>
                         <td>
                           <span className="badge bg-warning">
@@ -195,7 +195,7 @@ export default function Dashboard() {
                       </tr>
                       <tr>
                         <td>MD0837</td>
-                        <td>Triệu Thanh Phú</td>
+                        <td>Trần Hửu Trí</td>
                         <td>9.400.000 đ</td>
                         <td>
                           <span className="badge bg-success">
@@ -299,7 +299,7 @@ export default function Dashboard() {
       </div>
       <div className="text-center" style={{ fontSize: "13px" }}>
         <p>
-          <b>Copyright Phần mềm quản lý bán hàng | Dev By Trường</b>
+          <b>Copyright by team Dreamers </b>
         </p>
       </div>
     </>
