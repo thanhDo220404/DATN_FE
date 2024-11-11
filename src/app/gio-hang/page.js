@@ -103,28 +103,18 @@ export default function Cart() {
     }
   }, [payload, listProducts]);
 
-  const handleDelete = async (id) => {
-    // await deleteCart(id);
-    dispatch(removeProductFromCart(id));
-    if (payload && payload._id) {
-      fetchCart(payload._id);
-    }
-  };
-
   const handleQuantityChange = async (cartId, newQuantity) => {
     // Tìm cartItem trong giỏ hàng theo cartId
     const cartItem = carts.find((item) => item._id === cartId);
+
+    
 
     // Tìm sản phẩm trong listProducts
     const productInList = listProducts.find(
       (product) => product._id === cartItem.product._id
     );
 
-    // Tìm item tương ứng trong sản phẩm
-    const itemInProduct = productInList.items.find(
-      (item) => item._id === cartItem.product.items._id
-    );
-
+    
     // Tìm variation tương ứng trong item
     const variationInItem = itemInProduct.variations.find(
       (variation) => variation._id === cartItem.product.items.variations._id
@@ -167,6 +157,16 @@ export default function Cart() {
     }
   };
 
+  const handleDelete = async (id) => {
+    // await deleteCart(id);
+    dispatch(removeProductFromCart(id));
+    if (payload && payload._id) {
+      fetchCart(payload._id);
+    }
+  };
+
+  
+
   const handleCheckoutChange = (cartItem, isChecked) => {
     if (isChecked) {
       setListCheckout((prevList) => [...prevList, cartItem]);
@@ -203,15 +203,6 @@ export default function Cart() {
   //   0
   // );
 
-  const totalCheckoutPrice = listCheckout.reduce(
-    (total, item) =>
-      total +
-      item.product.items.price *
-        (1 - item.product.items.discount / 100) *
-        item.product.quantity,
-    0
-  );
-
   const handleCheckout = () => {
     if (listCheckout.length === 0) {
       setWarningMessage("Chưa chọn sản phẩm nào để mua!");
@@ -224,190 +215,201 @@ export default function Cart() {
     router.push(`/thanh-toan?data=${data}`);
   };
 
+  const totalCheckoutPrice = listCheckout.reduce(
+    (total, item) =>
+      total +
+      item.product.items.price *
+        (1 - item.product.items.discount / 100) *
+        item.product.quantity,
+    0
+  );
+
+  
+
   return (
     <>
-      <div className="container my-5">
-        <ToastContainer></ToastContainer>
-        <div className="row position-relative">
-          <div className="col-md-12 bg-white p-3">
-            <div className="d-flex justify-content-between align-items-center mb-4">
-              <h4>Giỏ Hàng</h4>
-              <span>Số lượng sản phẩm: {carts.length}</span>
-            </div>
-            <table className="table table-borderless align-middle">
-              <thead>
-                <tr>
-                  <th scope="col">
-                    <input
-                      type="checkbox"
-                      checked={isAllChecked}
-                      onChange={handleSelectAll}
-                    />
-                  </th>
-                  <th scope="col">Sản phẩm</th>
-                  <th scope="col" className="text-center">
-                    Giá
-                  </th>
-                  <th scope="col" className="text-center">
-                    Số lượng
-                  </th>
-                  <th scope="col" className="text-center">
-                    Số tiền
-                  </th>
-                  <th scope="col" className="text-center">
-                    Xóa
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="border-top">
-                {carts.map((cartItem) => {
-                  const price =
-                    cartItem.product.items.price *
-                    (1 - cartItem.product.items.discount / 100);
-                  const total = price * cartItem.product.quantity;
-                  const isChecked = listCheckout.some(
-                    (item) => item._id === cartItem._id
-                  );
-                  return (
-                    <tr key={cartItem._id} className="border-bottom">
-                      <td>
-                        <input
-                          type="checkbox"
-                          checked={isChecked}
-                          onChange={(e) =>
-                            handleCheckoutChange(cartItem, e.target.checked)
-                          }
-                        />
-                      </td>
-                      <td>
-                        <Link href={`/san-pham/${cartItem.product._id}`}></Link>
-                        <div className="d-flex align-items-center">
-                          <Link href={`/san-pham/${cartItem.product._id}`}>
-                            <img
-                              src={cartItem.product.items.image.mediaFilePath}
-                              alt={cartItem.product.name}
-                              className="rounded me-3"
-                              style={{
-                                width: "60px",
-                                height: "60px",
-                                objectFit: "cover",
-                              }}
-                            />
-                          </Link>
-
-                          <div>
-                            <p className="mb-1 fw-bold">
-                              <Link href={`/san-pham/${cartItem.product._id}`}>
-                                {cartItem.product.name}
-                              </Link>
-                            </p>
-                            <small className="text-muted">
-                              {cartItem.product.items.color.colorName} -{" "}
-                              {cartItem.product.items.variations.size.sizeName}
-                            </small>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="text-center">
-                        {cartItem.product.items.discount > 0 && (
-                          <del className="me-2 text-secondary">
-                            {cartItem.product.items.price.toLocaleString()} ₫
-                          </del>
-                        )}
-                        {price.toLocaleString()} ₫
-                      </td>
-                      <td className="text-center">
-                        <div className="btn-group" role="group">
-                          <button
-                            className="btn btn-secondary btn-sm"
-                            onClick={() =>
-                              handleQuantityChange(
-                                cartItem._id,
-                                Math.max(cartItem.product.quantity - 1, 1)
-                              )
-                            }
-                            style={{ width: "30px", height: "30px" }}
-                          >
-                            -
-                          </button>
-                          <input
-                            type="text"
-                            className="form-control text-center mx-1"
-                            value={cartItem.product.quantity}
-                            onChange={(e) =>
-                              handleQuantityChange(
-                                cartItem._id,
-                                parseInt(e.target.value)
-                              )
-                            }
-                            style={{ width: "60px" }}
-                          />
-                          <button
-                            className="btn btn-secondary btn-sm"
-                            onClick={() =>
-                              handleQuantityChange(
-                                cartItem._id,
-                                cartItem.product.quantity + 1
-                              )
-                            }
-                            style={{ width: "30px", height: "30px" }}
-                          >
-                            +
-                          </button>
-                        </div>
-                      </td>
-                      <td className="text-center fw-bold text-danger">
-                        {total.toLocaleString()} ₫
-                      </td>
-                      <td className="text-center">
-                        <button
-                          className="btn btn-link text-danger p-0"
-                          onClick={() => handleDelete(cartItem._id)}
-                        >
-                          <i className="bi bi-trash fs-5"></i>
-                        </button>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-
-          <div className="col-md-12 position-sticky mt-3 bottom-0 z-3 bg-white p-3 shadow-lg">
-            {warningMessage && (
-              <div className="text-danger mt-2">{warningMessage}</div>
-            )}
-            <div className="d-flex justify-content-between align-items-center">
-              <div className="d-flex align-items-center">
+    <div className="container my-5">
+    <ToastContainer></ToastContainer>
+    <div className="row position-relative">
+      <div className="col-md-12 bg-white p-3">
+        <div className="d-flex justify-content-between align-items-center mb-4">
+          <h4>Giỏ Hàng</h4>
+          <span>Số lượng sản phẩm: {carts.length}</span>
+        </div>
+        <table className="table table-borderless align-middle">
+          <thead>
+            <tr>
+              <th scope="col">
                 <input
-                  className="me-2"
-                  id="selectAll"
                   type="checkbox"
                   checked={isAllChecked}
                   onChange={handleSelectAll}
                 />
-                <label htmlFor="selectAll" className="mb-0">
-                  Chọn tất cả
-                </label>
-              </div>
+              </th>
+              <th scope="col">Sản phẩm</th>
+              <th scope="col" className="text-center">
+                Giá
+              </th>
+              <th scope="col" className="text-center">
+                Số lượng
+              </th>
+              <th scope="col" className="text-center">
+                Số tiền
+              </th>
+              <th scope="col" className="text-center">
+                Xóa
+              </th>
+            </tr>
+          </thead>
+          <tbody className="border-top">
+            {carts.map((cartItem) => {
+              const price =
+                cartItem.product.items.price *
+                (1 - cartItem.product.items.discount / 100);
+              const total = price * cartItem.product.quantity;
+              const isChecked = listCheckout.some(
+                (item) => item._id === cartItem._id
+              );
+              return (
+                <tr key={cartItem._id} className="border-bottom">
+                  <td>
+                    <input
+                      type="checkbox"
+                      checked={isChecked}
+                      onChange={(e) =>
+                        handleCheckoutChange(cartItem, e.target.checked)
+                      }
+                    />
+                  </td>
+                  <td>
+                    <Link href={`/san-pham/${cartItem.product._id}`}></Link>
+                    <div className="d-flex align-items-center">
+                      <Link href={`/san-pham/${cartItem.product._id}`}>
+                        <img
+                          src={cartItem.product.items.image.mediaFilePath}
+                          alt={cartItem.product.name}
+                          className="rounded me-3"
+                          style={{
+                            width: "60px",
+                            height: "60px",
+                            objectFit: "cover",
+                          }}
+                        />
+                      </Link>
 
-              <div className="text-center">
-                <span className="fw-bold">
-                  Tổng thanh toán ({listCheckout.length} sản phẩm):{" "}
-                </span>
-                <span className="text-danger fw-bold">
-                  {totalCheckoutPrice.toLocaleString()} ₫
-                </span>
-              </div>
+                      <div>
+                        <p className="mb-1 fw-bold">
+                          <Link href={`/san-pham/${cartItem.product._id}`}>
+                            {cartItem.product.name}
+                          </Link>
+                        </p>
+                        <small className="text-muted">
+                          {cartItem.product.items.color.colorName} -{" "}
+                          {cartItem.product.items.variations.size.sizeName}
+                        </small>
+                      </div>
+                    </div>
+                  </td>
+                  <td className="text-center">
+                    {cartItem.product.items.discount > 0 && (
+                      <del className="me-2 text-secondary">
+                        {cartItem.product.items.price.toLocaleString()} ₫
+                      </del>
+                    )}
+                    {price.toLocaleString()} ₫
+                  </td>
+                  <td className="text-center">
+                    <div className="btn-group" role="group">
+                      <button
+                        className="btn btn-secondary btn-sm"
+                        onClick={() =>
+                          handleQuantityChange(
+                            cartItem._id,
+                            Math.max(cartItem.product.quantity - 1, 1)
+                          )
+                        }
+                        style={{ width: "30px", height: "30px" }}
+                      >
+                        -
+                      </button>
+                      <input
+                        type="text"
+                        className="form-control text-center mx-1"
+                        value={cartItem.product.quantity}
+                        onChange={(e) =>
+                          handleQuantityChange(
+                            cartItem._id,
+                            parseInt(e.target.value)
+                          )
+                        }
+                        style={{ width: "60px" }}
+                      />
+                      <button
+                        className="btn btn-secondary btn-sm"
+                        onClick={() =>
+                          handleQuantityChange(
+                            cartItem._id,
+                            cartItem.product.quantity + 1
+                          )
+                        }
+                        style={{ width: "30px", height: "30px" }}
+                      >
+                        +
+                      </button>
+                    </div>
+                  </td>
+                  <td className="text-center fw-bold text-danger">
+                    {total.toLocaleString()} ₫
+                  </td>
+                  <td className="text-center">
+                    <button
+                      className="btn btn-link text-danger p-0"
+                      onClick={() => handleDelete(cartItem._id)}
+                    >
+                      <i className="bi bi-trash fs-5"></i>
+                    </button>
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
 
-              <button className="btn btn-primary" onClick={handleCheckout}>
-                Mua hàng
-              </button>
-            </div>
+      <div className="col-md-12 position-sticky mt-3 bottom-0 z-3 bg-white p-3 shadow-lg">
+        {warningMessage && (
+          <div className="text-danger mt-2">{warningMessage}</div>
+        )}
+        <div className="d-flex justify-content-between align-items-center">
+          <div className="d-flex align-items-center">
+            <input
+              className="me-2"
+              id="selectAll"
+              type="checkbox"
+              checked={isAllChecked}
+              onChange={handleSelectAll}
+            />
+            <label htmlFor="selectAll" className="mb-0">
+              Chọn tất cả
+            </label>
           </div>
+
+          <div className="text-center">
+            <span className="fw-bold">
+              Tổng thanh toán ({listCheckout.length} sản phẩm):{" "}
+            </span>
+            <span className="text-danger fw-bold">
+              {totalCheckoutPrice.toLocaleString()} ₫
+            </span>
+          </div>
+
+          <button className="btn btn-primary" onClick={handleCheckout}>
+            Mua hàng
+          </button>
         </div>
       </div>
+    </div>
+  </div>
     </>
   );
 }
