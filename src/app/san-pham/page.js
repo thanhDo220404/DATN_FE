@@ -61,6 +61,29 @@ export default function Products() {
       }
     });
   };
+  // Sắp xếp sản phẩm theo giá
+  const sortedProducts = [...filteredProducts].sort((a, b) => {
+    const getLowestPrice = (product) => {
+      return Math.min(
+        ...product.items.map((item) => {
+          // Tính giá sau khi áp dụng discount
+          const discountedPrice =
+            item.price - item.price * (item.discount / 100);
+          return discountedPrice;
+        })
+      );
+    };
+
+    const priceA = getLowestPrice(a);
+    const priceB = getLowestPrice(b);
+
+    if (sortOrder === "asc") {
+      return priceA - priceB; // Giá tăng dần
+    } else if (sortOrder === "desc") {
+      return priceB - priceA; // Giá giảm dần
+    }
+    return 0; // Không sắp xếp nếu không có giá trị sắp xếp
+  });
 
   // Lọc sản phẩm theo màu sắc và kích thước đã chọn
   const filteredProducts = products.filter((product) => {
@@ -85,29 +108,7 @@ export default function Products() {
     return hasColor && hasSize; // Chỉ hiển thị sản phẩm nếu có màu và kích thước được chọn
   });
 
-  // Sắp xếp sản phẩm theo giá
-  const sortedProducts = [...filteredProducts].sort((a, b) => {
-    const getLowestPrice = (product) => {
-      return Math.min(
-        ...product.items.map((item) => {
-          // Tính giá sau khi áp dụng discount
-          const discountedPrice =
-            item.price - item.price * (item.discount / 100);
-          return discountedPrice;
-        })
-      );
-    };
-
-    const priceA = getLowestPrice(a);
-    const priceB = getLowestPrice(b);
-
-    if (sortOrder === "asc") {
-      return priceA - priceB; // Giá tăng dần
-    } else if (sortOrder === "desc") {
-      return priceB - priceA; // Giá giảm dần
-    }
-    return 0; // Không sắp xếp nếu không có giá trị sắp xếp
-  });
+  
 
   return (
     <>
