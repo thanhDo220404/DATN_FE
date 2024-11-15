@@ -6,11 +6,11 @@ function TotalOrdersTable({ listOrders }) {
   const [filteredOrders, setFilteredOrders] = useState([]); // Biến lưu các đơn hàng đã lọc
 
   useEffect(() => {
-    // Lọc các đơn hàng có order_status._id = '6724f9c943ad843da1d3114f'
+    // Lọc các đơn hàng có order_status._id !== '6724f9c943ad843da1d31150'
     const filtered = listOrders.filter(
       (order) =>
         order.order_status &&
-        order.order_status._id === "6724f9c943ad843da1d3114f"
+        order.order_status._id !== "6724f9c943ad843da1d31150"
     );
 
     setFilteredOrders(filtered);

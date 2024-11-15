@@ -293,7 +293,7 @@ export default function OrderDetails({ params }) {
                 <input
                   type="text"
                   className="form-control bg-light"
-                  value={payment_type.name}
+                  value={payment_type}
                   readOnly
                 />
               </div>

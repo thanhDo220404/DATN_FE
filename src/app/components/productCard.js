@@ -121,7 +121,7 @@ export default function ProductCard({ product, col }) {
 
   return (
     <div className={`col-sm-${col} col-6 mb-3`}>
-      <div className="card">
+      <div className="card h-100">
         <div className="my-card-header my-relative">
           <Link href={`/san-pham/${product._id}`}>
             <img
@@ -155,7 +155,7 @@ export default function ProductCard({ product, col }) {
             {product.items.map((item, index) => (
               <div key={index} className="me-2">
                 <span
-                  className={`color-indicator border ${
+                  className={`color-indicator mb-1   border ${
                     selectedColorId === item.color._id ? "sortActive" : ""
                   }`} // Thêm class sortActive nếu màu hiện tại được chọn
                   style={{
@@ -173,7 +173,7 @@ export default function ProductCard({ product, col }) {
             ))}
           </div>
           <Link href={`/san-pham/${product._id}`}>
-            <h5 className="card-title fs-6">{product.name}</h5>
+            <div className="card-title fs-6">{product.name}</div>
           </Link>
           <div className="card-text fs-6 d-flex gap-1 align-items-center">
             <span className="fw-bold">

@@ -78,7 +78,7 @@ export default function ({ params }) {
                     <span>{user.email}</span>
                   </div>
                   <div className="d-flex mb-3">
-                    <i className="bi bi-geo-alt me-3"></i>
+                    <i className="bi bi-calendar me-3"></i>
                     <span>{addressToDisplay}</span>
                   </div>
                 </div>

@@ -78,7 +78,7 @@ export default function Menu() {
                     <span className="app-menu__label">Thư viện</span>
                   </Link>
                 </li>
-                <li>
+                {/* <li>
                   <Link
                     className={`app-menu__item ${
                       pathname === "/admin/media/videos" ? "active" : ""
@@ -87,7 +87,7 @@ export default function Menu() {
                   >
                     <span className="app-menu__label">Videos</span>
                   </Link>
-                </li>
+                </li> */}
               </ul>
             )}
           </li>

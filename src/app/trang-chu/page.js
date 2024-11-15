@@ -33,10 +33,10 @@ export default function HomePage() {
     const productCounts = {};
 
     orders.forEach((order) => {
-      // Kiểm tra nếu order_status._id là '6724f9c943ad843da1d3114f'
+      // Kiểm tra nếu order_status._id khác '6724f9c943ad843da1d31150'
       if (
         order.order_status &&
-        order.order_status._id === "6724f9c943ad843da1d3114f"
+        order.order_status._id !== "6724f9c943ad843da1d31150"
       ) {
         order.products.forEach((product) => {
           const productId = product._id;

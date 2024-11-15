@@ -138,7 +138,6 @@ export default function UpdateProduct({ params }) {
             onSelectMedia={handleSelectMedia}
             onClose={handleCloseModal}
           />
-          <Overlay onClose={handleCloseModal} />
         </>
       )}
       <div className="container">

@@ -79,7 +79,7 @@ export default function Dashboard() {
         ) {
           monthlyOrderCount[index] += 1;
           // Kiểm tra trạng thái của đơn hàng trước khi tính vào doanh thu
-          if (order.order_status._id === "6724f9c943ad843da1d3114f") {
+          if (order.order_status._id !== "6724f9c943ad843da1d31150") {
             monthlyRevenue[index] += order.order_total;
           }
         }
@@ -252,8 +252,8 @@ export default function Dashboard() {
                       {listOrders
                         .filter(
                           (order) =>
-                            order.order_status._id ===
-                            "6724f9c943ad843da1d3114f"
+                            order.order_status._id !==
+                            "6724f9c943ad843da1d31150"
                         )
                         .reduce((total, order) => total + order.order_total, 0)
                         .toLocaleString()}{" "}
