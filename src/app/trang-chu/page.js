@@ -84,6 +84,10 @@ export default function HomePage() {
 
   console.log(bestSellingProducts);
 
+  const latestProducts = products
+    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+    .slice(0, 4);
+
   return (
     <>
       <ToastContainer></ToastContainer>
@@ -212,7 +216,7 @@ export default function HomePage() {
             </>
           ) : (
             // Hiển thị danh sách sản phẩm khi đã tải
-            products.map((product) => (
+            latestProducts.map((product) => (
               <ProductCard col={3} key={product._id} product={product} />
             ))
           )}

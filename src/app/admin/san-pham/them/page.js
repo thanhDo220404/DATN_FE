@@ -8,6 +8,11 @@ import { getAllCategories } from "@/app/databases/categories";
 import { getAllColors } from "@/app/databases/color";
 import { getAllSizes } from "@/app/databases/size";
 import { insertProduct } from "@/app/databases/products";
+import dynamic from "next/dynamic";
+
+const CustomEditor = dynamic(() => import("@/app/components/custom-editor"), {
+  ssr: false,
+});
 
 export default function AddProduct() {
   const [currentItemIndex, setCurrentItemIndex] = useState(null); // Để theo dõi item nào đang được chọn
@@ -26,6 +31,8 @@ export default function AddProduct() {
       variations: [{ size: "", quantity: 0 }],
     },
   ]);
+
+  const [productDescription, setProductDescription] = useState("");
 
   const fetchCategories = async () => {
     const result = await getAllCategories(); // Gọi hàm lấy tất cả danh mục
@@ -101,7 +108,6 @@ export default function AddProduct() {
   const handleSubmit = async (event) => {
     event.preventDefault(); // Ngăn chặn hành vi mặc định của form
     const productName = event.target.productName.value;
-    const productDescription = event.target.productDescription.value;
     const productCategory = event.target.productCategory.value;
 
     const productData = {
@@ -141,15 +147,13 @@ export default function AddProduct() {
             />
             <label htmlFor="productName">Tên sản phẩm</label>
           </div>
-          <div className="form-floating mb-3">
-            <textarea
-              className="form-control"
-              id="productDescription"
-              placeholder="Mô tả sản phẩm"
-              rows="3"
-              required
-            />
+          <div className="mb-3">
             <label htmlFor="productDescription">Mô tả sản phẩm</label>
+            <CustomEditor
+              value={productDescription}
+              onChange={(value) => setProductDescription(value)} // Cập nhật giá trị description
+              placeholder="Mô tả sản phẩm"
+            />
           </div>
           <div className="form-floating mb-3">
             <select className="form-select" id="productCategory" required>

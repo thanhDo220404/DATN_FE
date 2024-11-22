@@ -50,7 +50,7 @@ export default function Purchure() {
           {orders.map((order) => (
             <div className="bg-white mt-3 p-3" key={order._id}>
               <div className="text-end text-success fs-6">
-                <i class="bi bi-truck"></i> {order.order_status.name}
+                <i className="bi bi-truck"></i> {order.order_status.name}
               </div>
               <table className="table align-middle">
                 <tbody>
@@ -115,16 +115,15 @@ export default function Purchure() {
                   </span>
                 </div>
                 <div className="text-end">
-                  <button
-                    className="btn btn-danger"
-                    onClick={() => cancelOrder(order._id)}
-                    disabled={
-                      order.order_status._id !== "6724f9c943ad843da1d3114c" &&
-                      order.order_status._id !== "6724f9c943ad843da1d3114d"
-                    }
-                  >
-                    Hủy đơn
-                  </button>
+                  {order.order_status._id === "6724f9c943ad843da1d3114c" ||
+                  order.order_status._id === "6724f9c943ad843da1d3114d" ? (
+                    <button
+                      className="btn btn-danger"
+                      onClick={() => cancelOrder(order._id)}
+                    >
+                      Hủy đơn
+                    </button>
+                  ) : null}
                 </div>
               </div>
             </div>

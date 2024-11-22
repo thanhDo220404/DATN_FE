@@ -31,6 +31,8 @@ export default function OrderDetails({ params }) {
   }, [id]);
 
   const handleUpdateStatus = async () => {
+    console.log(selectedStatus);
+
     try {
       await updateOrderStatus(order._id, selectedStatus);
       toast.success("Cập nhật trạng thái đơn hàng thành công!"); // Hiển thị thông báo thành công
@@ -130,7 +132,7 @@ export default function OrderDetails({ params }) {
         <div className="col-3 m-auto p-2 alert-info text-info">
           <div className="d-flex align-items-center">
             <div className="bg-info p-3 me-2 ">
-              <i class="bi bi-person-fill"></i>
+              <i className="bi bi-person-fill"></i>
             </div>
             <div className="fs-5">
               Tên
@@ -141,7 +143,7 @@ export default function OrderDetails({ params }) {
         <div className="col-3 m-auto p-2 alert-danger text-danger">
           <div className="d-flex align-items-center">
             <div className="bg-danger p-3 me-2">
-              <i class="bi bi-telephone-fill"></i>
+              <i className="bi bi-telephone-fill"></i>
             </div>
             <div className="fs-5">
               Số điện thoại

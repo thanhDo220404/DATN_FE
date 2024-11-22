@@ -1,6 +1,8 @@
 "use client";
-import { insertMedia, getAllMedia } from "@/app/databases/media";
+import { insertMedia, getAllMedia, deleteMedia } from "@/app/databases/media";
+import Link from "next/link";
 import { useEffect, useState } from "react";
+const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
 export default function Media() {
   const [dataMedia, setDataMedia] = useState([]);
@@ -54,7 +56,29 @@ export default function Media() {
     setDataMedia(result);
   };
 
-  const handleDelete = async (id) => {};
+  const handleDelete = async (id) => {
+    // Xác nhận hành động xóa từ người dùng
+    const isConfirmed = window.confirm("Bạn có chắc chắn muốn xóa media này?");
+
+    if (!isConfirmed) {
+      return; // Nếu người dùng không xác nhận, dừng lại
+    }
+
+    try {
+      // Gọi API để xóa media
+      const result = await deleteMedia(id);
+
+      // Cập nhật lại danh sách media sau khi xóa
+      await fetchMedia();
+
+      // Đóng modal nếu có
+      setShowModal(false);
+    } catch (error) {
+      // Xử lý lỗi nếu có
+      console.error("Lỗi khi xóa media:", error);
+      alert("Đã có lỗi xảy ra khi xóa media. Vui lòng thử lại.");
+    }
+  };
 
   useEffect(() => {
     fetchMedia();
@@ -95,22 +119,41 @@ export default function Media() {
                     />
                   </div>
                   <div className="col-4">
-                    <p>
-                      <span className="fw-bold">Đã tải lên vào lúc:</span>{" "}
-                      {formatDate(dataOneMedia.createdAt)}
-                    </p>
-                    <p>
-                      <span className="fw-bold">Tên tệp tin:</span>{" "}
-                      {dataOneMedia.fileName}
-                    </p>
-                    <p>
-                      <span className="fw-bold">Loại tệp tin:</span>{" "}
-                      {dataOneMedia.fileType}
-                    </p>
-                    <p>
-                      <span className="fw-bold">Dung lượng tệp:</span>{" "}
-                      {formatFileSize(dataOneMedia.fileSize)}
-                    </p>
+                    <div className="d-flex flex-column">
+                      <div className="w-100">
+                        <p>
+                          <span className="fw-bold">Đã tải lên vào lúc:</span>{" "}
+                          {formatDate(dataOneMedia.createdAt)}
+                        </p>
+                        <p>
+                          <span className="fw-bold">Tên tệp tin:</span>{" "}
+                          {dataOneMedia.fileName}
+                        </p>
+                        <p>
+                          <span className="fw-bold">Loại tệp tin:</span>{" "}
+                          {dataOneMedia.fileType}
+                        </p>
+                        <p>
+                          <span className="fw-bold">Dung lượng tệp:</span>{" "}
+                          {formatFileSize(dataOneMedia.fileSize)}
+                        </p>
+                      </div>
+                      <div className="w-100">
+                        <Link
+                          className="text-primary"
+                          href={`${apiUrl}/img/media/${dataOneMedia.fileName}`}
+                        >
+                          Xem tệp tin
+                        </Link>{" "}
+                        |{" "}
+                        <button
+                          className="text-danger"
+                          onClick={() => handleDelete(dataOneMedia._id)}
+                        >
+                          Xóa vĩnh viễn
+                        </button>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>

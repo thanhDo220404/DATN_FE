@@ -101,14 +101,19 @@ export default function ProductCard({ product, col }) {
         const result = dispatch(addProductToCart(newCartItem));
         if (result) {
           fetchCarts(payload._id); // Cập nhật giỏ hàng sau khi thêm thành công
-          toast.success("Thêm giỏ hàng thành công!");
+          toast.success("Thêm giỏ hàng thành công!", {
+            position: "top-center",
+          });
         } else {
           toast.error("Thêm giỏ hàng thất bại!");
         }
       } else {
         // Nếu vượt quá số lượng tối đa, hiển thị thông báo lỗi
         toast.error(
-          `Không thể thêm vào giỏ hàng! Bạn đã có ${maxQuantity} sản phẩm trong giỏ hàng với biến thể này.`
+          `Không thể thêm vào giỏ hàng! Bạn đã có ${maxQuantity} sản phẩm trong giỏ hàng với biến thể này.`,
+          {
+            position: "top-center",
+          }
         );
       }
 
@@ -173,7 +178,7 @@ export default function ProductCard({ product, col }) {
             ))}
           </div>
           <Link href={`/san-pham/${product._id}`}>
-            <div className="card-title fs-6">{product.name}</div>
+            <div className="card-title fs-6 text-truncate">{product.name}</div>
           </Link>
           <div className="card-text fs-6 d-flex gap-1 align-items-center">
             <span className="fw-bold">

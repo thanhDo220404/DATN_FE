@@ -4,8 +4,7 @@ import { getAllByUserId, insert } from "../databases/address";
 import Overlay from "../components/overlay";
 import { useSearchParams } from "next/navigation";
 import { getAllShippingMethods } from "../databases/shipping_methods";
-import { createOrder } from "../databases/order";
-import { deleteCart } from "../databases/cart";
+import { createOrder, createPaymentUrl } from "../databases/order";
 import { useForm } from "react-hook-form";
 import { useRouter } from "next/navigation";
 import { useDispatch } from "react-redux";
@@ -44,6 +43,7 @@ export default function Checkout() {
   const [defaultAddress, setDefaultAddress] = useState(null);
   const [showSelectAddress, setShowSelectAddress] = useState(false);
   const [selectedAddressId, setSelectedAddressId] = useState(null);
+  const [payment_type, setPaymentType] = useState("Thanh toán khi nhận hàng");
 
   const [listCheckout, setListCheckout] = useState({
     user: null,
@@ -58,7 +58,7 @@ export default function Checkout() {
 
   const searchParams = useSearchParams();
   const data = JSON.parse(searchParams.get("data"));
-  console.log("this is data: ", data);
+  // console.log("this is data: ", data);
 
   const fetchAddress = async (userId) => {
     const result = await getAllByUserId(userId);
@@ -68,7 +68,7 @@ export default function Checkout() {
       setDefaultAddress(defaultAddr);
       setSelectedAddressId(defaultAddr._id); // Đặt selectedAddressId là địa chỉ mặc định
     }
-    console.log("fetchAddress: ", result);
+    // console.log("fetchAddress: ", result);
   };
   const fetchShippingMethods = async () => {
     const result = await getAllShippingMethods();
@@ -107,18 +107,15 @@ export default function Checkout() {
   const handleShowSelectShippingMethods = () => {
     setShowShippingMethods(true);
   };
-
   const handleCloseSelectAddress = () => {
     setShowSelectAddress(false);
   };
   const handleCloseSelectShippingMethods = () => {
     setShowShippingMethods(false);
   };
-
   const handleSelectAddress = (addressId) => {
     setSelectedAddressId(addressId);
   };
-
   const handleConfirmSelection = () => {
     const newDefaultAddress = address.find(
       (addr) => addr._id === selectedAddressId
@@ -128,7 +125,6 @@ export default function Checkout() {
     }
     handleCloseSelectAddress();
   };
-
   const handleSelectShippingMethod = (method) => {
     setSelectedShippingMethod(method);
   };
@@ -139,6 +135,7 @@ export default function Checkout() {
         ...listCheckout,
         shipping_method: selectedShippingMethod,
         order_address: defaultAddress,
+        payment_type: payment_type,
         order_total: totalAmount, // Tổng tiền đã tính toán
       };
 
@@ -154,7 +151,22 @@ export default function Checkout() {
 
         await Promise.all(deletePromises);
 
-        router.push("/user/don-mua"); // Dùng router.push thay vì window.location.href
+        const paymentData = {
+          orderId: result._id,
+          amount: totalAmount,
+          bankCode: "",
+          language: "vn",
+        };
+
+        if (payment_type === "Ví điện tử VNPAY") {
+          try {
+            await createPaymentUrl(paymentData);
+          } catch (error) {
+            console.error("Payment process failed:", error);
+          }
+        } else {
+          router.push("/user/don-mua"); // Dùng router.push thay vì window.location.href
+        }
       } else {
         alert(result || "Không thể tạo đơn hàng."); // Hiển thị thông báo lỗi từ backend
         router.push("/gio-hang");
@@ -164,8 +176,8 @@ export default function Checkout() {
     } catch (error) {
       // Xử lý lỗi trong trường hợp có lỗi ngoài ý muốn
       console.error("Có lỗi xảy ra:", error);
-      alert("Có lỗi xảy ra. Vui lòng thử lại.");
-      router.push("/gio-hang");
+      // alert("Có lỗi xảy ra. Vui lòng thử lại.");
+      // router.push("/gio-hang");
     }
   };
 
@@ -563,9 +575,22 @@ export default function Checkout() {
         <div className="bg-white w-100 mt-3">
           <div className="w-100 p-3">
             <h4>Phương thức thanh toán</h4>
-            <div className="border-bottom py-2 d-flex justify-content-between align-items-center">
+            <div className="border rounded p-3 mb-2 d-flex justify-content-between align-items-center">
               <span>Thanh toán khi nhận hàng</span>
-              <input type="radio" name="payment_method" defaultChecked />
+              <input
+                type="radio"
+                name="payment_method"
+                onChange={() => setPaymentType("Thanh toán khi nhận hàng")}
+                defaultChecked
+              />
+            </div>
+            <div className="border rounded p-3 mb-2 d-flex justify-content-between align-items-center">
+              <span>Ví điện tử VNPAY</span>
+              <input
+                type="radio"
+                name="payment_method"
+                onChange={() => setPaymentType("Ví điện tử VNPAY")}
+              />
             </div>
             <div className="bg-danger-subtle text-end p-3 d-flex">
               <div className="w-25">
@@ -620,7 +645,7 @@ export default function Checkout() {
           </div>
         </div>
       </div>
-      {/* insert */}
+      {/* insert address */}
       <div
         className="modal fade"
         id="newUserAddress"

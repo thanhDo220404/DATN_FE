@@ -2,12 +2,16 @@
 import "../../style.css";
 import { useEffect, useState } from "react";
 import MediaModal from "../../components/mediaModal"; // Import component MediaModal
-import Overlay from "@/app/components/overlay";
 import { getAllCategories } from "@/app/databases/categories";
 import { getAllColors } from "@/app/databases/color";
 import { getAllSizes } from "@/app/databases/size";
 import { getProductById, updateProduct } from "@/app/databases/products";
-import { ToastContainer, toast } from "react-toastify"; // Import toast
+import { ToastContainer, toast } from "react-toastify"; // Import toast\
+import dynamic from "next/dynamic";
+
+const CustomEditor = dynamic(() => import("@/app/components/custom-editor"), {
+  ssr: false,
+});
 
 export default function UpdateProduct({ params }) {
   const { id } = params; // Lấy ID từ router
@@ -155,19 +159,14 @@ export default function UpdateProduct({ params }) {
             />
             <label htmlFor="productName">Tên sản phẩm</label>
           </div>
-          <div className="form-floating mb-3">
-            <textarea
-              className="form-control"
-              id="productDescription"
-              placeholder="Mô tả sản phẩm"
-              rows="3"
-              value={product.description}
-              onChange={(e) =>
-                setProduct({ ...product, description: e.target.value })
-              }
-              required
-            />
+          <div className="mb-3">
             <label htmlFor="productDescription">Mô tả sản phẩm</label>
+            <CustomEditor
+              value={product.description}
+              onChange={(content) =>
+                setProduct({ ...product, description: content })
+              }
+            />
           </div>
           <div className="form-floating mb-3">
             <select

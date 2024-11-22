@@ -57,9 +57,9 @@ export default function MediaModal({ onSelectMedia, onClose }) {
           zIndex: 1000,
         }}
       >
-        <div className="w-100 h-100 m-auto bg-white shadow-lg d-flex flex-wrap p-2  overflow-scroll">
+        <div className="w-100 h-100 m-auto bg-white shadow-lg d-flex flex-column p-2  overflow-scroll">
           {/* Header */}
-          <div className="fs-4 w-100">
+          <div className="fs-4 w-100 mb-3">
             <div className="fs-3 float-start">Hình ảnh</div>
             <button className="float-end" onClick={onClose}>
               <i className="bi bi-x-lg"></i>
@@ -67,7 +67,7 @@ export default function MediaModal({ onSelectMedia, onClose }) {
           </div>
 
           {/* Nút thêm hình */}
-          <div className="d-flex w-100">
+          <div className="mb-3">
             <input
               className="d-none"
               type="file"
@@ -84,7 +84,7 @@ export default function MediaModal({ onSelectMedia, onClose }) {
           </div>
 
           {/* Khu vực hiển thị danh sách media */}
-          <div>
+          <div className="mb-3">
             {dataMedia.length > 0 ? (
               <div className="d-flex flex-wrap">
                 {dataMedia.map((media, index) => (

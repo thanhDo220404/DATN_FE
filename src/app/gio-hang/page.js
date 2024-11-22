@@ -1,10 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-import {
-  deleteCart,
-  getCartByUserId,
-  updateCartQuantity,
-} from "../databases/cart";
+import { updateCartQuantity } from "../databases/cart";
 import { getCookie } from "../lib/CookieManager";
 import { parseJwt } from "../databases/users";
 import Link from "next/link";
@@ -15,12 +11,12 @@ import { useDispatch, useSelector } from "react-redux";
 import {
   fetchCartByUserId,
   removeProductFromCart,
+  updateCartItemQuantity,
 } from "../../../redux/slices/cartSlice";
 
 export default function Cart() {
   const dispatch = useDispatch();
   const [listProducts, setListProducts] = useState([]);
-  // const [carts, setCarts] = useState([]);
   const [payload, setPayload] = useState();
   const [listCheckout, setListCheckout] = useState([]);
   const [isAllChecked, setIsAllChecked] = useState(false);
@@ -33,7 +29,6 @@ export default function Cart() {
   const fetchProducts = async () => {
     const result = await getAllProducts();
     setListProducts(result);
-    console.log(result);
   };
 
   const fetchCart = async (userId) => {
@@ -41,50 +36,52 @@ export default function Cart() {
     const result = res.payload;
 
     // Duyệt qua từng sản phẩm trong giỏ hàng
-    const updatedCarts = await Promise.all(
-      result.map(async (cartItem) => {
-        const productInList = listProducts.find(
-          (product) => product._id === cartItem.product._id
+    result.map(async (cartItem) => {
+      const productInList = listProducts.find(
+        (product) => product._id === cartItem.product._id
+      );
+
+      // Kiểm tra nếu sản phẩm tồn tại trong danh sách sản phẩm
+      if (productInList) {
+        const itemInProduct = productInList.items.find(
+          (item) => item._id === cartItem.product.items._id
         );
 
-        // Kiểm tra nếu sản phẩm tồn tại trong danh sách sản phẩm
-        if (productInList) {
-          const itemInProduct = productInList.items.find(
-            (item) => item._id === cartItem.product.items._id
-          );
+        const variationInItem = itemInProduct.variations.find(
+          (item) => item._id === cartItem.product.items.variations._id
+        );
 
-          const variationInItem = itemInProduct.variations.find(
-            (item) => item._id === cartItem.product.items.variations._id
-          );
-
-          if (!variationInItem) {
+        if (!variationInItem) {
+          if (cartItem._id) {
             dispatch(removeProductFromCart(cartItem._id)); // Gọi hàm deleteCart để xóa sản phẩm khỏi giỏ hàng
-            // return null;
-            window.location.reload();
-          }
-
-          const availableQuantity = variationInItem?.quantity || 0;
-
-          // Nếu số lượng có sẵn nhỏ hơn hoặc bằng 0, xóa sản phẩm khỏi giỏ hàng
-          if (availableQuantity <= 0) {
-            if (cartItem._id) {
-              dispatch(removeProductFromCart(cartItem._id)); // Gọi hàm deleteCart để xóa sản phẩm khỏi giỏ hàng
-              // return null;
-              window.location.reload();
-            }
-          }
-
-          // Nếu số lượng trong giỏ hàng lớn hơn số lượng có sẵn, điều chỉnh lại số lượng
-          if (cartItem.product.quantity > availableQuantity) {
-            cartItem.product.quantity = availableQuantity;
+            return;
           }
         }
 
-        return cartItem;
-      })
-    );
+        const availableQuantity = variationInItem?.quantity || 0;
 
-    carts = updatedCarts; // Cập nhật lại giỏ hàng
+        // Nếu số lượng có sẵn nhỏ hơn hoặc bằng 0, xóa sản phẩm khỏi giỏ hàng
+        if (availableQuantity <= 0) {
+          if (cartItem._id) {
+            dispatch(removeProductFromCart(cartItem._id)); // Gọi hàm deleteCart để xóa sản phẩm khỏi giỏ hàng
+            return;
+          }
+        }
+
+        // Nếu số lượng trong giỏ hàng lớn hơn số lượng có sẵn, điều chỉnh lại số lượng
+        if (cartItem.product.quantity > availableQuantity) {
+          if (cartItem._id) {
+            dispatch(
+              updateCartItemQuantity({
+                cartId: cartItem._id,
+                quantity: availableQuantity,
+              })
+            ); // Gọi hàm deleteCart để xóa sản phẩm khỏi giỏ hàng
+            return;
+          }
+        }
+      }
+    });
   };
 
   useEffect(() => {
@@ -157,7 +154,6 @@ export default function Cart() {
 
     try {
       const updatedCart = await updateCartQuantity(cartId, newQuantity);
-      console.log("Giỏ hàng đã được cập nhật:", updatedCart);
       toast.success("Giỏ hàng đã được cập nhật!");
       if (payload && payload._id) {
         fetchCart(payload._id);

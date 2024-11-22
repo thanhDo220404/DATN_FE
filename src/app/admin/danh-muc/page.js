@@ -34,11 +34,7 @@ export default function Categories() {
   const handleUpdate = async (data) => {
     resetUpdate();
     setValueUpdate("name", data.name);
-    setValueUpdate("description", data.description); // Giả sử bạn có trường mô tả cho danh mục
-    setValueUpdate("status", data.status); // Trạng thái cho danh mục
-    if (data.parent !== null) {
-      setValueUpdate("parent", data.parent.categoryId); // Trạng thái cho danh mục
-    }
+    setValueUpdate("description", data.description);
     setCategorySelected(data);
   };
   const handleDelete = async (data) => {

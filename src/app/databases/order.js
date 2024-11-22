@@ -129,3 +129,29 @@ export const updateOrderStatus = async (orderId, orderStatusId) => {
     throw error;
   }
 };
+
+export const createPaymentUrl = async (paymentData) => {
+  try {
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_API_URL}/orders/create_payment_url`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(paymentData),
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error("Failed to create payment URL");
+    }
+
+    // API này trả về URL redirect, bạn có thể xử lý tiếp theo.
+    const paymentUrl = await response.json(); // Giả sử API trả về JSON với URL.
+    window.location.href = paymentUrl; // Chuyển hướng người dùng tới URL thanh toán.
+  } catch (error) {
+    console.error("Error while creating payment URL:", error);
+    throw error;
+  }
+};

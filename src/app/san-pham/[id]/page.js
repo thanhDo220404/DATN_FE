@@ -228,14 +228,19 @@ export default function ProductDetail({ params }) {
         if (result) {
           setAddToCartData(newCartItem);
           fetchCarts(payload._id); // Cập nhật giỏ hàng sau khi thêm thành công
-          toast.success("Thêm giỏ hàng thành công!");
+          toast.success("Thêm giỏ hàng thành công!", {
+            position: "top-center",
+          });
         } else {
           toast.error("Thêm giỏ hàng thất bại!");
         }
       } else {
         // Nếu vượt quá số lượng tối đa, hiển thị thông báo lỗi
         toast.error(
-          `Không thể thêm vào giỏ hàng! Bạn đã có ${maxQuantity} sản phẩm trong giỏ hàng với biến thể này.`
+          `Không thể thêm vào giỏ hàng! Bạn đã có ${maxQuantity} sản phẩm trong giỏ hàng với biến thể này.`,
+          {
+            position: "top-center",
+          }
         );
       }
     } else {
@@ -341,7 +346,6 @@ export default function ProductDetail({ params }) {
         </div>
         <div className="col-md-6">
           <h3>{product.name}</h3>
-          <p>{product.description}</p>
           <div className="d-flex align-items-center gap-3">
             {selectedItem.discount > 0 ? (
               <>
@@ -471,10 +475,14 @@ export default function ProductDetail({ params }) {
       </div>
       <div className="details-section row mt-4">
         <div className="col-md-6">
-          <h5>DETAILS</h5>
-          <p>
-            <strong>Mô tả:</strong> {product.description}
-          </p>
+          <div className="product-description">
+            <h4>Mô tả sản phẩm</h4>
+            <div
+              dangerouslySetInnerHTML={{
+                __html: product.description,
+              }}
+            />
+          </div>
         </div>
       </div>
       <div>

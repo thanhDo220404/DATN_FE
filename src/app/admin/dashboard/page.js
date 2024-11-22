@@ -256,7 +256,8 @@ export default function Dashboard() {
                             "6724f9c943ad843da1d31150"
                         )
                         .reduce((total, order) => total + order.order_total, 0)
-                        .toLocaleString()}{" "}
+                        .toLocaleString()}
+                      {" đ"}
                       {/* Hiển thị tổng doanh thu đã được định dạng */}
                     </b>
                   </p>
