@@ -126,7 +126,7 @@ export default function ProductCard({ product, col }) {
 
   return (
     <div className={`col-sm-${col} col-6 mb-3`}>
-      <div className="card h-100">
+      <div className="card">
         <div className="my-card-header my-relative">
           <Link href={`/san-pham/${product._id}`}>
             <img
@@ -180,7 +180,7 @@ export default function ProductCard({ product, col }) {
           <Link href={`/san-pham/${product._id}`}>
             <div className="card-title fs-6 text-truncate">{product.name}</div>
           </Link>
-          <div className="card-text fs-6 d-flex gap-1 align-items-center">
+          <div className="card-text fs-6 d-flex gap-1 align-items-center text-truncate">
             <span className="fw-bold">
               {discountedPrice.toLocaleString("vi-VN", {
                 style: "currency",

@@ -4,13 +4,13 @@ import "@/app/san-pham/style.css";
 import { useEffect, useState } from "react";
 import SortColor from "@/app/components/sortColor";
 import SortSize from "@/app/components/sortSize";
-import Link from "next/link";
 import { getAllProducts } from "@/app/databases/products";
 import { getAllColors } from "@/app/databases/color";
 import { getAllSizes } from "@/app/databases/size";
 import ProductCard from "@/app/components/productCard";
 import { getCategoryById } from "@/app/databases/categories";
 import { ToastContainer } from "react-toastify";
+import Pagination from "@/app/components/pagination";
 
 export default function Products({ params }) {
   const { id } = params;
@@ -21,6 +21,9 @@ export default function Products({ params }) {
   const [selectedColors, setSelectedColors] = useState([]); // Lưu nhiều màu đã chọn
   const [selectedSizes, setSelectedSizes] = useState([]);
   const [sortOrder, setSortOrder] = useState(""); // Trạng thái cho sắp xếp
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 6; // Số sản phẩm trên mỗi trang
 
   const fetchProducts = async (category_id) => {
     const result = await getAllProducts();
@@ -121,6 +124,13 @@ export default function Products({ params }) {
     return 0; // Không sắp xếp nếu không có giá trị sắp xếp
   });
 
+  const paginatedProducts = sortedProducts.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
+  const totalPages = Math.ceil(sortedProducts.length / itemsPerPage);
+
   return (
     <>
       <div className="container my-5">
@@ -211,10 +221,16 @@ export default function Products({ params }) {
                   ))}
                 </>
               ) : (
-                // Hiển thị danh sách sản phẩm khi đã tải
-                sortedProducts.map((product) => (
-                  <ProductCard col={4} key={product._id} product={product} />
-                ))
+                <>
+                  {paginatedProducts.map((product) => (
+                    <ProductCard col={4} key={product._id} product={product} />
+                  ))}
+                  <Pagination
+                    totalPages={totalPages}
+                    currentPage={currentPage}
+                    onPageChange={(pageNumber) => setCurrentPage(pageNumber)}
+                  />
+                </>
               )}
             </div>
           </div>

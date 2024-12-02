@@ -8,8 +8,8 @@ import { getAllSizes } from "../databases/size";
 import ProductCard from "../components/productCard";
 import SortColor from "../components/sortColor";
 import SortSize from "../components/sortSize";
-import Link from "next/link";
 import { ToastContainer } from "react-toastify";
+import Pagination from "../components/pagination";
 
 export default function Products() {
   const [products, setProducts] = useState([]);
@@ -18,6 +18,9 @@ export default function Products() {
   const [selectedColors, setSelectedColors] = useState([]); // Lưu nhiều màu đã chọn
   const [selectedSizes, setSelectedSizes] = useState([]);
   const [sortOrder, setSortOrder] = useState(""); // Trạng thái cho sắp xếp
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 6; // Số sản phẩm trên mỗi trang
 
   const fetchProducts = async () => {
     const result = await getAllProducts();
@@ -108,6 +111,13 @@ export default function Products() {
     }
     return 0; // Không sắp xếp nếu không có giá trị sắp xếp
   });
+
+  const paginatedProducts = sortedProducts.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
+  const totalPages = Math.ceil(sortedProducts.length / itemsPerPage);
 
   return (
     <>
@@ -200,9 +210,16 @@ export default function Products() {
                 </>
               ) : (
                 // Hiển thị danh sách sản phẩm khi đã tải
-                sortedProducts.map((product) => (
-                  <ProductCard col={4} key={product._id} product={product} />
-                ))
+                <>
+                  {paginatedProducts.map((product) => (
+                    <ProductCard col={4} key={product._id} product={product} />
+                  ))}
+                  <Pagination
+                    totalPages={totalPages}
+                    currentPage={currentPage}
+                    onPageChange={(pageNumber) => setCurrentPage(pageNumber)}
+                  />
+                </>
               )}
             </div>
           </div>

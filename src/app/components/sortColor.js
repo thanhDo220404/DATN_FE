@@ -4,18 +4,10 @@ const SortColor = ({ colors, selectedColors, onColorSelect }) => {
   return (
     <div>
       <div className="fs-3">Màu sắc</div>
-      <div className="d-flex flex-wrap gap-4 py-3">
+      <div className="d-flex flex-wrap gap-2 py-3">
         {colors.length > 0 ? (
           colors.map((color, index) => (
-            <div
-              key={index}
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                margin: "0 8px", // Khoảng cách giữa các màu
-              }}
-            >
+            <div key={index}>
               <div
                 id={`componentSortColor-${color._id}`}
                 className={`${
@@ -31,13 +23,6 @@ const SortColor = ({ colors, selectedColors, onColorSelect }) => {
                 }}
                 onClick={() => onColorSelect(color)}
               ></div>
-              <span
-                htmlFor={`componentSortColor-${color._id}`}
-                style={{ marginTop: "5px", cursor: "pointer" }}
-                onClick={() => onColorSelect(color)}
-              >
-                {color.name}
-              </span>
             </div>
           ))
         ) : (

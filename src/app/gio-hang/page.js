@@ -137,6 +137,12 @@ export default function Cart() {
       return; // Ngừng thực hiện các bước tiếp theo nếu số lượng không hợp lệ
     }
 
+    // Nếu newQuantity = 0, gọi hàm handleDelete
+    if (newQuantity === 0) {
+      handleDelete(cartId);
+      return;
+    }
+
     // Giới hạn số lượng tối đa
     newQuantity = Math.min(newQuantity, maxQuantity);
 
@@ -319,7 +325,7 @@ export default function Cart() {
                             onClick={() =>
                               handleQuantityChange(
                                 cartItem._id,
-                                Math.max(cartItem.product.quantity - 1, 1)
+                                Math.max(cartItem.product.quantity - 1)
                               )
                             }
                             style={{ width: "30px", height: "30px" }}

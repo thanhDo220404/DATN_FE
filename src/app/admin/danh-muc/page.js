@@ -5,8 +5,10 @@ import {
   insertCategory,
   updateCategory,
 } from "@/app/databases/categories"; // Thay đổi import sang danh mục
+import { getAllProducts } from "@/app/databases/products";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
+import { toast, ToastContainer } from "react-toastify";
 
 export default function Categories() {
   const [listCategories, setListCategories] = useState([]);
@@ -27,6 +29,22 @@ export default function Categories() {
     const result = await getAllCategories(); // Gọi hàm lấy tất cả danh mục
     setListCategories(result);
   };
+  const fetchProductsByCateId = async (cateId) => {
+    try {
+      // Lấy toàn bộ sản phẩm
+      const result = await getAllProducts();
+
+      // Lọc sản phẩm theo cateId
+      const filteredProducts = result.filter(
+        (product) => product.category._id === cateId
+      );
+      return filteredProducts; // Trả về danh sách sản phẩm đã lọc
+    } catch (error) {
+      console.error("Lỗi khi lấy sản phẩm theo cateId:", error);
+      return []; // Trả về mảng rỗng trong trường hợp lỗi
+    }
+  };
+
   useEffect(() => {
     fetchCategories();
   }, []);
@@ -43,47 +61,91 @@ export default function Categories() {
 
   const onSubmit = async (data) => {
     try {
-      await insertCategory(data); // Thay đổi hàm chèn màu sắc thành chèn danh mục
-      await fetchCategories();
-      resetInsert(); // Đặt lại form sau khi gửi thành công
+      // Kiểm tra trùng tên danh mục
+      const isDuplicate = listCategories.some(
+        (category) => category.name.toLowerCase() === data.name.toLowerCase()
+      );
+      if (isDuplicate) {
+        // Hiển thị cảnh báo bằng toast
+        toast.warning("Tên danh mục đã tồn tại!");
+        return; // Dừng quá trình thêm mới
+      }
+
+      await insertCategory(data); // Thêm danh mục mới
+      await fetchCategories(); // Tải lại danh sách danh mục
+      resetInsert(); // Đặt lại form
+      toast.success("Thêm thành công!"); // Thông báo thành công
       const modal = document.getElementById("insertCategory");
       const bootstrapModal = bootstrap.Modal.getInstance(modal);
       bootstrapModal.hide();
-      // console.log(data);
     } catch (error) {
+      toast.error("Lỗi khi cập nhật danh mục");
       console.error("Lỗi khi thêm danh mục", error);
     }
   };
 
   const onSubmitUpdate = async (data) => {
     try {
-      await updateCategory(categorySelected._id, data); // Thay đổi hàm cập nhật danh mục
-      await fetchCategories();
-      resetUpdate(); // Đặt lại form sau khi gửi thành công
+      // Kiểm tra trùng tên danh mục (trừ danh mục đang chỉnh sửa)
+      const isDuplicate = listCategories.some(
+        (category) =>
+          category.name.toLowerCase() === data.name.toLowerCase() &&
+          category._id !== categorySelected._id
+      );
+      if (isDuplicate) {
+        // Hiển thị cảnh báo bằng toast
+        toast.warning("Tên danh mục đã tồn tại!");
+        return; // Dừng quá trình cập nhật
+      }
+
+      await updateCategory(categorySelected._id, data); // Cập nhật danh mục
+      await fetchCategories(); // Tải lại danh sách danh mục
+      resetUpdate(); // Đặt lại form
+      toast.success("Cập nhật thành công!"); // Thông báo thành công
       const modal = document.getElementById("updateCategory");
       const bootstrapModal = bootstrap.Modal.getInstance(modal);
       bootstrapModal.hide();
     } catch (error) {
-      throw new Error(error);
+      toast.error("Lỗi khi cập nhật danh mục");
+      console.error("Lỗi khi cập nhật danh mục", error);
     }
-    console.log("this is onSubmitUpdate", data);
   };
+
   const onSubmitDelete = async () => {
     if (categorySelected) {
       try {
-        await deleteCategory(categorySelected._id);
-        await fetchCategories(); // Cập nhật lại danh sách
+        // Kiểm tra nếu danh mục có sản phẩm
+        const products = await fetchProductsByCateId(categorySelected._id);
+
+        if (products.length > 0) {
+          // Nếu có sản phẩm, hiển thị toast và không xóa
+          toast.error("Không thể xóa danh mục vì vẫn còn sản phẩm trong đó!");
+          const modal = document.getElementById("deleteCategory");
+          const bootstrapModal = bootstrap.Modal.getInstance(modal);
+          bootstrapModal.hide();
+          return;
+        }
+
+        // Thực hiện xóa danh mục nếu không có sản phẩm
+        await deleteCategory(categorySelected._id); // Gọi hàm xóa danh mục
+        await fetchCategories(); // Tải lại danh sách danh mục
+        toast.success("Xóa danh mục thành công!"); // Thông báo thành công
+
+        // Đóng modal sau khi xóa
         const modal = document.getElementById("deleteCategory");
         const bootstrapModal = bootstrap.Modal.getInstance(modal);
-        bootstrapModal.hide(); // Đóng modal
+        bootstrapModal.hide();
       } catch (error) {
-        console.error("Xóa màu thất bại:", error);
+        // Hiển thị lỗi nếu xóa thất bại
+        toast.error("Xóa thất bại!");
+        console.error("Xóa thất bại:", error);
       }
     }
   };
 
   return (
     <>
+      <ToastContainer />
       <div className="app-title">
         <ul className="app-breadcrumb breadcrumb side">
           <li className="breadcrumb-item active">

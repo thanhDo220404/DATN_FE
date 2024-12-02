@@ -1,4 +1,5 @@
 "use client";
+import Pagination from "@/app/components/pagination";
 import { deleteProduct, getAllProducts } from "@/app/databases/products";
 import Link from "next/link";
 import { useEffect, useState } from "react";
@@ -6,6 +7,9 @@ import { useEffect, useState } from "react";
 export default function Products() {
   const [listProducts, setListProducts] = useState([]);
   const [productSelected, setProductSelected] = useState(null);
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
 
   const fetchProducts = async () => {
     const result = await getAllProducts();
@@ -39,6 +43,12 @@ export default function Products() {
   const handleReplaceUpdate = (id) => {
     window.location.href = `/admin/san-pham/sua/${id}`;
   };
+
+  const paginatedProducts = listProducts.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+  const totalPages = Math.ceil(listProducts.length / itemsPerPage);
   return (
     <>
       <div className="app-title">
@@ -132,7 +142,7 @@ export default function Products() {
                 </thead>
                 <tbody>
                   {listProducts && listProducts.length > 0 ? (
-                    listProducts.map((product) => {
+                    paginatedProducts.map((product) => {
                       // Lấy item đầu tiên và tổng số lượng variations
                       const firstItem =
                         product.items.length > 0 ? product.items[0] : null;
@@ -230,6 +240,13 @@ export default function Products() {
                   </tr>
                 </tfoot>
               </table>
+              <div>
+                <Pagination
+                  totalPages={totalPages}
+                  currentPage={currentPage}
+                  onPageChange={(pageNumber) => setCurrentPage(pageNumber)}
+                />
+              </div>
             </div>
           </div>
         </div>

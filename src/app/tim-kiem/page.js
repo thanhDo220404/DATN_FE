@@ -9,18 +9,21 @@ import ProductCard from "../components/productCard";
 import SortColor from "../components/sortColor";
 import SortSize from "../components/sortSize";
 import { useSearchParams } from "next/navigation";
-import Link from "next/link";
 import { ToastContainer } from "react-toastify";
+import Pagination from "../components/pagination";
 export default function Search() {
   const searchParams = useSearchParams();
   const keywords = searchParams.get("keywords");
-  console.log(keywords);
+
   const [products, setProducts] = useState([]);
   const [colors, setColors] = useState([]);
   const [sizes, setSizes] = useState([]);
   const [selectedColors, setSelectedColors] = useState([]); // Lưu nhiều màu đã chọn
   const [selectedSizes, setSelectedSizes] = useState([]);
   const [sortOrder, setSortOrder] = useState(""); // Trạng thái cho sắp xếp
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 6; // Số sản phẩm trên mỗi trang
 
   const fetchProducts = async (keywords) => {
     const result = await searchProduct(keywords);
@@ -40,10 +43,10 @@ export default function Search() {
 
   useEffect(() => {
     fetchProducts(keywords);
+    setCurrentPage(1);
     fetchColors();
     fetchSizes();
   }, [keywords]);
-  console.log(products);
 
   // Hàm xử lý khi chọn màu
   const handleColorSelect = (color) => {
@@ -89,22 +92,6 @@ export default function Search() {
 
     return hasColor && hasSize; // Chỉ hiển thị sản phẩm nếu có màu và kích thước được chọn
   });
-  // const filteredProducts = products.filter((product) => {
-  //   // Kiểm tra xem sản phẩm có ít nhất một item với màu và kích thước đã chọn
-  //   const hasValidItem = product.items.some((item) => {
-  //     const colorMatches = selectedColors.length === 0 ||
-  //       selectedColors.some((selectedColor) => selectedColor._id === item.color._id);
-
-  //     const sizeMatches = selectedSizes.length === 0 ||
-  //       item.variations.some((variation) =>
-  //         selectedSizes.some((selectedSize) => selectedSize._id === variation.size._id)
-  //       );
-
-  //     return colorMatches && sizeMatches; // Trả về true nếu item có cả màu và kích thước phù hợp
-  //   });
-
-  //   return hasValidItem; // Chỉ hiển thị sản phẩm nếu có ít nhất một item hợp lệ
-  // });
 
   // Sắp xếp sản phẩm theo giá
   const sortedProducts = [...filteredProducts].sort((a, b) => {
@@ -129,6 +116,13 @@ export default function Search() {
     }
     return 0; // Không sắp xếp nếu không có giá trị sắp xếp
   });
+
+  const paginatedProducts = sortedProducts.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
+  const totalPages = Math.ceil(sortedProducts.length / itemsPerPage);
 
   return (
     <>
@@ -220,10 +214,16 @@ export default function Search() {
                   ))}
                 </>
               ) : (
-                // Hiển thị danh sách sản phẩm khi đã tải
-                sortedProducts.map((product) => (
-                  <ProductCard col={4} key={product._id} product={product} />
-                ))
+                <>
+                  {paginatedProducts.map((product) => (
+                    <ProductCard col={4} key={product._id} product={product} />
+                  ))}
+                  <Pagination
+                    totalPages={totalPages}
+                    currentPage={currentPage}
+                    onPageChange={(pageNumber) => setCurrentPage(pageNumber)}
+                  />
+                </>
               )}
             </div>
           </div>

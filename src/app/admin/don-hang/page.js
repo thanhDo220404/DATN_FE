@@ -1,30 +1,40 @@
 "use client";
 import { getAllOrders } from "@/app/databases/order";
+import { getOrderStatuses } from "@/app/databases/order_status";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
 export default function Orders() {
   const [orders, setOrders] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [listOrderStatuses, setListOrderStatues] = useState([]);
+  const [selectedStatus, setSelectedStatus] = useState(null); // Mặc định chọn "Tất cả"
 
-  const fetchOrders = async () => {
+  const fetchOrderStatues = async () => {
+    const result = await getOrderStatuses();
+    setListOrderStatues(result);
+  };
+
+  const fetchOrders = async (statusId = null) => {
     setIsLoading(true);
     const result = await getAllOrders();
-    setOrders(result);
+    // Lọc đơn hàng theo trạng thái nếu có
+    const filteredOrders = statusId
+      ? result.filter((order) => order.order_status._id === statusId)
+      : result;
+    setOrders(filteredOrders); // Cập nhật trạng thái đơn hàng
     setIsLoading(false);
   };
 
   useEffect(() => {
     fetchOrders(); // Gọi hàm fetchOrders khi component mount
+    fetchOrderStatues();
   }, []);
 
-  console.log("this is orders : ", orders);
-
-  const handleDelete = (orderId) => {
-    if (confirm("Bạn có chắc chắn muốn xóa đơn hàng này?")) {
-      // Thực hiện logic xóa đơn hàng ở đây
-      console.log("Xóa đơn hàng với ID:", orderId);
-    }
+  // Hàm xử lý khi người dùng chọn trạng thái
+  const handleOrderStatus = (statusId) => {
+    setSelectedStatus(statusId); // Cập nhật trạng thái đã chọn
+    fetchOrders(statusId); // Lọc đơn hàng theo trạng thái đã chọn
   };
 
   return (
@@ -39,7 +49,39 @@ export default function Orders() {
         </ul>
         <div id="clock" />
       </div>
-      <div className="row">
+      <div className="bg-white position-sticky top-0 shadow-sm">
+        <div className="d-flex justify-content-between fs-6">
+          {/* Tạo riêng div cho "Tất cả" */}
+          <div
+            className={`p-3 flex-shrink-0 ${
+              selectedStatus === null
+                ? "border-primary border-bottom border-3 "
+                : ""
+            }`}
+            style={{ cursor: "pointer" }}
+            onClick={() => handleOrderStatus(null)} // Khi bấm "Tất cả" thì hiển thị tất cả đơn hàng
+          >
+            Tất cả
+          </div>
+
+          {/* Hiển thị các trạng thái còn lại từ listOrderStatuses */}
+          {listOrderStatuses.map((status, index) => (
+            <div
+              key={index}
+              className={`p-3 flex-grow-1 text-center ${
+                selectedStatus === status._id
+                  ? "border-bottom border-primary border-3"
+                  : ""
+              }`}
+              style={{ cursor: "pointer" }}
+              onClick={() => handleOrderStatus(status._id)} // Xử lý khi bấm vào trạng thái
+            >
+              {status.name}
+            </div>
+          ))}
+        </div>
+      </div>
+      <div className="row mt-3">
         <div className="col-md-12">
           <div className="tile">
             <div className="tile-body">

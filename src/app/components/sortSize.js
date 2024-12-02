@@ -4,7 +4,7 @@ const SortSize = ({ sizes, selectedSizes, onSizeSelect }) => {
   return (
     <div>
       <div className="fs-3">Kích cỡ</div>
-      <div className="d-flex flex-wrap gap-3 py-3">
+      <div className="d-flex flex-wrap gap-2 py-3">
         {sizes.length > 0 ? (
           sizes.map((size, index) => (
             <div

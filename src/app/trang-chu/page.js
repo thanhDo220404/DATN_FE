@@ -149,7 +149,7 @@ export default function HomePage() {
       {/* Product Categories */}
       <div className="container mt-5">
         <div className="row product-category">
-          {categories.map((category, index) => {
+          {categories.slice(0, 4).map((category, index) => {
             // Tìm sản phẩm đầu tiên có category._id trùng với category._id hiện tại
             const productInCategory = products.find(
               (product) => product.category._id === category._id
@@ -184,7 +184,7 @@ export default function HomePage() {
 
       {/* Featured Products */}
       <div className="container mt-5 text-start">
-        <h3 className="product-title">Sản Phẩm Nổi Bật</h3>
+        <h3 className="product-title">Sản Phẩm Mới</h3>
 
         <div className="row featured-products">
           {products.length === 0 ? (
@@ -306,7 +306,7 @@ export default function HomePage() {
           ) : (
             // Hiển thị danh sách sản phẩm có view cao nhất
             products
-              .sort((a, b) => b.views - a.views) // Sắp xếp sản phẩm theo lượt xem từ cao đến thấp
+              .sort((a, b) => b.view - a.view) // Sắp xếp sản phẩm theo lượt xem từ cao đến thấp
               .slice(0, 4) // Lấy 4 sản phẩm đầu tiên
               .map((product) => (
                 <ProductCard col={3} key={product._id} product={product} />

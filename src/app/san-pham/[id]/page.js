@@ -315,6 +315,7 @@ export default function ProductDetail({ params }) {
         relatedProduct.category._id === product.category._id &&
         relatedProduct._id !== product._id
     )
+    .sort(() => Math.random() - 0.5)
     .slice(0, 4); // Giới hạn hiển thị 4 sản phẩm
 
   return (
