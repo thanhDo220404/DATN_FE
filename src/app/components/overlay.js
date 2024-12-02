@@ -1,4 +1,4 @@
-export default function Overlay() {
+export default function Overlay({ onClose }) {
   return (
     <>
       <div
@@ -7,6 +7,7 @@ export default function Overlay() {
           top: 0,
           left: 0,
         }}
+        onClick={onClose} // Gọi hàm onClick khi nhấn vào overlay
       />
     </>
   );

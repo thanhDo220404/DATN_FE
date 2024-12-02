@@ -1,0 +1,31 @@
+/* VoucherManagement.module.css */
+
+.container-fluid {
+  padding: 20px;
+}
+
+.card-header {
+  background-color: #f8f9fc;
+}
+
+.table {
+  margin-top: 20px;
+}
+
+.modal-content {
+  border-radius: 8px;
+}
+
+.btn-primary {
+  background-color: #4e73df;
+  border-color: #4e73df;
+}
+
+.btn-primary:hover {
+  background-color: #2e59d9;
+  border-color: #2653d4;
+}
+
+.alert {
+  margin-top: 10px;
+}

@@ -13,7 +13,7 @@ const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
 const Alert = ({ message, countdown, onClose }) => (
   <div
-    className="alert alert-light border border-success position-absolute shadow-lg"
+    className="alert alert-light w-25 border border-success position-absolute shadow-lg"
     role="alert"
     style={{
       top: "20%",
@@ -29,9 +29,6 @@ const Alert = ({ message, countdown, onClose }) => (
     </div>
     <p>{message}</p>
     <hr />
-    <p className="my-3 fs-3 text-danger">
-      Hãy kiểm tra email và xác nhận tài khoản
-    </p>
     <p className="mb-0">Thời gian còn lại: {countdown} giây</p>
     <div className="position-absolute w-100 h-100 top-0 start-0">
       <div
@@ -80,11 +77,7 @@ export default function Register() {
     const token = getCookie("LOGIN_INFO");
     if (token) {
       console.log("Người dùng đã đăng nhập, điều hướng về trang trước đó...");
-      if (window.history.length > 1) {
-        window.history.back(); // Nếu có lịch sử điều hướng, quay lại trang trước
-      } else {
-        window.location.href = "/"; // Nếu không có lịch sử, quay về trang chủ
-      }
+      window.location.href = "/user/tai-khoan"; // Nếu không có lịch sử, quay về trang chủ
     }
   }, []);
 
@@ -121,8 +114,17 @@ export default function Register() {
 
   return (
     <div className="container row m-auto text-center position-relative my-5 p-sm-5">
-      {/* Overlay làm mờ khi hiển thị Alert */}
-      {showAlert && <Overlay />}
+      {/* Hiển thị thông báo thành công */}
+      {showAlert && (
+        <>
+          <Overlay />
+          <Alert
+            message="Bạn đã đăng ký thành công tài khoản."
+            countdown={countdown}
+            onClose={() => setShowAlert(false)}
+          />
+        </>
+      )}
       <div className="col border border-dark p-sm-5 p-3">
         <h1>Đăng ký</h1>
         <form onSubmit={handleSubmit(onSubmit)}>
@@ -219,15 +221,6 @@ export default function Register() {
           )}
         </form>
 
-        {/* Hiển thị thông báo thành công */}
-        {showAlert && (
-          <Alert
-            message="Bạn đã đăng ký thành công tài khoản."
-            countdown={countdown}
-            onClose={() => setShowAlert(false)}
-          />
-        )}
-
         {/* Liên kết tới trang đăng nhập */}
         <div className="row mb-3">
           <div className="col">
@@ -247,7 +240,7 @@ export default function Register() {
         </Link>
       </div>
       <div className="col border border-dark d-none d-md-flex">
-        <img src="/images/logo4x.png" alt="Logo" className="w-50 m-auto" />
+        <img src="/images/logocolor.png" alt="Logo" className="w-50 m-auto" />
       </div>
     </div>
   );

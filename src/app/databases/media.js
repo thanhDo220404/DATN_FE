@@ -1,4 +1,4 @@
-export { insertMedia, getAllMedia };
+export { insertMedia, getAllMedia, deleteMedia };
 const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
 const getAllMedia = async () => {
@@ -26,6 +26,18 @@ const insertMedia = async (file) => {
 
   if (!response.ok) {
     throw new Error("Lỗi khi upload file");
+  }
+
+  return await response.json();
+};
+
+const deleteMedia = async (id) => {
+  const response = await fetch(`${apiUrl}/media/${id}`, {
+    method: "DELETE",
+  });
+
+  if (!response.ok) {
+    throw new Error("Lỗi khi xóa file");
   }
 
   return await response.json();

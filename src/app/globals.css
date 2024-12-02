@@ -143,7 +143,7 @@ table {
   width: 696px;
   height: 600px;
   object-fit: cover; /* Đảm bảo hình ảnh vừa khít khung */
-  margin: 20px auto; /* Thêm khoảng cách margin top và bottom */
+  margin: auto; /* Thêm khoảng cách margin top và bottom */
 }
 
 /* CSS cho danh mục và sản phẩm */
@@ -265,7 +265,7 @@ table {
 .thumbnail-images {
   /* Sắp xếp các ảnh phụ theo chiều ngang và cách đều nhau */
   display: flex;
-  justify-content: space-between;
+  gap: 5px;
   margin-top: 15px;
 }
 
@@ -282,25 +282,16 @@ table {
   /* Khi hover vào ảnh phụ, đổi màu viền */
   border-color: #000;   
 }
+.thumbnail-images img.active {
+  /* Khi hover vào ảnh phụ, đổi màu viền */
+  border-color: #000;   
+}
 
 .details-section {
   /* Thiết lập đường viền trên cùng và khoảng cách với các thành phần khác */
   border-top: 1px solid #ddd;
   margin-top: 20px;   
   padding-top: 20px;  
-}
-
-.price {
-  /* Định dạng cho giá sản phẩm */
-  font-size: 1.5rem; /* Kích thước chữ lớn cho giá hiện tại */
-  font-weight: bold;  
-  color: #ff0000;   
-}
-
-.old-price {
-  /* Định dạng cho giá gạch bỏ (giá cũ) */
-  text-decoration: line-through;  
-  color: #888;  
 }
 
 .btn-custom {
@@ -611,30 +602,7 @@ table {
 /* styles/checkout.css */
 
 /* Nút "Tiến hành thanh toán" */
-.btn-primary {
-  background-color:yellow; /* Màu nền nút */
-  color: black; /* Màu chữ */
-  border: none; /* Không viền */
-  padding: 10px 20px; /* Khoảng cách bên trong */
-  font-size: 16px; /* Kích thước chữ */
-  border-radius: 5px; 
-  cursor: pointer; /* Con trỏ chuột */
-  transition: background-color 0.3s ease, transform 0.2s ease; 
-  width: 500px;
-  margin-left: 19px;
-  margin-top: 50px;
- 
-}
 
-/* Thay đổi màu khi di chuột */
-.btn-primary:hover {
-  background-color: #324B4D; /* Màu nền khi di chuột */
-}
-
-/* Hiệu ứng khi nhấn nút */
-.btn-primary:active {
-  transform: scale(0.95); /* Nhỏ lại khi nhấn */
-}
 
 /* Định dạng cho nhóm phương thức thanh toán và đơn vị vận chuyển */
 .payment-method-group,

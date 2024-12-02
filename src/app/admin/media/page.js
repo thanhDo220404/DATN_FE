@@ -1,9 +1,13 @@
 "use client";
-import { insertMedia, getAllMedia } from "@/app/databases/media";
+import { insertMedia, getAllMedia, deleteMedia } from "@/app/databases/media";
+import Link from "next/link";
 import { useEffect, useState } from "react";
+const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
 export default function Media() {
   const [dataMedia, setDataMedia] = useState([]);
+  const [dataOneMedia, setDataOneMedia] = useState({});
+  const [showModal, setShowModal] = useState(false);
 
   // Hàm xử lý khi chọn file
   const handleFileSelect = async (event) => {
@@ -18,6 +22,33 @@ export default function Media() {
       console.error("Lỗi khi upload file:", error);
     }
   };
+  const handleSetDataOneMedia = (data) => {
+    setDataOneMedia(data);
+    setShowModal(true);
+  };
+
+  const handleCloseModal = async () => {
+    setShowModal(false);
+  };
+
+  const formatDate = (dateString) => {
+    return new Intl.DateTimeFormat("vi-VN", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+    }).format(new Date(dateString));
+  };
+  const formatFileSize = (bytes) => {
+    if (bytes < 1024) {
+      return `${bytes} B`; // Byte nếu kích thước dưới 1KB
+    } else if (bytes < 1024 * 1024) {
+      return `${(bytes / 1024).toFixed(2)} KB`; // KB nếu kích thước dưới 1MB
+    } else {
+      return `${(bytes / (1024 * 1024)).toFixed(2)} MB`; // MB nếu kích thước từ 1MB trở lên
+    }
+  };
 
   // Hàm lấy danh sách media
   const fetchMedia = async () => {
@@ -25,13 +56,112 @@ export default function Media() {
     setDataMedia(result);
   };
 
+  const handleDelete = async (id) => {
+    // Xác nhận hành động xóa từ người dùng
+    const isConfirmed = window.confirm("Bạn có chắc chắn muốn xóa media này?");
+
+    if (!isConfirmed) {
+      return; // Nếu người dùng không xác nhận, dừng lại
+    }
+
+    try {
+      // Gọi API để xóa media
+      const result = await deleteMedia(id);
+
+      // Cập nhật lại danh sách media sau khi xóa
+      await fetchMedia();
+
+      // Đóng modal nếu có
+      setShowModal(false);
+    } catch (error) {
+      // Xử lý lỗi nếu có
+      console.error("Lỗi khi xóa media:", error);
+      alert("Đã có lỗi xảy ra khi xóa media. Vui lòng thử lại.");
+    }
+  };
+
   useEffect(() => {
     fetchMedia();
   }, []);
+  console.log("thís is one media data", dataOneMedia);
 
   return (
     <>
-      <div className="py-3">
+      {showModal ? (
+        <>
+          <div className="position-relative w-100 h-100">
+            <div
+              className="position-fixed top-0 start-0 w-100 h-100 bg-black opacity-25"
+              style={{ zIndex: 200 }}
+            ></div>
+            <div
+              className="position-fixed top-0 start-0 w-100 h-100 p-4"
+              style={{ zIndex: 500 }}
+            >
+              <div className="w-100 h-100 bg-white p-3">
+                <div>
+                  <div className="float-start fs-4 mb-3 fw-bold">
+                    Chi tiết tệp đính kèm
+                  </div>
+                  <div className="float-end">
+                    <button
+                      className="btn-close"
+                      onClick={handleCloseModal}
+                    ></button>
+                  </div>
+                </div>
+                <div className="row w-100">
+                  <div className="col-8 text-center">
+                    <img
+                      src={dataOneMedia.filePath}
+                      alt={dataOneMedia.fileName}
+                      height={600}
+                    />
+                  </div>
+                  <div className="col-4">
+                    <div className="d-flex flex-column">
+                      <div className="w-100">
+                        <p>
+                          <span className="fw-bold">Đã tải lên vào lúc:</span>{" "}
+                          {formatDate(dataOneMedia.createdAt)}
+                        </p>
+                        <p>
+                          <span className="fw-bold">Tên tệp tin:</span>{" "}
+                          {dataOneMedia.fileName}
+                        </p>
+                        <p>
+                          <span className="fw-bold">Loại tệp tin:</span>{" "}
+                          {dataOneMedia.fileType}
+                        </p>
+                        <p>
+                          <span className="fw-bold">Dung lượng tệp:</span>{" "}
+                          {formatFileSize(dataOneMedia.fileSize)}
+                        </p>
+                      </div>
+                      <div className="w-100">
+                        <Link
+                          className="text-primary"
+                          href={`${apiUrl}/img/media/${dataOneMedia.fileName}`}
+                        >
+                          Xem tệp tin
+                        </Link>{" "}
+                        |{" "}
+                        <button
+                          className="text-danger"
+                          onClick={() => handleDelete(dataOneMedia._id)}
+                        >
+                          Xóa vĩnh viễn
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </>
+      ) : null}
+      <div className="p-3">
         <div className="d-flex">
           <h3>Media</h3>
           {/* Input file ẩn */}
@@ -53,7 +183,7 @@ export default function Media() {
         </div>
 
         {/* Khu vực hiển thị danh sách media */}
-        <div className="rounded bg-white my-3">
+        <div className="rounded my-3">
           <div className="d-flex flex-wrap">
             {dataMedia.length > 0 ? (
               dataMedia.map((media, index) => (
@@ -61,9 +191,10 @@ export default function Media() {
                   key={index}
                   className="media-item"
                   style={{ width: "150px", height: "150px" }}
+                  onClick={() => handleSetDataOneMedia(media)}
                 >
                   <img
-                    src={media.filePath} // Đường dẫn tới file ảnh
+                    src={media.filePath} // Đường d ẫn tới file ảnh
                     alt={media.fileName}
                     className="img-thumbnail"
                     style={{
@@ -75,7 +206,12 @@ export default function Media() {
                 </div>
               ))
             ) : (
-              <p>Chưa có media nào.</p>
+              <div
+                className="m-auto fs-1 text-primary"
+                style={{ height: "500px" }}
+              >
+                Chưa có media nào.
+              </div>
             )}
           </div>
         </div>
