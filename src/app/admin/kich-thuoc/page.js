@@ -119,9 +119,6 @@ export default function Sizes() {
               >
                 <thead>
                   <tr>
-                    <th width={10}>
-                      <input type="checkbox" id="all" />
-                    </th>
                     <th width={300}>ID</th>
                     <th width={250}>Tên</th>
                     <th width={150}>Giá trị</th>{" "}
@@ -132,13 +129,6 @@ export default function Sizes() {
                 <tbody>
                   {listSizes.map((size, index) => (
                     <tr key={index}>
-                      <td width={10}>
-                        <input
-                          type="checkbox"
-                          name={`check${index}`}
-                          defaultValue={index}
-                        />
-                      </td>
                       <td>{size._id}</td> {/* ID của kích thước */}
                       <td>{size.name}</td>
                       <td>{size.value}</td> {/* Giá trị của kích thước */}

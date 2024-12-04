@@ -103,6 +103,11 @@ export default function Cart() {
   const handleDelete = async (id) => {
     // await deleteCart(id);
     dispatch(removeProductFromCart(id));
+    // Cập nhật listCheckout
+    setListCheckout((prevList) =>
+      prevList.filter((checkoutItem) => checkoutItem._id !== id)
+    );
+
     if (payload && payload._id) {
       fetchCart(payload._id);
     }
@@ -152,7 +157,10 @@ export default function Cart() {
         checkoutItem._id === cartId
           ? {
               ...checkoutItem,
-              quantity: newQuantity, // Cập nhật số lượng trong listCheckout
+              product: {
+                ...checkoutItem.product,
+                quantity: newQuantity, // Cập nhật số lượng bên trong product
+              },
             }
           : checkoutItem
       );
@@ -196,14 +204,6 @@ export default function Cart() {
   useEffect(() => {
     setIsAllChecked(listCheckout.length === carts.length && carts.length > 0);
   }, [listCheckout, carts.length]);
-
-  // const totalPrice = carts.reduce(
-  //   (total, item) =>
-  //     total +
-  //     (item.product.items.price - item.product.items.discount) *
-  //       item.product.quantity,
-  //   0
-  // );
 
   const totalCheckoutPrice = listCheckout.reduce(
     (total, item) =>

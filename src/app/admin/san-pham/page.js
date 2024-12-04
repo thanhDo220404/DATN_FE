@@ -76,47 +76,6 @@ export default function Products() {
                     Thêm sản phẩm
                   </Link>
                 </div>
-                <div className="col-sm-2">
-                  <a
-                    className="btn btn-delete btn-sm nhap-tu-file"
-                    type="button"
-                    title="Nhập"
-                  >
-                    <i className="bi bi-file-earmark-arrow-up" /> Tải từ file
-                  </a>
-                </div>
-                <div className="col-sm-2">
-                  <a
-                    className="btn btn-delete btn-sm print-file"
-                    type="button"
-                    title="In"
-                  >
-                    <i className="bi bi-printer" /> In dữ liệu
-                  </a>
-                </div>
-                <div className="col-sm-2">
-                  <a
-                    className="btn btn-delete btn-sm print-file js-textareacopybtn"
-                    type="button"
-                    title="Sao chép"
-                  >
-                    <i className="bi bi-clipboard" /> Sao chép
-                  </a>
-                </div>
-                <div className="col-sm-2">
-                  <a className="btn btn-excel btn-sm" href="" title="In">
-                    <i className="bi bi-file-earmark-spreadsheet" /> Xuất Excel
-                  </a>
-                </div>
-                <div className="col-sm-2">
-                  <a
-                    className="btn btn-delete btn-sm pdf-file"
-                    type="button"
-                    title="In"
-                  >
-                    <i className="bi bi-file-earmark-pdf" /> Xuất PDF
-                  </a>
-                </div>
               </div>
               <table
                 className="table table-hover table-bordered js-copytextarea"
@@ -127,9 +86,6 @@ export default function Products() {
               >
                 <thead>
                   <tr>
-                    <th width={10}>
-                      <input type="checkbox" id="all" />
-                    </th>
                     <th>Mã sản phẩm</th>
                     <th width={150}>Tên</th>
                     <th width={20}>Ảnh</th>
@@ -159,12 +115,6 @@ export default function Products() {
 
                       return (
                         <tr key={product._id}>
-                          <td width={10}>
-                            <input
-                              type="checkbox"
-                              name={`check_${product._id}`}
-                            />
-                          </td>
                           <td>{product._id}</td>
                           <td>{product.name}</td>
                           <td>
@@ -226,9 +176,6 @@ export default function Products() {
                 </tbody>
                 <tfoot>
                   <tr>
-                    <th width={10}>
-                      <input type="checkbox" id="all" />
-                    </th>
                     <th>Mã sản phẩm</th>
                     <th width={150}>tên</th>
                     <th width={20}>Ảnh</th>

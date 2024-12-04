@@ -9,12 +9,15 @@ import { getCookie } from "@/app/lib/CookieManager";
 import { useEffect, useState } from "react";
 import Link from "next/link"; // Đừng quên import Link
 import { getOrderStatuses } from "@/app/databases/order_status";
+import Rating from "react-rating-stars-component";
 
 export default function Purchure() {
   const [payload, setPayload] = useState(null);
   const [orders, setOrders] = useState([]);
   const [listOrderStatuses, setListOrderStatues] = useState([]);
   const [selectedStatus, setSelectedStatus] = useState(null); // Mặc định chọn "Tất cả"
+  const [currentReviewOrder, setCurrentReviewOrder] = useState(null);
+  const [reviewData, setReviewData] = useState([]); // Để lưu dữ liệu review
 
   const fetchOrders = async (userId, statusId = null) => {
     const result = await getOrdersByUserId(userId);
@@ -50,6 +53,65 @@ export default function Purchure() {
   const handleOrderStatus = (statusId) => {
     setSelectedStatus(statusId); // Cập nhật trạng thái đã chọn
     fetchOrders(payload._id, statusId); // Lọc đơn hàng theo trạng thái đã chọn
+  };
+
+  const handleReview = (orderData) => {
+    setCurrentReviewOrder(orderData);
+
+    // Khởi tạo mảng chứa các review cho từng sản phẩm
+    const initialReviewData = orderData.products.map((product) => ({
+      product: product, // Lưu ID sản phẩm
+      rating: 1, // Đánh giá mặc định là 1
+      comment: "", // Bình luận mặc định là rỗng
+    }));
+
+    setReviewData(initialReviewData);
+    console.log(initialReviewData);
+  };
+
+  const submitReview = () => {
+    console.log("Review Data:", reviewData);
+    setCurrentReviewOrder(null); // Đóng modal
+  };
+
+  const handleRatingChange = (product, newRating) => {
+    setReviewData((prev) =>
+      prev.map((review) => {
+        if (review.product._id === product._id) {
+          // Kiểm tra nếu sản phẩm trùng khớp và cập nhật rating
+          if (
+            review.product.items._id === product.items._id &&
+            review.product.items.variations._id === product.items.variations._id
+          ) {
+            return {
+              ...review,
+              rating: newRating, // Cập nhật rating cho sản phẩm
+            };
+          }
+        }
+        return review;
+      })
+    );
+  };
+
+  const handleCommentChange = (product, newComment) => {
+    setReviewData((prev) =>
+      prev.map((review) => {
+        if (review.product._id === product._id) {
+          // Kiểm tra nếu sản phẩm trùng khớp và cập nhật comment
+          if (
+            review.product.items._id === product.items._id &&
+            review.product.items.variations._id === product.items.variations._id
+          ) {
+            return {
+              ...review,
+              comment: newComment, // Cập nhật comment cho sản phẩm
+            };
+          }
+        }
+        return review;
+      })
+    );
   };
 
   useEffect(() => {
@@ -99,26 +161,26 @@ export default function Purchure() {
             </div>
           </div>
           {orders.length > 0 ? (
-            orders.map((order) => (
-              <div className="bg-white mt-3 p-3" key={order._id}>
+            orders.map((order, index) => (
+              <div className="bg-white mt-3 p-3" key={index}>
                 <div className="text-end text-success fs-6">
                   <i className="bi bi-truck"></i> {order.order_status.name}
                 </div>
                 <table className="table align-middle">
                   <tbody>
-                    {order.products.map((cartItem, index) => {
+                    {order.products.map((product, index) => {
                       const price =
-                        cartItem.items.price *
-                        (1 - cartItem.items.discount / 100);
+                        product.items.price *
+                        (1 - product.items.discount / 100);
 
                       return (
-                        <tr key={cartItem._id} className="border-bottom">
+                        <tr key={index} className="border-bottom">
                           <td>
-                            <Link href={`/san-pham/${cartItem._id}`}>
+                            <Link href={`/san-pham/${product._id}`}>
                               <div className="d-flex align-items-center">
                                 <img
-                                  src={cartItem.items.image.mediaFilePath}
-                                  alt={cartItem.name}
+                                  src={product.items.image.mediaFilePath}
+                                  alt={product.name}
                                   className="rounded me-3"
                                   style={{
                                     width: "60px",
@@ -127,18 +189,16 @@ export default function Purchure() {
                                   }}
                                 />
                                 <div className="fs-6">
-                                  <p className="mb-0 fw-bold">
-                                    {cartItem.name}
-                                  </p>
+                                  <p className="mb-0 fw-bold">{product.name}</p>
                                   <p className="mb-0">
                                     <small className="text-muted">
-                                      {cartItem.items.color.colorName} -{" "}
-                                      {cartItem.items.variations.size.sizeName}
+                                      {product.items.color.colorName} -{" "}
+                                      {product.items.variations.size.sizeName}
                                     </small>
                                   </p>
                                   <p className="mb-0">
                                     <small className="text-muted">
-                                      x {cartItem.quantity}
+                                      x {product.quantity}
                                     </small>
                                   </p>
                                 </div>
@@ -146,9 +206,9 @@ export default function Purchure() {
                             </Link>
                           </td>
                           <td className="text-end fs-6">
-                            {cartItem.items.discount > 0 && (
+                            {product.items.discount > 0 && (
                               <del className="me-2 text-secondary">
-                                {cartItem.items.price.toLocaleString()} ₫
+                                {product.items.price.toLocaleString()} ₫
                               </del>
                             )}
                             {price.toLocaleString()} ₫
@@ -199,7 +259,9 @@ export default function Purchure() {
                     <div className="text-end mt-3">
                       <button
                         className="btn btn-warning"
-                        onClick={() => handleReview(order._id)} // Handle review function
+                        data-bs-toggle="modal"
+                        data-bs-target="#createReviewModal"
+                        onClick={() => handleReview(order)} // Handle review function
                       >
                         Đánh giá
                       </button>
@@ -229,46 +291,97 @@ export default function Purchure() {
           )}
         </div>
       </div>
-      <button
-        type="button"
-        className="btn btn-primary"
-        data-bs-toggle="modal"
-        data-bs-target="#exampleModal"
-      >
-        Launch demo modal
-      </button>
 
+      {/* Modal đánh giá */}
       <div
         className="modal fade"
-        id="exampleModal"
-        tabindex="-1"
+        id="createReviewModal"
+        tabIndex="-1"
         aria-labelledby="exampleModalLabel"
         aria-hidden="true"
+        style={{ backgroundColor: "rgba(0, 0, 0, 0.5)" }}
       >
-        <div className="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg">
+        <div className="modal-dialog modal-dialog-centered modal-dialog-scrollable">
           <div className="modal-content">
             <div className="modal-header">
-              <h1 className="modal-title fs-5" id="exampleModalLabel">
-                Modal title
-              </h1>
+              <h5 className="modal-title">Đánh giá sản phẩm</h5>
               <button
                 type="button"
                 className="btn-close"
                 data-bs-dismiss="modal"
                 aria-label="Close"
+                onClick={() => setCurrentReviewOrder(null)}
               ></button>
             </div>
-            <div className="modal-body">...</div>
+            {currentReviewOrder ? (
+              <div className="modal-body">
+                {currentReviewOrder.products.map((product, index) => (
+                  <div key={index} className="mb-4">
+                    <div className="d-flex align-items-center mb-2">
+                      <img
+                        src={product.items.image.mediaFilePath}
+                        alt={product.name}
+                        className="rounded me-3"
+                        style={{
+                          width: "60px",
+                          height: "60px",
+                          objectFit: true,
+                        }}
+                      />
+                      <div>
+                        <p className="mb-0 fw-bold">{product.name}</p>
+                        <small className="text-muted">
+                          Phân loại sản phẩm : {product.items.color.colorName} -{" "}
+                          {product.items.variations.size.sizeName}
+                        </small>
+                      </div>
+                    </div>
+                    <div className="row">
+                      <div className="col-5 my-auto">Chất lượng sản phẩm</div>
+                      <div className="col-6">
+                        <Rating
+                          count={5}
+                          size={20}
+                          value={reviewData[product]?.rating || 1}
+                          emptyIcon={<i className="bi bi-star"></i>}
+                          halfIcon={<i className="bi bi-star-half"></i>}
+                          filledIcon={<i className="bi bi-star-fill"></i>}
+                          onChange={(newRating) =>
+                            handleRatingChange(product, newRating)
+                          }
+                        />
+                      </div>
+                    </div>
+                    <textarea
+                      className="form-control mt-2"
+                      placeholder="Viết đánh giá của bạn..."
+                      // value={reviewData[product]?.comment || ""}
+                      onChange={(e) =>
+                        handleCommentChange(product, e.target.value)
+                      }
+                    ></textarea>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center">Không có dữ liệu đánh giá</div>
+            )}
+
             <div className="modal-footer">
               <button
                 type="button"
                 className="btn btn-secondary"
                 data-bs-dismiss="modal"
+                onClick={() => setCurrentReviewOrder(null)}
               >
-                Close
+                Đóng
               </button>
-              <button type="button" className="btn btn-primary">
-                Save changes
+              <button
+                type="button"
+                className="btn btn-primary"
+                onClick={submitReview}
+              >
+                Gửi đánh giá
               </button>
             </div>
           </div>
