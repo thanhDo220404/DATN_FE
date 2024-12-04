@@ -159,8 +159,10 @@ export default function UpdateProduct({ params }) {
             />
             <label htmlFor="productName">Tên sản phẩm</label>
           </div>
-          <div className="mb-3">
-            <label htmlFor="productDescription">Mô tả sản phẩm</label>
+          <div className="mb-3 bg-white p-3">
+            <label htmlFor="productDescription" className="fw-bold">
+              Mô tả sản phẩm
+            </label>
             <CustomEditor
               value={product.description}
               onChange={(content) =>
@@ -192,13 +194,13 @@ export default function UpdateProduct({ params }) {
           {items.map((item, itemIndex) => (
             <div key={itemIndex} className="border p-3 mb-3 bg-white">
               <div className="d-flex align-items-center">
-                <h5>Mặt Hàng {itemIndex + 1}</h5>
+                <h5>Màu Sắc {itemIndex + 1}</h5>
                 <button
                   type="button"
                   className="btn btn-danger ms-2"
-                  onClick={() => handleRemoveItem(itemIndex)} // Nút để xóa mặt hàng
+                  onClick={() => handleRemoveItem(itemIndex)} // Nút để xóa Màu Sắc
                 >
-                  Xóa Mặt Hàng
+                  Xóa Màu Sắc
                 </button>
               </div>
               <div className="form-floating mb-3">
@@ -285,15 +287,15 @@ export default function UpdateProduct({ params }) {
                     {item.variations.map((variation, variationIndex) => (
                       <div key={variationIndex} className="mb-3">
                         <div className="d-flex align-items-center">
-                          <h6>Biến thể {variationIndex + 1}</h6>
+                          <h6>Kích Thước {variationIndex + 1}</h6>
                           <button
                             type="button"
                             className="btn btn-danger ms-2"
                             onClick={() =>
                               handleRemoveVariation(itemIndex, variationIndex)
-                            } // Nút để xóa biến thể
+                            } // Nút để xóa Kích Thước
                           >
-                            Xóa Biến Thể
+                            Xóa Kích Thước
                           </button>
                         </div>
                         <div className="form-floating mb-3">
@@ -354,7 +356,7 @@ export default function UpdateProduct({ params }) {
                       className="btn btn-secondary"
                       onClick={() => handleAddVariation(itemIndex)}
                     >
-                      Thêm biến thể
+                      Thêm Kích Thước
                     </button>
                   </div>
 
@@ -389,7 +391,7 @@ export default function UpdateProduct({ params }) {
             className="btn btn-secondary mb-3"
             onClick={handleAddItem}
           >
-            Thêm mặt hàng
+            Thêm Màu Sắc
           </button>
           <div className="row">
             <div className="col-12">

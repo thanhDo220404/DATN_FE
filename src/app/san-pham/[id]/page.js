@@ -127,7 +127,19 @@ export default function ProductDetail({ params }) {
   // Hàm xử lý khi chọn màu
   const handleColorSelect = (item) => {
     setSelectedItem(item);
-    setSelectedVariation(item.variations[0]);
+    if (item.variations[0].quantity <= 0) {
+      const availableVariation = item.variations.find(
+        (variation) => variation.quantity > 0
+      );
+
+      if (availableVariation) {
+        setSelectedVariation(availableVariation);
+      } else {
+        console.log("Không có variation nào khả dụng.");
+      }
+    } else {
+      setSelectedVariation(item.variations[0]);
+    }
     setQuantity(1); // Đặt lại số lượng về 1
 
     // Cập nhật productData với selectedItem và selectedVariation
@@ -303,12 +315,6 @@ export default function ProductDetail({ params }) {
         (total, variation) => total + variation.quantity,
         0
       );
-  // console.log("this is product: ", product);
-  // console.log("this is item: ", selectedItem);
-  // console.log("this is variation: ", selectedVariation);
-  // console.log("this is productData: ", productData);
-  // console.log("this is products : ", products);
-  // Lọc sản phẩm liên quan, loại bỏ sản phẩm hiện tại
   const relatedProducts = products
     .filter(
       (relatedProduct) =>
@@ -321,7 +327,7 @@ export default function ProductDetail({ params }) {
   return (
     <div className="container mt-5">
       <ToastContainer /> {/* Thêm ToastContainer vào đây */}
-      <div className="row">
+      <div className="row bg-white p-4">
         <div className="col-md-6">
           <div className="product-image">
             <img
@@ -404,7 +410,7 @@ export default function ProductDetail({ params }) {
                   .map((variation) => (
                     <button
                       key={variation.size._id}
-                      className={`my-size-items me-3 ${
+                      className={`my-size-items me-3 shadow-sm border ${
                         selectedVariation &&
                         selectedVariation._id === variation._id
                           ? "active"
@@ -474,8 +480,8 @@ export default function ProductDetail({ params }) {
           </button>
         </div>
       </div>
-      <div className="details-section row mt-4">
-        <div className="col-md-6">
+      <div className="details-section row my-4 bg-white p-3">
+        <div className="col-md-12">
           <div className="product-description">
             <h4>Mô tả sản phẩm</h4>
             <div
