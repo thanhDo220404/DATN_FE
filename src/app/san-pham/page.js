@@ -20,11 +20,12 @@ export default function Products() {
   const [sortOrder, setSortOrder] = useState(""); // Trạng thái cho sắp xếp
 
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 6; // Số sản phẩm trên mỗi trang
+  const itemsPerPage = 6; // Số sản phẩm hiển thị trên mỗi trang
 
+    
   const fetchProducts = async () => {
     const result = await getAllProducts();
-    setProducts(result);
+    setProducts(result);// Cập nhật trạng thái danh sách sản phẩm.
   };
 
   const fetchColors = async () => {
@@ -41,7 +42,7 @@ export default function Products() {
     fetchProducts();
     fetchColors();
     fetchSizes();
-  }, []);
+  }, []); // mảng rỗng để chỉ chạy 1 lần khi cmponet mount
 
   // Hàm xử lý khi chọn màu
   const handleColorSelect = (color) => {
