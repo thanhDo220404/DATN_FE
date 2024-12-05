@@ -184,9 +184,6 @@ export default function Categories() {
               >
                 <thead>
                   <tr>
-                    <th width={10}>
-                      <input type="checkbox" id="all" />
-                    </th>
                     <th width={300}>ID</th>
                     <th width={250}>Tên</th>
                     <th width={250}>Mô tả</th>
@@ -197,13 +194,6 @@ export default function Categories() {
                 <tbody>
                   {listCategories.map((category, index) => (
                     <tr key={index}>
-                      <td width={10}>
-                        <input
-                          type="checkbox"
-                          name={`check${index}`}
-                          defaultValue={index}
-                        />
-                      </td>
                       <td>{category._id}</td> {/* ID của danh mục */}
                       <td>{category.name}</td>
                       <td>{category.description}</td> {/* Mô tả của danh mục */}
