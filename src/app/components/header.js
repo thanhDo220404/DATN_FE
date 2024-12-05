@@ -73,11 +73,65 @@ export default function Header() {
         <nav className="navbar navbar-expand-lg navbar-dark">
           {/* Icons cho mobile */}
           <div className="nav-icons d-flex d-lg-none align-items-center">
-            <Link href="/dang-nhap">
-              <FaUser className="nav-icon text-light fs-5 me-3" />
-            </Link>
-            <Link href="/gio-hang">
-              <FaShoppingCart className="nav-icon text-light fs-5" />
+            {isLoggedIn ? (
+              <div className="dropdown">
+                <Link
+                  className="nav-link"
+                  href="#"
+                  role="button"
+                  data-bs-toggle="dropdown"
+                  aria-expanded="false"
+                >
+                  {userLoginInfo ? (
+                    <img
+                      width="32"
+                      height="32"
+                      className="rounded-circle me-2"
+                      src={`${apiUrl}/img/user/${userLoginInfo.image}`}
+                      alt=""
+                    />
+                  ) : (
+                    <FaUser className="nav-icon text-light fs-5 me-3" />
+                  )}
+                </Link>
+                <ul className="dropdown-menu">
+                  {isAdmin && (
+                    <li>
+                      <a className="dropdown-item" href="/admin">
+                        Quản lý website
+                      </a>
+                    </li>
+                  )}
+                  <li>
+                    <Link
+                      className="dropdown-item"
+                      href="/user/tai-khoan/ho-so"
+                    >
+                      Tài khoản của tôi
+                    </Link>
+                  </li>
+                  <li>
+                    <Link className="dropdown-item" href="/user/don-mua">
+                      Đơn mua
+                    </Link>
+                  </li>
+                  <li>
+                    <button className="dropdown-item" onClick={handleLogout}>
+                      Đăng xuất
+                    </button>
+                  </li>
+                </ul>
+              </div>
+            ) : (
+              <Link href={`/buyer/dang-nhap?next=${pathname}`}>
+                <FaUser className="nav-icon text-light fs-5 me-3" />
+              </Link>
+            )}
+            <Link href="/gio-hang" className="position-relative">
+              <FaShoppingCart className="nav-icon text-light fs-3" />
+              <div className="position-absolute top-0 start-100 translate-middle badge border rounded-circle bg-danger px-2 py-1">
+                <span style={{ fontSize: "12px" }}>{totalItems}</span>
+              </div>
             </Link>
           </div>
 
@@ -139,26 +193,11 @@ export default function Header() {
                   ))}
                 </ul>
               </div>
-              {/* <li className="nav-item">
-                <a className="nav-link d-flex" href="#">
-                  Flash Sale
-                  <img
-                    src="/images/fireFlashSale.png"
-                    width="20px"
-                    alt="Flash Sale"
-                  />
-                </a>
-              </li> */}
               <li className="nav-item">
                 <Link className="nav-link" href="#">
                   Về chúng tôi
                 </Link>
               </li>
-              {/* <li className="nav-item">
-                <Link className="nav-link" href="#">
-                  Hỗ trợ
-                </Link>
-              </li> */}
             </ul>
 
             {/* Form tìm kiếm */}
@@ -233,13 +272,10 @@ export default function Header() {
                 </Link>
               )}
               <Link href="/gio-hang" className="position-relative">
-                <FaShoppingCart className="nav-icon text-light fs-5" />
-                <span
-                  style={{ fontSize: "12px" }}
-                  className="position-absolute top-0 start-100 translate-middle badge border border-light rounded-circle bg-danger p-1"
-                >
-                  {totalItems}
-                </span>
+                <FaShoppingCart className="nav-icon text-light fs-3" />
+                <div className="position-absolute top-0 start-100 translate-middle badge border rounded-circle bg-danger px-2 py-1">
+                  <span style={{ fontSize: "12px" }}>{totalItems}</span>
+                </div>
               </Link>
             </div>
           </div>

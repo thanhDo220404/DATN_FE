@@ -181,32 +181,12 @@ export default function Products() {
               </div>
             </div>
             <div className="row featured-products">
-              {products.length === 0 ? (
+              {paginatedProducts.length <= 0 ? (
                 // Hiển thị 3 placeholder khi không có sản phẩm
                 <>
-                  {Array(3).map((_, index) => (
-                    <div className="col-4" key={index}>
-                      <div className="card" aria-hidden="true">
-                        <img src="" className="card-img-top" alt="..." />
-                        <div className="card-body">
-                          <h5 className="card-title placeholder-glow">
-                            <span className="placeholder col-6"></span>
-                          </h5>
-                          <div className="card-text placeholder-glow">
-                            <span className="placeholder col-7"></span>
-                            <span className="placeholder col-4"></span>
-                            <span className="placeholder col-4"></span>
-                            <span className="placeholder col-6"></span>
-                            <span className="placeholder col-8"></span>
-                          </div>
-                          <a
-                            className="btn btn-primary disabled placeholder col-6"
-                            aria-disabled="true"
-                          ></a>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
+                  <h5 className="fw-bold text-center">
+                    Không tìm thấy sản phẩm phù hợp theo yêu cầu của bạn!
+                  </h5>
                 </>
               ) : (
                 // Hiển thị danh sách sản phẩm khi đã tải

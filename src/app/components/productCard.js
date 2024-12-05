@@ -35,10 +35,8 @@ export default function ProductCard({ product, col }) {
   const handleItemSelect = (item) => {
     setSelectedItem(item); // Cập nhật item được chọn
     setSelectedColorId(item.color._id); // Cập nhật màu đã chọn
-    console.log("this is item: ", item);
   };
 
-  // console.log(selectedItem);
   const discountedPrice =
     selectedItem.price * (1 - selectedItem.discount / 100);
 
@@ -116,8 +114,6 @@ export default function ProductCard({ product, col }) {
           }
         );
       }
-
-      console.log("New Cart Item: ", newCartItem); // Log ra newCartItem
     } else {
       // Chuyển hướng đến trang đăng nhập nếu chưa đăng nhập
       window.location.href = `/buyer/dang-nhap?next=${pathname}`;
@@ -136,8 +132,11 @@ export default function ProductCard({ product, col }) {
             />
           </Link>
 
-          <div className="my-absolute w-100 p-2">
+          <div className="my-absolute w-100 p-4 d-none d-sm-block">
             <div className="w-100 my-backdrop-filter">
+              <div className="fw-bold mb-0 text-center w-100">
+                <span>Thêm nhanh vào giỏ hàng +</span>
+              </div>
               {selectedItem.variations
                 .filter((variation) => variation.quantity > 0) // Lọc các variation có quantity > 0
                 .map((variation, index) => (

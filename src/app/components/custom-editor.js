@@ -81,7 +81,6 @@ function CustomEditor({ value, onChange }) {
               "underline",
               "|",
               "link",
-              "insertImage",
               "insertTable",
               "highlight",
               "blockQuote",

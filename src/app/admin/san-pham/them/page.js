@@ -9,6 +9,7 @@ import { getAllColors } from "@/app/databases/color";
 import { getAllSizes } from "@/app/databases/size";
 import { insertProduct } from "@/app/databases/products";
 import dynamic from "next/dynamic";
+import { toast, ToastContainer } from "react-toastify";
 
 const CustomEditor = dynamic(() => import("@/app/components/custom-editor"), {
   ssr: false,
@@ -75,15 +76,28 @@ export default function AddProduct() {
   };
 
   const handleRemoveVariation = (itemIndex, variationIndex) => {
+    if (items[itemIndex].variations.length <= 1) {
+      toast.warning("Mỗi màu phải có ít nhất một size!");
+      return;
+    }
     const newItems = [...items];
     newItems[itemIndex].variations.splice(variationIndex, 1);
     setItems(newItems);
   };
 
   const handleRemoveItem = (itemIndex) => {
+    if (items.length <= 1) {
+      toast.warning("Mỗi sản phẩm phải có ít nhất một màu!");
+      return;
+    }
     const newItems = [...items];
     newItems.splice(itemIndex, 1);
     setItems(newItems);
+
+    const newImageFilePath = imageFilePath.filter(
+      (_, index) => index !== itemIndex
+    );
+    setImageFilePath(newImageFilePath);
   };
 
   const handleSelectMedia = (media) => {
@@ -110,6 +124,14 @@ export default function AddProduct() {
     const productName = event.target.productName.value;
     const productCategory = event.target.productCategory.value;
 
+    // Kiểm tra từng item có chứa image không rỗng
+    const isValid = items.every((item) => item.image && item.image !== "");
+
+    if (!isValid) {
+      toast.warning("Mỗi màu sản phẩm phải có hình ảnh!");
+      return; // Dừng việc gửi form nếu có item thiếu hình ảnh
+    }
+
     const productData = {
       name: productName,
       description: productDescription,
@@ -123,6 +145,7 @@ export default function AddProduct() {
 
   return (
     <>
+      <ToastContainer></ToastContainer>
       {showMedia ? (
         <>
           <MediaModal
@@ -207,29 +230,6 @@ export default function AddProduct() {
                         ))}
                       </select>
                       <label htmlFor={`color-${itemIndex}`}>Màu sắc</label>
-                    </div>
-
-                    <div className="form-floating mb-3 d-none">
-                      <input
-                        type="text"
-                        className="form-control"
-                        id={`image-${itemIndex}`}
-                        placeholder="Media ID"
-                        value={item.image}
-                        required
-                      />
-                      <label htmlFor={`image-${itemIndex}`}>Media ID</label>
-
-                      <button
-                        type="button"
-                        className="btn btn-primary mt-2"
-                        onClick={() => {
-                          setCurrentItemIndex(itemIndex); // Lưu lại index của item hiện tại
-                          setShowMedia(true); // Mở modal media
-                        }}
-                      >
-                        Chọn hình ảnh
-                      </button>
                     </div>
 
                     <div className="form-floating mb-3">
@@ -352,11 +352,16 @@ export default function AddProduct() {
                           imageFilePath[itemIndex] || "/images/image-select.png"
                         }
                         alt="Selected media"
-                        className="img-thumbnail w-100 rounded"
+                        className="img-thumbnail w-100 "
                         style={{ maxWidth: "100%", height: "auto" }}
                       />
                       <div
-                        className="hover-overlay"
+                        className={`hover-overlay ${
+                          !items[itemIndex].image ||
+                          items[itemIndex].image === ""
+                            ? "opacity-100"
+                            : ""
+                        }`}
                         onClick={() => {
                           setCurrentItemIndex(itemIndex); // Lưu lại index của item hiện tại
                           setShowMedia(true); // Mở modal media

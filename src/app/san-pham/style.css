@@ -26,22 +26,24 @@
 
 .my-backdrop-filter {
   border-radius: 10px;
-  backdrop-filter: blur(10px);
+  backdrop-filter: blur(20px);
+  background: linear-gradient(0deg, rgba(0, 0, 0, .1), rgba(0, 0, 0, .1)), hsla(0, 0%, 100%, .4);
   display: flex;
   flex-wrap: wrap;
   justify-content: flex-start;
   padding: 10px;
-  gap: 10px;
+  gap: 5px;
 }
+
 
 .my-size-items {
   background-color: white;
   color: black;
-  padding: 10px;
+  padding: 10px 14px;
   border-radius: 10px;
-  width: 50px;
   text-align: center;
   font-size: 13px;
+  font-weight: bold;
   transition: background-color 0.3s ease, color 0.3s ease; /* Thêm chuyển tiếp cho màu nền và màu chữ */
   transform: scale(1); /* Thiết lập kích thước ban đầu */
 }

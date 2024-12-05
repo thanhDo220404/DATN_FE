@@ -75,6 +75,7 @@ export default function ProductDetail({ params }) {
       if (availableVariation) {
         setSelectedVariation(availableVariation);
       } else {
+        setSelectedVariation(null);
         console.log("Không có variation nào khả dụng.");
       }
     } else {
@@ -135,6 +136,7 @@ export default function ProductDetail({ params }) {
       if (availableVariation) {
         setSelectedVariation(availableVariation);
       } else {
+        setSelectedVariation(null);
         console.log("Không có variation nào khả dụng.");
       }
     } else {
@@ -167,13 +169,11 @@ export default function ProductDetail({ params }) {
       })),
     }));
   };
-
   // Hàm xử lý thay đổi số lượng
   const handleQuantityChange = (value) => {
     const parsedValue = Math.max(1, Math.min(value, totalQuantity));
     setQuantity(parsedValue);
   };
-
   // Hàm kiểm tra số lượng sản phẩm có thể thêm vào giỏ hàng
   const canAddToCart = (newCartItem, listCarts, maxQuantity) => {
     const currentQuantityInCart = listCarts.reduce((total, cartItem) => {
@@ -190,7 +190,6 @@ export default function ProductDetail({ params }) {
 
     return currentQuantityInCart + newCartItem.product.quantity <= maxQuantity;
   };
-
   const handleAddToCart = async () => {
     if (payload && payload._id) {
       // Gọi API lấy giỏ hàng để có dữ liệu mới nhất
@@ -260,7 +259,6 @@ export default function ProductDetail({ params }) {
       window.location.href = `/buyer/dang-nhap?next=${pathname}`;
     }
   };
-
   const handleCheckout = async () => {
     if (payload && payload._id) {
       const newCartItem = [
@@ -327,7 +325,7 @@ export default function ProductDetail({ params }) {
   return (
     <div className="container mt-5">
       <ToastContainer /> {/* Thêm ToastContainer vào đây */}
-      <div className="row bg-white p-4">
+      <div className="row bg-white p-sm-4 px-0 py-3">
         <div className="col-md-6">
           <div className="product-image">
             <img
@@ -384,7 +382,7 @@ export default function ProductDetail({ params }) {
                 {product.items.map((item) => (
                   <div
                     key={item.color._id}
-                    className={`btn me-2 ${
+                    className={`btn me-2 shadow-sm ${
                       selectedItem.color._id === item.color._id
                         ? "sortActive"
                         : ""
@@ -410,7 +408,7 @@ export default function ProductDetail({ params }) {
                   .map((variation) => (
                     <button
                       key={variation.size._id}
-                      className={`my-size-items me-3 shadow-sm border ${
+                      className={`my-size-items me-2 shadow-sm border ${
                         selectedVariation &&
                         selectedVariation._id === variation._id
                           ? "active"
@@ -436,7 +434,7 @@ export default function ProductDetail({ params }) {
                 </button>
                 <input
                   type="text"
-                  value={quantity}
+                  value={totalQuantity > 0 ? quantity : 0}
                   onChange={(e) => handleQuantityChange(Number(e.target.value))}
                   className="my-input text-center"
                   min="1"
@@ -458,10 +456,18 @@ export default function ProductDetail({ params }) {
                   +
                 </button>
                 <span className="ms-3">
-                  {selectedVariation
-                    ? selectedVariation.quantity
-                    : totalQuantity}{" "}
-                  sản phẩm có sẳn
+                  {totalQuantity > 0 ? (
+                    <>
+                      {selectedVariation
+                        ? selectedVariation.quantity
+                        : totalQuantity}{" "}
+                      sản phẩm có sẵn
+                    </>
+                  ) : (
+                    <span className="fw-bold text-danger">
+                      Loại này đang tạm hết, vui lòng chọn biến thể khác
+                    </span>
+                  )}
                 </span>
               </div>
             </div>
@@ -469,12 +475,14 @@ export default function ProductDetail({ params }) {
           <button
             className="btn btn-warning btn-lg"
             onClick={() => handleCheckout()}
+            disabled={totalQuantity <= 0} // Vô hiệu hóa nếu totalQuantity <= 0
           >
             MUA NGAY
           </button>
           <button
             className="btn btn-outline-secondary btn-lg ms-3"
             onClick={() => handleAddToCart()}
+            disabled={totalQuantity <= 0} // Vô hiệu hóa nếu totalQuantity <= 0
           >
             Thêm vào giỏ hàng
           </button>
@@ -493,7 +501,9 @@ export default function ProductDetail({ params }) {
         </div>
       </div>
       <div>
-        <h4>Có thể bạn quan tâm</h4>
+        <h3 className="text-center fw-bold text-uppercase">
+          Có thể bạn quan tâm
+        </h3>
         <div className="row featured-products">
           {relatedProducts.map((relatedProduct) => (
             <ProductCard

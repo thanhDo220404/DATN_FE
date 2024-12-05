@@ -65,11 +65,13 @@ export default function UpdateProduct({ params }) {
     fetchSize();
     fetchProduct();
   }, [id]);
-  console.log(product);
 
   const handleAddVariation = (itemIndex) => {
     const newItems = [...items];
-    newItems[itemIndex].variations.push({ size: "", quantity: 0 });
+    newItems[itemIndex].variations.push({
+      size: listSizes[0]._id,
+      quantity: 0,
+    });
     setItems(newItems);
   };
 
@@ -77,21 +79,36 @@ export default function UpdateProduct({ params }) {
     setItems([
       ...items,
       {
-        color: "",
+        color: listColors[0]._id,
         image: "",
         price: "",
         discount: 0,
-        variations: [{ size: "", quantity: 0 }],
+        variations: [{ size: listSizes[0]._id, quantity: 0 }],
       },
     ]);
   };
 
   const handleRemoveItem = (itemIndex) => {
+    if (items.length <= 1) {
+      toast.warning("Mỗi sản phẩm phải có ít nhất một màu");
+      return;
+    }
+    // Lọc items để loại bỏ phần tử theo itemIndex
     const newItems = items.filter((_, index) => index !== itemIndex);
-    setItems(newItems); // Cập nhật trạng thái items
+    setItems(newItems);
+
+    // Lọc imageFilePath để loại bỏ phần tử tương ứng
+    const newImageFilePath = imageFilePath.filter(
+      (_, index) => index !== itemIndex
+    );
+    setImageFilePath(newImageFilePath);
   };
 
   const handleRemoveVariation = (itemIndex, variationIndex) => {
+    if (items[itemIndex].variations.length <= 1) {
+      toast.warning("Mỗi màu phải có ít nhất một size!");
+      return;
+    }
     const newItems = [...items];
     newItems[itemIndex].variations = newItems[itemIndex].variations.filter(
       (_, index) => index !== variationIndex
@@ -117,19 +134,24 @@ export default function UpdateProduct({ params }) {
 
   // Hàm xử lý khi nhấn nút Cập Nhật Sản Phẩm
   const handleSubmit = async (event) => {
-    event.preventDefault();
-    const productData = {
-      name: product.name,
-      description: product.description,
-      category: product.category,
-      items,
-    };
-    const result = await updateProduct(id, productData); // Gọi hàm updateProduct để cập nhật sản phẩm
-    if (result) {
-      toast.success("Cập nhật sản phẩm thành công!"); // Hiển thị toast thành công
-      // Có thể điều hướng đến trang khác hoặc cập nhật lại dữ liệu
-    } else {
-      toast.error("Cập nhật sản phẩm thất bại!"); // Hiển thị toast lỗi
+    try {
+      event.preventDefault();
+      const productData = {
+        name: product.name,
+        description: product.description,
+        category: product.category,
+        items,
+      };
+
+      const result = await updateProduct(id, productData); // Gọi hàm updateProduct để cập nhật sản phẩm
+      if (result) {
+        toast.success("Cập nhật sản phẩm thành công!"); // Hiển thị toast thành công
+        // Có thể điều hướng đến trang khác hoặc cập nhật lại dữ liệu
+      } else {
+        toast.error("Cập nhật sản phẩm thất bại!"); // Hiển thị toast lỗi
+      }
+    } catch (error) {
+      throw new Error("Lỗi Update Sản Phẩm", error);
     }
   };
 
@@ -228,28 +250,6 @@ export default function UpdateProduct({ params }) {
                         ))}
                       </select>
                       <label htmlFor={`color-${itemIndex}`}>Màu sắc</label>
-                    </div>
-                    <div className="form-floating mb-3 d-none">
-                      <input
-                        type="text"
-                        className="form-control"
-                        id={`image-${itemIndex}`}
-                        placeholder="Media ID"
-                        value={item.image}
-                        required
-                      />
-                      <label htmlFor={`image-${itemIndex}`}>Media ID</label>
-
-                      <button
-                        type="button"
-                        className="btn btn-primary mt-2"
-                        onClick={() => {
-                          setCurrentItemIndex(itemIndex); // Lưu lại index của item hiện tại
-                          setShowMedia(true); // Mở modal media
-                        }}
-                      >
-                        Chọn hình ảnh
-                      </button>
                     </div>
 
                     <div className="form-floating mb-3">
