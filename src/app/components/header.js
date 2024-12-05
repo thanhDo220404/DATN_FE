@@ -139,7 +139,7 @@ export default function Header() {
                   ))}
                 </ul>
               </div>
-              <li className="nav-item">
+              {/* <li className="nav-item">
                 <a className="nav-link d-flex" href="#">
                   Flash Sale
                   <img
@@ -148,17 +148,17 @@ export default function Header() {
                     alt="Flash Sale"
                   />
                 </a>
-              </li>
+              </li> */}
               <li className="nav-item">
                 <Link className="nav-link" href="#">
                   Về chúng tôi
                 </Link>
               </li>
-              <li className="nav-item">
+              {/* <li className="nav-item">
                 <Link className="nav-link" href="#">
                   Hỗ trợ
                 </Link>
-              </li>
+              </li> */}
             </ul>
 
             {/* Form tìm kiếm */}
