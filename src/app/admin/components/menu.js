@@ -65,31 +65,6 @@ export default function Menu() {
               <i className="bi bi-card-image me-1"></i>
               <span className="app-menu__label">Media</span>
             </Link>
-            {/* Hiển thị submenu nếu pathname chứa "/admin/media" */}
-            {pathname.includes("/admin/media") && (
-              <ul className="app-submenu">
-                <li>
-                  <Link
-                    className={`app-menu__item ${
-                      pathname === "/admin/media" ? "active" : ""
-                    }`}
-                    href="/admin/media"
-                  >
-                    <span className="app-menu__label">Thư viện</span>
-                  </Link>
-                </li>
-                {/* <li>
-                  <Link
-                    className={`app-menu__item ${
-                      pathname === "/admin/media/videos" ? "active" : ""
-                    }`}
-                    href="/admin/media/videos"
-                  >
-                    <span className="app-menu__label">Videos</span>
-                  </Link>
-                </li> */}
-              </ul>
-            )}
           </li>
           <li>
             <Link

@@ -55,10 +55,18 @@ export default function Checkout() {
   const [showShippingMethods, setShowShippingMethods] = useState(false);
   const [selectedShippingMethod, setSelectedShippingMethod] = useState(null);
   const [userId, setUserId] = useState(null);
+  const [data, setData] = useState(null);
 
   const searchParams = useSearchParams();
-  const data = JSON.parse(searchParams.get("data"));
-  // console.log("this is data: ", data);
+  const nextPage = searchParams.get("next");
+  useEffect(() => {
+    const checkoutData = JSON.parse(localStorage.getItem("checkoutData"));
+    if (checkoutData) {
+      setData(checkoutData);
+      localStorage.removeItem("checkoutData"); // Xóa sau khi lấy xong
+    }
+  }, []); // Chỉ chạy sau khi render client-side
+  // console.log(data);
 
   const fetchAddress = async (userId) => {
     const result = await getAllByUserId(userId);
@@ -68,7 +76,6 @@ export default function Checkout() {
       setDefaultAddress(defaultAddr);
       setSelectedAddressId(defaultAddr._id); // Đặt selectedAddressId là địa chỉ mặc định
     }
-    // console.log("fetchAddress: ", result);
   };
   const fetchShippingMethods = async () => {
     const result = await getAllShippingMethods();
@@ -94,7 +101,7 @@ export default function Checkout() {
     }
     fetchShippingMethods();
     fetchCities();
-  }, []);
+  }, [data]);
 
   const districts =
     cities.find((location) => location.id === selectedCity)?.districts || [];
@@ -172,12 +179,14 @@ export default function Checkout() {
         router.push("/gio-hang");
       }
 
-      console.log(newOrder);
+      // console.log(newOrder);
     } catch (error) {
       // Xử lý lỗi trong trường hợp có lỗi ngoài ý muốn
       console.error("Có lỗi xảy ra:", error);
-      // alert("Có lỗi xảy ra. Vui lòng thử lại.");
-      // router.push("/gio-hang");
+      alert("Có lỗi xảy ra. Vui lòng thử lại sau.");
+      if (nextPage) {
+        router.push(nextPage);
+      }
     }
   };
 
@@ -231,7 +240,7 @@ export default function Checkout() {
       },
     };
 
-    console.log("Địa chỉ JSON:", addressJson);
+    // console.log("Địa chỉ JSON:", addressJson);
 
     if (data) {
       const addressData = {
@@ -242,10 +251,10 @@ export default function Checkout() {
         specific_address: formData.specific_address,
         is_default: formData.is_default || false,
       };
-      console.log(addressData);
+      // console.log(addressData);
       try {
         const result = await insert(addressData);
-        console.log(result);
+        // console.log(result);
         resetInsert(); // Đặt lại form
         await fetchAddress(userId); // Làm mới danh sách địa chỉ
 
@@ -423,7 +432,45 @@ export default function Checkout() {
               Địa chỉ nhận hàng
             </div>
             <div className="mt-3 ms-1">
-              {defaultAddress ? (
+              {data ? (
+                defaultAddress ? (
+                  <>
+                    <span className="fw-bold me-3">
+                      {defaultAddress.name} {defaultAddress.phone}
+                    </span>
+                    <span className="me-3">
+                      {defaultAddress.specific_address},{" "}
+                      {defaultAddress.address.district.ward.prefix}{" "}
+                      {defaultAddress.address.district.ward.name},{" "}
+                      {defaultAddress.address.district.name},{" "}
+                      {defaultAddress.address.name}
+                    </span>
+                    {defaultAddress.is_default && (
+                      <span className="border border-primary p-1 text-primary me-3">
+                        Mặc định
+                      </span>
+                    )}
+                    <button
+                      className="ms-3 text-primary"
+                      onClick={handleShowSelectAddress}
+                    >
+                      Thay đổi
+                    </button>
+                  </>
+                ) : (
+                  <span className="text-muted">
+                    Chưa có địa chỉ mặc định
+                    <button
+                      className="btn btn-success ms-3"
+                      data-bs-toggle="modal"
+                      data-bs-target="#newUserAddress"
+                    >
+                      Thêm địa chỉ mới
+                    </button>
+                  </span>
+                )
+              ) : null}
+              {/* {defaultAddress ? (
                 <>
                   <span className="fw-bold me-3">
                     {defaultAddress.name} {defaultAddress.phone}
@@ -458,7 +505,7 @@ export default function Checkout() {
                     Thêm địa chỉ mới
                   </button>
                 </span>
-              )}
+              )} */}
             </div>
           </div>
         </div>
@@ -532,110 +579,118 @@ export default function Checkout() {
           <div className="bg-white w-100 mt-3">
             <div className="w-100 p-3">
               <h4>Phương thức giao hàng</h4>
-              {selectedShippingMethod && (
-                <>
-                  <div className="d-flex w-50 justify-content-between align-items-center">
-                    <div>
-                      <div>{selectedShippingMethod.name}</div>
-                      <small className="text-muted">
-                        {selectedShippingMethod.description}
-                      </small>
-                    </div>
-                    <span>
-                      {new Intl.NumberFormat("vi-VN", {
-                        style: "currency",
-                        currency: "VND",
-                      }).format(selectedShippingMethod.price)}
-                    </span>
-                    <button
-                      className="text-primary"
-                      onClick={handleShowSelectShippingMethods}
-                    >
-                      Thay đổi
-                    </button>
-                  </div>
-                </>
-              )}
+              {data
+                ? selectedShippingMethod && (
+                    <>
+                      <div className="d-flex w-50 justify-content-between align-items-center">
+                        <div>
+                          <div>{selectedShippingMethod.name}</div>
+                          <small className="text-muted">
+                            {selectedShippingMethod.description}
+                          </small>
+                        </div>
+                        <span>
+                          {new Intl.NumberFormat("vi-VN", {
+                            style: "currency",
+                            currency: "VND",
+                          }).format(selectedShippingMethod.price)}
+                        </span>
+                        <button
+                          className="text-primary"
+                          onClick={handleShowSelectShippingMethods}
+                        >
+                          Thay đổi
+                        </button>
+                      </div>
+                    </>
+                  )
+                : null}
             </div>
           </div>
           <div className="w-100 p-3 border-top">
             <div className="text-end">
-              <span>
-                Tổng số tiền ({listCheckout.products.length} sản phẩm) :
-                <span className="ms-2 fs-5 text-danger">
-                  {new Intl.NumberFormat("vi-VN", {
-                    style: "currency",
-                    currency: "VND",
-                  }).format(totalAmount)}
+              {data && (
+                <span>
+                  Tổng số tiền ({listCheckout.products.length} sản phẩm) :
+                  <span className="ms-2 fs-5 text-danger">
+                    {new Intl.NumberFormat("vi-VN", {
+                      style: "currency",
+                      currency: "VND",
+                    }).format(totalAmount)}
+                  </span>
                 </span>
-              </span>
+              )}
             </div>
           </div>
         </div>
         <div className="bg-white w-100 mt-3">
           <div className="w-100 p-3">
             <h4>Phương thức thanh toán</h4>
-            <div className="border rounded p-3 mb-2 d-flex justify-content-between align-items-center">
-              <span>Thanh toán khi nhận hàng</span>
-              <input
-                type="radio"
-                name="payment_method"
-                onChange={() => setPaymentType("Thanh toán khi nhận hàng")}
-                defaultChecked
-              />
-            </div>
-            <div className="border rounded p-3 mb-2 d-flex justify-content-between align-items-center">
-              <span>Ví điện tử VNPAY</span>
-              <input
-                type="radio"
-                name="payment_method"
-                onChange={() => setPaymentType("Ví điện tử VNPAY")}
-              />
-            </div>
-            <div className="bg-danger-subtle text-end p-3 d-flex">
-              <div className="w-25">
-                <span className="invisible">.</span>
-              </div>
-              <div className="w-75">
-                <div className="w-50 float-end">
-                  <div className="d-flex justify-content-between py-2">
-                    <span className="me-2">Tổng Thành Tiền</span>
-                    <span>
-                      {new Intl.NumberFormat("vi-VN", {
-                        style: "currency",
-                        currency: "VND",
-                      }).format(
-                        listCheckout.products.reduce((total, product) => {
-                          const price =
-                            product.items.price *
-                            (1 - product.items.discount / 100);
-                          const totalProduct = price * product.quantity;
-                          return total + totalProduct;
-                        }, 0)
-                      )}
-                    </span>
+            {data && (
+              <>
+                <div className="border rounded p-3 mb-2 d-flex justify-content-between align-items-center">
+                  <span>Thanh toán khi nhận hàng</span>
+                  <input
+                    type="radio"
+                    name="payment_method"
+                    onChange={() => setPaymentType("Thanh toán khi nhận hàng")}
+                    defaultChecked
+                  />
+                </div>
+                <div className="border rounded p-3 mb-2 d-flex justify-content-between align-items-center">
+                  <span>Ví điện tử VNPAY</span>
+                  <input
+                    type="radio"
+                    name="payment_method"
+                    onChange={() => setPaymentType("Ví điện tử VNPAY")}
+                  />
+                </div>
+                <div className="bg-danger-subtle text-end p-3 d-flex">
+                  <div className="w-25">
+                    <span className="invisible">.</span>
                   </div>
-                  <div className="d-flex justify-content-between py-2">
-                    <span className="me-2">Tổng tiền phí vận chuyển</span>
-                    <span>
-                      {new Intl.NumberFormat("vi-VN", {
-                        style: "currency",
-                        currency: "VND",
-                      }).format(selectedShippingMethod?.price)}
-                    </span>
-                  </div>
-                  <div className="d-flex justify-content-between py-2">
-                    <span className="me-2">Tổng Thanh Toán</span>
-                    <span className="text-primary fs-5">
-                      {new Intl.NumberFormat("vi-VN", {
-                        style: "currency",
-                        currency: "VND",
-                      }).format(totalAmount)}
-                    </span>
+                  <div className="w-75">
+                    <div className="w-50 float-end">
+                      <div className="d-flex justify-content-between py-2">
+                        <span className="me-2">Tổng Thành Tiền</span>
+                        <span>
+                          {new Intl.NumberFormat("vi-VN", {
+                            style: "currency",
+                            currency: "VND",
+                          }).format(
+                            listCheckout.products.reduce((total, product) => {
+                              const price =
+                                product.items.price *
+                                (1 - product.items.discount / 100);
+                              const totalProduct = price * product.quantity;
+                              return total + totalProduct;
+                            }, 0)
+                          )}
+                        </span>
+                      </div>
+                      <div className="d-flex justify-content-between py-2">
+                        <span className="me-2">Tổng tiền phí vận chuyển</span>
+                        <span>
+                          {new Intl.NumberFormat("vi-VN", {
+                            style: "currency",
+                            currency: "VND",
+                          }).format(selectedShippingMethod?.price)}
+                        </span>
+                      </div>
+                      <div className="d-flex justify-content-between py-2">
+                        <span className="me-2">Tổng Thanh Toán</span>
+                        <span className="text-primary fs-5">
+                          {new Intl.NumberFormat("vi-VN", {
+                            style: "currency",
+                            currency: "VND",
+                          }).format(totalAmount)}
+                        </span>
+                      </div>
+                    </div>
                   </div>
                 </div>
-              </div>
-            </div>
+              </>
+            )}
 
             <div className="text-end p-3">
               <button className="btn btn-primary" onClick={handleOrder}>

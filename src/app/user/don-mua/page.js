@@ -10,6 +10,12 @@ import { useEffect, useState } from "react";
 import Link from "next/link"; // Đừng quên import Link
 import { getOrderStatuses } from "@/app/databases/order_status";
 import Rating from "react-rating-stars-component";
+import {
+  createReview,
+  getReviewsByOrder,
+  getReviewsByUser,
+} from "@/app/databases/user_reviews";
+import { toast, ToastContainer } from "react-toastify";
 
 export default function Purchure() {
   const [payload, setPayload] = useState(null);
@@ -18,6 +24,8 @@ export default function Purchure() {
   const [selectedStatus, setSelectedStatus] = useState(null); // Mặc định chọn "Tất cả"
   const [currentReviewOrder, setCurrentReviewOrder] = useState(null);
   const [reviewData, setReviewData] = useState([]); // Để lưu dữ liệu review
+  const [listReviewsByUser, setListreviewsByUser] = useState([]);
+  const [listReviewsByOrder, setListReviewsByOrder] = useState(null);
 
   const fetchOrders = async (userId, statusId = null) => {
     const result = await getOrdersByUserId(userId);
@@ -27,6 +35,11 @@ export default function Purchure() {
       ? result.filter((order) => order.order_status._id === statusId)
       : result;
     setOrders(filteredOrders); // Cập nhật trạng thái đơn hàng
+  };
+
+  const fetchReviewsByUser = async (userId) => {
+    const result = await getReviewsByUser(userId);
+    setListreviewsByUser(result);
   };
 
   const fetchOrderStatues = async () => {
@@ -56,22 +69,70 @@ export default function Purchure() {
   };
 
   const handleReview = (orderData) => {
+    // console.log("this is orderData: ", orderData);
+
     setCurrentReviewOrder(orderData);
 
     // Khởi tạo mảng chứa các review cho từng sản phẩm
     const initialReviewData = orderData.products.map((product) => ({
+      order: { _id: orderData._id },
+      user: orderData.user,
       product: product, // Lưu ID sản phẩm
       rating: 1, // Đánh giá mặc định là 1
       comment: "", // Bình luận mặc định là rỗng
     }));
 
     setReviewData(initialReviewData);
-    console.log(initialReviewData);
+    console.log("this is initialReviewData: ", initialReviewData);
   };
 
-  const submitReview = () => {
-    console.log("Review Data:", reviewData);
-    setCurrentReviewOrder(null); // Đóng modal
+  const submitReview = async () => {
+    try {
+      console.log(reviewData);
+
+      // console.log("Review Data:", reviewData);
+      const reviewPromises = reviewData.map(async (review) => {
+        // const { product, rating, comment } = review;
+
+        return createReview(review);
+      });
+
+      // Đợi tất cả các review được gửi xong
+      const results = await Promise.all(reviewPromises);
+
+      // console.log("Kết quả review:", results);
+
+      fetchReviewsByUser(payload._id);
+
+      const modal = document.getElementById("createReviewModal");
+      const bootstrapModal = bootstrap.Modal.getInstance(modal);
+      bootstrapModal.hide();
+      toast.success("Đánh giá thành công");
+      // Đóng modal và reset trạng thái
+      setCurrentReviewOrder(null);
+      setReviewData([]);
+    } catch (error) {
+      console.log("Lỗi khi đánh giá sản phẩm: ", error);
+    }
+  };
+
+  const handleViewReviewsByOrder = async (order) => {
+    try {
+      const orderId = order._id;
+      // Lấy review theo orderId và danh sách reviews hiện có
+      const reviews = await getReviewsByOrder(orderId, listReviewsByUser);
+
+      if (reviews.length > 0) {
+        // Hiển thị modal hoặc thực hiện logic cần thiết để xem review
+        console.log("Reviews:", reviews);
+        setListReviewsByOrder(reviews);
+        // Ví dụ: Show modal hoặc navigate
+      } else {
+        console.log("No reviews found for this order.");
+      }
+    } catch (error) {
+      console.error("Error viewing reviews by orderId:", error);
+    }
   };
 
   const handleRatingChange = (product, newRating) => {
@@ -121,11 +182,13 @@ export default function Purchure() {
       const result = parseJwt(token);
       setPayload(parseJwt(token));
       fetchOrders(result._id);
+      fetchReviewsByUser(result._id);
     }
   }, []);
 
   return (
     <>
+      <ToastContainer></ToastContainer>
       <div className="fs-5">
         <div className="position-relative">
           <div className="bg-white position-sticky top-0 shadow-sm">
@@ -257,14 +320,27 @@ export default function Purchure() {
                     </div>
                   ) : order.order_status._id === "6724f9c943ad843da1d3114f" ? (
                     <div className="text-end mt-3">
-                      <button
-                        className="btn btn-warning"
-                        data-bs-toggle="modal"
-                        data-bs-target="#createReviewModal"
-                        onClick={() => handleReview(order)} // Handle review function
-                      >
-                        Đánh giá
-                      </button>
+                      {listReviewsByUser.some(
+                        (review) => review.order._id === order._id
+                      ) ? (
+                        <button
+                          className="btn btn-warning"
+                          data-bs-toggle="modal"
+                          data-bs-target="#viewReviewModal"
+                          onClick={() => handleViewReviewsByOrder(order)} // Hàm để xem review
+                        >
+                          Xem đánh giá
+                        </button>
+                      ) : (
+                        <button
+                          className="btn btn-warning"
+                          data-bs-toggle="modal"
+                          data-bs-target="#createReviewModal"
+                          onClick={() => handleReview(order)} // Hàm để tạo review
+                        >
+                          Đánh giá
+                        </button>
+                      )}
                     </div>
                   ) : null}
                 </div>
@@ -297,7 +373,7 @@ export default function Purchure() {
         className="modal fade"
         id="createReviewModal"
         tabIndex="-1"
-        aria-labelledby="exampleModalLabel"
+        aria-labelledby="createReviewModalLabel"
         aria-hidden="true"
         style={{ backgroundColor: "rgba(0, 0, 0, 0.5)" }}
       >
@@ -337,8 +413,10 @@ export default function Purchure() {
                       </div>
                     </div>
                     <div className="row">
-                      <div className="col-5 my-auto">Chất lượng sản phẩm</div>
-                      <div className="col-6">
+                      <div className="col-auto my-auto pe-0">
+                        Chất lượng sản phẩm
+                      </div>
+                      <div className="col-auto">
                         <Rating
                           count={5}
                           size={20}
@@ -382,6 +460,94 @@ export default function Purchure() {
                 onClick={submitReview}
               >
                 Gửi đánh giá
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+      {/* Modal xem đánh giá */}
+      <div
+        className="modal fade"
+        id="viewReviewModal"
+        tabIndex="-1"
+        aria-labelledby="viewReviewModalLabel"
+        aria-hidden="true"
+        style={{ backgroundColor: "rgba(0, 0, 0, 0.5)" }}
+      >
+        <div className="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+          <div className="modal-content">
+            <div className="modal-header">
+              <h5 className="modal-title">Đánh giá sản phẩm</h5>
+              <button
+                type="button"
+                className="btn-close"
+                data-bs-dismiss="modal"
+                aria-label="Close"
+                onClick={() => setListReviewsByOrder(null)}
+              ></button>
+            </div>
+            {listReviewsByOrder && listReviewsByOrder.length > 0 ? (
+              <div className="modal-body">
+                {listReviewsByOrder.map((review, index) => (
+                  <div key={index} className="mb-4">
+                    <div className="d-flex align-items-center mb-2">
+                      <img
+                        src={review.product.items.image.mediaFilePath}
+                        alt={review.product.name}
+                        className="rounded me-3"
+                        style={{
+                          width: "60px",
+                          height: "60px",
+                          objectFit: "cover",
+                        }}
+                      />
+                      <div>
+                        <p className="mb-0 fw-bold">{review.product.name}</p>
+                        <small className="text-muted">
+                          Phân loại sản phẩm:{" "}
+                          {review.product.items.color.colorName} -{" "}
+                          {review.product.items.variations.size.sizeName}
+                        </small>
+                      </div>
+                    </div>
+                    <div className="row">
+                      <div className="col-auto pe-0 my-auto">
+                        Chất lượng sản phẩm
+                      </div>
+                      <div className="col-auto">
+                        <Rating
+                          count={5}
+                          size={20}
+                          edit={false}
+                          value={review.rating || 1}
+                          emptyIcon={<i className="bi bi-star"></i>}
+                          halfIcon={<i className="bi bi-star-half"></i>}
+                          filledIcon={<i className="bi bi-star-fill"></i>}
+                          readonly
+                        />
+                      </div>
+                    </div>
+                    <textarea
+                      className="form-control mt-2"
+                      placeholder="Không có nhận xét"
+                      value={review.comment || ""}
+                      readOnly
+                    ></textarea>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center">Không có đánh giá nào</div>
+            )}
+
+            <div className="modal-footer">
+              <button
+                type="button"
+                className="btn btn-secondary"
+                data-bs-dismiss="modal"
+                onClick={() => setListReviewsByOrder(null)}
+              >
+                Đóng
               </button>
             </div>
           </div>

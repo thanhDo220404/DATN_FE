@@ -16,8 +16,13 @@ import {
   fetchCartByUserId,
 } from "../../../../redux/slices/cartSlice";
 import ProductCard from "@/app/components/productCard";
+import { useRouter } from "next/navigation";
+import Rating from "react-rating-stars-component";
+import { getReviewsByProduct } from "@/app/databases/user_reviews";
+import ProductReviews from "@/app/components/product_reviews";
 
 export default function ProductDetail({ params }) {
+  const router = useRouter();
   const dispatch = useDispatch();
   const { id } = params;
   const pathname = usePathname();
@@ -29,6 +34,7 @@ export default function ProductDetail({ params }) {
   const [productData, setProductData] = useState({});
   const [payload, setPayload] = useState({});
   const [addToCartData, setAddToCartData] = useState({});
+  const [reviews, setReviews] = useState([]);
   // const [listCarts, setListCarts] = useState([]);
   let listCarts = useSelector((state) => state.cart.items);
 
@@ -93,14 +99,18 @@ export default function ProductDetail({ params }) {
       ],
     });
   };
+
+  const fetchReviewByProduct = async (id) => {
+    const result = await getReviewsByProduct(id);
+    setReviews(result);
+  };
   useEffect(() => {
     fetchAllProducts();
     fetchProduct(id);
+    fetchReviewByProduct(id);
     const token = getCookie("LOGIN_INFO");
     if (token) {
       setPayload(parseJwt(token));
-      // const LOGIN_INFO = parseJwt(token);
-      // fetchCarts(LOGIN_INFO._id);
     }
   }, [id]);
 
@@ -298,8 +308,9 @@ export default function ProductDetail({ params }) {
           },
         },
       ];
-      const data = encodeURIComponent(JSON.stringify(newCartItem));
-      window.location.href = `/thanh-toan?data=${data}`;
+      // const data = encodeURIComponent(JSON.stringify(newCartItem));
+      localStorage.setItem("checkoutData", JSON.stringify(newCartItem));
+      window.location.href = `/thanh-toan?next=${pathname}`;
       console.log(newCartItem);
     } else {
       window.location.href = `/buyer/dang-nhap?next=${pathname}`;
@@ -321,6 +332,17 @@ export default function ProductDetail({ params }) {
     )
     .sort(() => Math.random() - 0.5)
     .slice(0, 4); // Giới hạn hiển thị 4 sản phẩm
+
+  const totalReviews = 500;
+  const ratingDistribution = {
+    5: 450,
+    4: 50,
+    3: 0,
+    2: 0,
+    1: 0,
+  };
+
+  const averageRating = 4.9;
 
   return (
     <div className="container mt-5">
@@ -500,6 +522,7 @@ export default function ProductDetail({ params }) {
           </div>
         </div>
       </div>
+      <ProductReviews reviews={reviews}></ProductReviews>
       <div>
         <h3 className="text-center fw-bold text-uppercase">
           Có thể bạn quan tâm

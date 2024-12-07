@@ -99,3 +99,55 @@ export const deleteReview = async (id) => {
     throw error;
   }
 };
+
+// Lọc tất cả reviews theo userId
+export const getReviewsByUser = async (userId) => {
+  try {
+    // Lấy tất cả các review
+    const reviews = await getAllReviews();
+
+    // Lọc reviews theo userId
+    const filteredReviews = reviews.filter(
+      (review) => review.user._id === userId
+    );
+
+    return filteredReviews;
+  } catch (error) {
+    console.error("Error filtering reviews by userId:", error);
+    throw error;
+  }
+};
+// Lọc tất cả reviews theo orderId
+export const getReviewsByOrder = async (orderId, reviewData = null) => {
+  try {
+    // Lấy tất cả các review
+    const reviews = reviewData || (await getAllReviews());
+
+    // Lọc reviews theo userId
+    const filteredReviews = reviews.filter(
+      (review) => review.order._id === orderId
+    );
+
+    return filteredReviews;
+  } catch (error) {
+    console.error("Error filtering reviews by userId:", error);
+    throw error;
+  }
+};
+// Lọc tất cả reviews theo orderId
+export const getReviewsByProduct = async (productId, reviewData = null) => {
+  try {
+    // Lấy tất cả các review
+    const reviews = reviewData || (await getAllReviews());
+
+    // Lọc reviews theo userId
+    const filteredReviews = reviews.filter(
+      (review) => review.product._id === productId
+    );
+
+    return filteredReviews;
+  } catch (error) {
+    console.error("Error filtering reviews by userId:", error);
+    throw error;
+  }
+};

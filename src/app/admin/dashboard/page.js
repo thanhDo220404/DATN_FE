@@ -1,4 +1,4 @@
-"use client"; // Thêm dòng này ở đầu file
+"use client";
 
 import React, { useEffect, useRef, useState } from "react";
 import Chart from "chart.js/auto"; // nhớ npm install chart.js
@@ -179,10 +179,9 @@ export default function Dashboard() {
       </div>
       <div className="row">
         {/*Left*/}
-        <div className="col-md-12 col-lg-6">
+        <div className="col-md-12">
           <div className="row">
-            {/* col-6 */}
-            <div className="col-md-6">
+            <div className="col-md-6 col-lg-3">
               <div className="widget-small primary coloured-icon">
                 <i className="bi bi-people-fill fa-3x" />
                 <div className="info">
@@ -194,8 +193,7 @@ export default function Dashboard() {
                 </div>
               </div>
             </div>
-            {/* col-6 */}
-            <div className="col-md-6">
+            <div className="col-md-6 col-lg-3">
               <div className="widget-small info coloured-icon">
                 <i className="bi bi-box-seam fa-3x" />
                 <div className="info">
@@ -227,8 +225,7 @@ export default function Dashboard() {
                 </div>
               </div>
             </div>
-            {/* col-6 */}
-            <div className="col-md-6">
+            <div className="col-md-6 col-lg-3">
               <div className="widget-small warning coloured-icon">
                 <i className="bi bi-bag-fill fa-3x" />
                 <div className="info">
@@ -240,8 +237,7 @@ export default function Dashboard() {
                 </div>
               </div>
             </div>
-            {/* col-6 */}
-            <div className="col-md-6">
+            <div className="col-md-6 col-lg-3">
               <div className="widget-small danger coloured-icon">
                 <i className="bi bi-exclamation-triangle-fill fa-3x" />
                 <div className="info">
@@ -268,7 +264,7 @@ export default function Dashboard() {
               </div>
             </div>
 
-            {/* col-12 */}
+            {/* Đơn hàng mới*/}
             <div className="col-md-12">
               <div className="tile">
                 <h3 className="tile-title">Tình trạng đơn hàng</h3>
@@ -357,9 +353,9 @@ export default function Dashboard() {
         </div>
         {/* END left*/}
         {/*Right*/}
-        <div className="col-md-12 col-lg-6">
+        <div className="col-md-12">
           <div className="row">
-            <div className="col-md-12">
+            <div className="col-md-6">
               <div className="tile">
                 <h3 className="tile-title">THỐNG KÊ ĐƠN HÀNG</h3>
                 <div className="embed-responsive embed-responsive-16by9">
@@ -370,7 +366,7 @@ export default function Dashboard() {
                 </div>
               </div>
             </div>
-            <div className="col-md-12">
+            <div className="col-md-6">
               <div className="tile">
                 <h3 className="tile-title">BIỂU ĐỒ LỢI NHUẬN</h3>
                 <div className="embed-responsive embed-responsive-16by9">

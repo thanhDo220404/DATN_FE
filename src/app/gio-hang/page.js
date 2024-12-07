@@ -4,7 +4,7 @@ import { updateCartQuantity } from "../databases/cart";
 import { getCookie } from "../lib/CookieManager";
 import { parseJwt } from "../databases/users";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { getAllProducts } from "../databases/products";
 import { ToastContainer, toast } from "react-toastify";
 import { useDispatch, useSelector } from "react-redux";
@@ -16,6 +16,7 @@ import {
 
 export default function Cart() {
   const dispatch = useDispatch();
+  const pathname = usePathname();
   const [listProducts, setListProducts] = useState([]);
   const [payload, setPayload] = useState();
   const [listCheckout, setListCheckout] = useState([]);
@@ -221,9 +222,9 @@ export default function Cart() {
     }
     setWarningMessage(""); // Reset warning message if there's items in checkout
     // Thực hiện logic mua hàng tại đây
-
-    const data = encodeURIComponent(JSON.stringify(listCheckout));
-    router.push(`/thanh-toan?data=${data}`);
+    localStorage.setItem("checkoutData", JSON.stringify(listCheckout));
+    // const data = encodeURIComponent(JSON.stringify(listCheckout));
+    router.push(`/thanh-toan?next=${pathname}`);
   };
 
   return (

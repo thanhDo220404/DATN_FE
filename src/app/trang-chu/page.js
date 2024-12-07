@@ -33,7 +33,7 @@ export default function HomePage() {
     const productCounts = {};
 
     orders.forEach((order) => {
-      // Kiểm tra nếu order_status._id khác '6724f9c943ad843da1d31150'
+      // Kiểm tra nếu order_status._id khác '6724f9c943ad843da1d31150' tức đơn hàng "bị hủy"
       if (
         order.order_status &&
         order.order_status._id !== "6724f9c943ad843da1d31150"
@@ -53,9 +53,13 @@ export default function HomePage() {
 
     const sortedProducts = Object.entries(productCounts)
       .sort((a, b) => b[1] - a[1])
-      .slice(0, limit);
+      .slice(0, limit); // Giới hạn số lượng theo limit
 
-    return sortedProducts.map(([productId]) => productId);
+    // Trả về danh sách chứa cả productId và productCount
+    return sortedProducts.map(([productId, count]) => ({
+      productId,
+      count,
+    }));
   }
 
   useEffect(() => {
@@ -66,7 +70,8 @@ export default function HomePage() {
   // Effect hook to calculate best-selling products once products and orders are fetched
   useEffect(() => {
     if (products.length > 0 && orders.length > 0) {
-      const bestSellerIds = getTopPurchasedProducts(orders);
+      const bestSellers = getTopPurchasedProducts(orders); // Gồm cả productId và count
+      const bestSellerIds = bestSellers.map((seller) => seller.productId); // Chỉ lấy productId
 
       // Lọc các sản phẩm bán chạy từ mảng products
       const bestSelling = products.filter((product) =>
