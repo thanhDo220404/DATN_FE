@@ -146,12 +146,24 @@ export default function ChartComponent({
           {
             label: chartDatasetsLabel,
             data: useRevenue ? revenue : orderCount,
-            borderColor: borderColor && "rgba(75, 192, 192, 1)",
-            backgroundColor: backgroundColor && "rgba(75, 192, 192, 0.2)",
+            borderColor: borderColor ?? "#87CEEB",
+            backgroundColor: backgroundColor ?? "#1E90FF",
           },
         ],
       },
-      options: { responsive: true },
+      options: {
+        animations: {
+          tension: {
+            duration: 1000,
+            easing: "linear",
+            from: 1,
+            to: 0,
+            loop: true,
+          },
+        },
+
+        responsive: true,
+      },
     });
 
     return () => {
@@ -164,7 +176,7 @@ export default function ChartComponent({
   return (
     <div className="tile">
       <div className="tile-title text-uppercase d-flex justify-content-between">
-        <h3>{title}</h3>
+        <h5 className="mb-0">{title}</h5>
         <select onChange={(e) => setFilter(e.target.value)}>
           <option value="days">Ngày</option>
           <option value="months">Tháng</option>

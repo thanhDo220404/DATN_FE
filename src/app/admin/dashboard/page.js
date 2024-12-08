@@ -205,18 +205,24 @@ export default function Dashboard() {
                       </tr>
                     </thead>
                     <tbody>
-                      {listUsers.map((user) => (
-                        <tr key={user._id}>
-                          <td>{user._id}</td>
-                          <td>{user.name}</td>
-                          <td>{user.email}</td>
-                          <td>
-                            <span className={`tag tag-${user.status}`}>
-                              {user.phone}
-                            </span>
-                          </td>
-                        </tr>
-                      ))}
+                      {listUsers
+                        .sort(
+                          (a, b) =>
+                            new Date(b.createdAt) - new Date(a.createdAt)
+                        ) // Sắp xếp ngày giảm dần
+                        .map((user) => (
+                          <tr key={user._id}>
+                            <td>{user._id}</td>
+                            <td>{user.name}</td>
+                            <td>{user.email}</td>
+                            <td>
+                              <span className={`tag tag-${user.status}`}>
+                                {user.phone}
+                              </span>
+                            </td>
+                            {/* Hiển thị ngày tạo */}
+                          </tr>
+                        ))}
                     </tbody>
                   </table>
                 </div>
@@ -228,7 +234,7 @@ export default function Dashboard() {
         {/*Right*/}
         <div className="col-md-12">
           <div className="row">
-            <div className="col-md-6">
+            <div className="col-sm-12 col-lg-6">
               <ChartComponent
                 chartElementId={"chartOrderCount"}
                 title={"THỐNG KÊ ĐƠN HÀNG"}
@@ -237,7 +243,7 @@ export default function Dashboard() {
                 chartDatasetsLabel={"Tổng số lượng đơn hàng"}
               />
             </div>
-            <div className="col-md-6">
+            <div className="col-sm-12 col-lg-6">
               <ChartComponent
                 chartElementId={"chartRevenue"}
                 title={"THỐNG KÊ ĐƠN HÀNG"}
@@ -245,8 +251,8 @@ export default function Dashboard() {
                 orders={listOrders}
                 chartDatasetsLabel={"Tổng số lượng đơn hàng"}
                 useRevenue={true}
-                backgroundColor={"rgba(255, 99, 132, 0.2)"}
                 borderColor={"rgba(255, 99, 132, 1)"}
+                backgroundColor={"rgba(255, 99, 132, 0.2)"}
               />
             </div>
             <div className="col-md-6"></div>

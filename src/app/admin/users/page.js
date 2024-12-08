@@ -64,35 +64,39 @@ export default function Users() {
                 </thead>
                 <tbody>
                   {listUsers.length > 0 ? (
-                    listUsers.map((user) => (
-                      <tr key={user._id}>
-                        <td>{user._id}</td>
-                        <td>{user.name}</td>
-                        <td>
-                          <img
-                            className="img-card-person"
-                            src={`http://localhost:2204/img/user/${user.image}`}
-                            alt="User Avatar"
-                            width="50"
-                          />
-                        </td>
-                        <td>{user.email}</td>
-                        <td>{user.phone}</td>
-                        <td>
-                          <Link href={`/admin/users/${user._id}`}>
-                            <button
-                              className="btn btn-primary btn-sm edit"
-                              type="button"
-                              title="Sửa"
-                              id="show-emp"
-                              style={{ width: "20px", margin: "5px" }}
-                            >
-                              <i className="bi bi-pencil" />
-                            </button>
-                          </Link>
-                        </td>
-                      </tr>
-                    ))
+                    listUsers
+                      .sort(
+                        (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+                      )
+                      .map((user) => (
+                        <tr key={user._id}>
+                          <td>{user._id}</td>
+                          <td>{user.name}</td>
+                          <td>
+                            <img
+                              className="img-card-person"
+                              src={`http://localhost:2204/img/user/${user.image}`}
+                              alt="User Avatar"
+                              width="50"
+                            />
+                          </td>
+                          <td>{user.email}</td>
+                          <td>{user.phone}</td>
+                          <td>
+                            <Link href={`/admin/users/${user._id}`}>
+                              <button
+                                className="btn btn-primary btn-sm"
+                                type="button"
+                                title="Xem"
+                                id="show-emp"
+                                style={{ width: "20px", margin: "5px" }}
+                              >
+                                <i className="bi bi-eye-fill"></i>
+                              </button>
+                            </Link>
+                          </td>
+                        </tr>
+                      ))
                   ) : (
                     <tr>
                       <td colSpan="6" style={{ textAlign: "center" }}>
