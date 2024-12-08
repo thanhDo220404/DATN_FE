@@ -44,8 +44,13 @@ export default function Products({ params }) {
   };
 
   const fetchCategory = async (id) => {
-    const result = await getCategoryById(id);
-    setCategory(result);
+    try {
+      const result = await getCategoryById(id);
+      setCategory(result);
+    } catch (error) {
+      console.log(error);
+      window.location.href = "/not-found";
+    }
   };
 
   useEffect(() => {

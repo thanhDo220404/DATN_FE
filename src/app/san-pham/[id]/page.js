@@ -49,55 +49,60 @@ export default function ProductDetail({ params }) {
   };
 
   const fetchProduct = async (id) => {
-    const result = await getProductById(id);
-    setProduct(result.product);
-    const initialItem = result.product.items[0];
+    try {
+      const result = await getProductById(id);
+      setProduct(result.product);
+      const initialItem = result.product.items[0];
 
-    const initialVariation = (() => {
-      // Kiểm tra nếu quantity của biến thể đầu tiên nhỏ hơn 0
+      const initialVariation = (() => {
+        // Kiểm tra nếu quantity của biến thể đầu tiên nhỏ hơn 0
+        if (initialItem.variations[0].quantity <= 0) {
+          // Tìm biến thể đầu tiên có quantity >= 0
+          const validVariation = initialItem.variations.find(
+            (variation) => variation.quantity > 0
+          );
+
+          // Nếu tìm thấy biến thể hợp lệ, sử dụng nó
+          return validVariation
+            ? { ...validVariation, quantity: quantity }
+            : null; // Hoặc một giá trị mặc định khác
+        }
+
+        // Nếu không có vấn đề gì với biến thể đầu tiên, trả về nó
+        return { ...initialItem.variations[0], quantity: quantity };
+      })();
+
+      setSelectedItem(initialItem);
+
       if (initialItem.variations[0].quantity <= 0) {
-        // Tìm biến thể đầu tiên có quantity >= 0
-        const validVariation = initialItem.variations.find(
+        const availableVariation = initialItem.variations.find(
           (variation) => variation.quantity > 0
         );
 
-        // Nếu tìm thấy biến thể hợp lệ, sử dụng nó
-        return validVariation
-          ? { ...validVariation, quantity: quantity }
-          : null; // Hoặc một giá trị mặc định khác
-      }
-
-      // Nếu không có vấn đề gì với biến thể đầu tiên, trả về nó
-      return { ...initialItem.variations[0], quantity: quantity };
-    })();
-
-    setSelectedItem(initialItem);
-
-    if (initialItem.variations[0].quantity <= 0) {
-      const availableVariation = initialItem.variations.find(
-        (variation) => variation.quantity > 0
-      );
-
-      if (availableVariation) {
-        setSelectedVariation(availableVariation);
+        if (availableVariation) {
+          setSelectedVariation(availableVariation);
+        } else {
+          setSelectedVariation(null);
+          console.log("Không có variation nào khả dụng.");
+        }
       } else {
-        setSelectedVariation(null);
-        console.log("Không có variation nào khả dụng.");
+        setSelectedVariation(initialItem.variations[0]);
       }
-    } else {
-      setSelectedVariation(initialItem.variations[0]);
-    }
 
-    // Thiết lập productData dựa trên product nhưng với selectedItem và selectedVariation có quantity là 1
-    setProductData({
-      ...result.product,
-      items: [
-        {
-          ...initialItem,
-          variations: [initialVariation], // Sử dụng selectedVariation với quantity là 1
-        },
-      ],
-    });
+      // Thiết lập productData dựa trên product nhưng với selectedItem và selectedVariation có quantity là 1
+      setProductData({
+        ...result.product,
+        items: [
+          {
+            ...initialItem,
+            variations: [initialVariation], // Sử dụng selectedVariation với quantity là 1
+          },
+        ],
+      });
+    } catch (error) {
+      console.log(error);
+      window.location.href = "/not-found";
+    }
   };
 
   const fetchReviewByProduct = async (id) => {
