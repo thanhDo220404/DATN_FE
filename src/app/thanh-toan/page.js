@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { getAllByUserId, insert } from "../databases/address";
 import Overlay from "../components/overlay";
 import { useSearchParams } from "next/navigation";
@@ -24,6 +24,7 @@ export default function Checkout() {
     reset: resetInsert,
   } = useForm();
 
+  const [showVoucherModal, setShowVoucherModal] = useState(false);
   const selectedCity = watchAddress("province");
   const selectedDistrict = watchAddress("district");
 
@@ -61,6 +62,7 @@ export default function Checkout() {
   const [voucherCode, setVoucherCode] = useState('');
   const [discount, setDiscount] = useState(0);
   const [voucherError, setVoucherError] = useState('');
+  const [vouchers, setVouchers] = useState([]);
 
   const searchParams = useSearchParams();
   const data = JSON.parse(searchParams.get("data"));
@@ -81,6 +83,15 @@ export default function Checkout() {
     setSelectedShippingMethod(result[0]);
   };
 
+  const fetchVouchers = async () => {
+    try {
+      const response = await axios.get(`${apiUrl}/voucher`);
+      setVouchers(response.data);
+    } catch (error) {
+      console.error("Error fetching vouchers:", error);
+    }
+  };
+
   useEffect(() => {
     if (data) {
       setUserId(data[0].user._id);
@@ -97,6 +108,7 @@ export default function Checkout() {
     }
     fetchShippingMethods();
     fetchCities();
+    fetchVouchers();
   }, []);
 
   const districts =
@@ -132,6 +144,20 @@ export default function Checkout() {
     setSelectedShippingMethod(method);
   };
 
+  const totalAmount = useMemo(() => {
+    const productsTotal = listCheckout.products.reduce((total, product) => {
+      const price =
+        product.items.price * (1 - product.items.discount / 100);
+      return total + price * product.quantity;
+    }, 0);
+    const shipping = selectedShippingMethod?.price || 0;
+    return productsTotal + shipping;
+  }, [listCheckout.products, selectedShippingMethod]);
+
+  const finalTotal = useMemo(() => {
+    return totalAmount - discount;
+  }, [totalAmount, discount]);
+
   const handleOrder = async () => {
     try {
       const newOrder = {
@@ -139,7 +165,7 @@ export default function Checkout() {
         shipping_method: selectedShippingMethod,
         order_address: defaultAddress,
         payment_type: payment_type,
-        order_total: totalAmount - discount,
+        order_total: finalTotal < 0 ? 0 : finalTotal,
       };
 
       setOrder(newOrder);
@@ -155,7 +181,7 @@ export default function Checkout() {
 
         const paymentData = {
           orderId: result._id,
-          amount: totalAmount - discount,
+          amount: finalTotal < 0 ? 0 : finalTotal,
           bankCode: "",
           language: "vn",
         };
@@ -182,34 +208,23 @@ export default function Checkout() {
     }
   };
 
-  const totalAmount =
-    listCheckout.products.reduce((total, product) => {
-      const price =
-        product.items.price * (1 - product.items.discount / 100);
-      const totalProduct = price * product.quantity;
-      return total + totalProduct;
-    }, 0) + (selectedShippingMethod?.price || 0);
-
-  const applyVoucher = async () => {
-    if (!voucherCode.trim()) {
+  const applyVoucher = async (code) => {
+    if (!code.trim()) {
       setVoucherError("Vui lòng nhập mã voucher.");
       return;
     }
     try {
-      console.log("Applying voucher with code:", voucherCode, "and orderValue:", totalAmount);
       const response = await axios.post(`${apiUrl}/voucher/validate`, {
-        code: voucherCode,
+        code,
         orderValue: totalAmount,
       });
-      console.log("Voucher response:", response.data);
       const { discountAmount, message } = response.data;
 
-      // Đảm bảo discountAmount là số
       const parsedDiscount = Number(discountAmount) || 0;
 
       setDiscount(parsedDiscount);
       setVoucherError('');
-      alert("Voucher áp dụng thành công!");
+      alert(message);
     } catch (error) {
       console.error("Lỗi khi áp dụng voucher:", error);
       if (error.response && error.response.data && error.response.data.message) {
@@ -593,29 +608,114 @@ export default function Checkout() {
             </div>
           </div>
 
-          {/* Voucher Section */}
-          <div className="bg-white w-100 mt-3">
-            <div className="w-100 p-3">
-              <h4>Áp Dụng Voucher</h4>
-              <div className="d-flex align-items-center mb-3">
-                <input
-                  type="text"
-                  className="form-control me-2"
-                  placeholder="Nhập mã voucher"
-                  value={voucherCode}
-                  onChange={(e) => setVoucherCode(e.target.value)}
-                />
-                <button className="btn btn-primary" onClick={applyVoucher}>
-                  Áp Dụng
+          <div className="col-12 mt-3">
+            <div className="card shadow-sm">
+              <div className="card-header text-black d-flex justify-content-between align-items-center" style={{ backgroundColor: '#f8f9fa' }}>
+                <h5 className="mb-0">Áp Dụng Voucher</h5>
+                <button
+                  className="btn btn-outline-dark btn-sm"
+                  onClick={() => setShowVoucherModal(true)}
+                >
+                  Xem Danh Sách Voucher
                 </button>
               </div>
-              {voucherError && <p className="text-danger">{voucherError}</p>}
-              {discount > 0 && (
-                <p className="text-success">Đã giảm: {discount.toLocaleString()} VND</p>
-              )}
+              <div className="card-body" style={{ backgroundColor: '#ffffff' }}>
+                <div className="d-flex flex-column flex-md-row align-items-start align-items-md-center mb-3">
+                  <input
+                    type="text"
+                    className="form-control me-md-3 mb-2 mb-md-0"
+                    placeholder="Nhập mã voucher"
+                    value={voucherCode}
+                    onChange={(e) => setVoucherCode(e.target.value)}
+                  />
+                  <button className="btn btn-primary" onClick={() => applyVoucher(voucherCode)}>
+                    Áp Dụng
+                  </button>
+                </div>
+                {voucherError && <p className="text-danger">{voucherError}</p>}
+                {discount > 0 && (
+                  <p className="text-success">Đã giảm: {discount.toLocaleString()} VND</p>
+                )}
+              </div>
             </div>
           </div>
 
+          {/* Voucher Modal */}
+          {showVoucherModal && (
+            <div
+              className="modal show fade d-block"
+              tabIndex="-1"
+              role="dialog"
+              onClick={() => setShowVoucherModal(false)}
+            >
+              <div
+                className="modal-dialog modal-lg modal-dialog-centered"
+                role="document"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <div className="modal-content">
+                  <div className="modal-header">
+                    <h5 className="modal-title">Danh Sách Voucher</h5>
+                    <button
+                      type="button"
+                      className="btn-close"
+                      onClick={() => setShowVoucherModal(false)}
+                      aria-label="Close"
+                    ></button>
+                  </div>
+                  <div className="modal-body">
+                    <div className="table-responsive">
+                      <table className="table table-striped table-hover">
+                        <thead className="table-secondary">
+                          <tr>
+                            <th>Code</th>
+                            <th>Giảm</th>
+                            <th>Giảm Tối Đa</th>
+                            <th>Hết Hạn</th>
+                            <th>Đơn Hàng Tối Thiểu</th>
+                            <th></th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {vouchers.map(voucher => (
+                            <tr key={voucher._id}>
+                              <td>{voucher.code}</td>
+                              <td>{voucher.discountValue}{voucher.discountType === 'percentage' ? '%' : ' VND'}</td>
+                              <td>{voucher.maxDiscountAmount ? `${voucher.maxDiscountAmount.toLocaleString()} VND` : 'Không giới hạn'}</td>
+                              <td>{new Date(voucher.expiryDate).toLocaleDateString()}</td>
+                              <td>{voucher.minOrderValue.toLocaleString()} VND</td>
+                              <td>
+                                <button
+                                  className="btn btn-sm btn-primary"
+                                  onClick={() => {
+                                    applyVoucher(voucher.code);
+                                    setShowVoucherModal(false);
+                                  }}
+                                  disabled={!voucher.isActive || new Date(voucher.expiryDate) < new Date()}
+                                >
+                                  Áp Dụng
+                                </button>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                  <div className="modal-footer">
+                    <button
+                      type="button"
+                      className="btn btn-secondary"
+                      onClick={() => setShowVoucherModal(false)}
+                    >
+                      Đóng
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+                
           {/* Updated Total Section */}
           <div className="bg-white w-100 mt-3">
             <div className="w-100 p-3 border-top">
@@ -640,12 +740,12 @@ export default function Checkout() {
                 <span>
                   Tổng Thanh Toán:
                   <span className="ms-2 fs-5 text-primary">
-                    {isNaN(totalAmount - discount) 
+                    {isNaN(finalTotal) 
                       ? "0 ₫" 
                       : new Intl.NumberFormat("vi-VN", {
                           style: "currency",
                           currency: "VND",
-                        }).format(totalAmount - discount)}
+                        }).format(finalTotal < 0 ? 0 : finalTotal)}
                   </span>
                 </span>
               </div>
@@ -707,12 +807,12 @@ export default function Checkout() {
                     <div className="d-flex justify-content-between py-2">
                       <span className="me-2">Tổng Thanh Toán</span>
                       <span className="text-primary fs-5">
-                        {isNaN(totalAmount - discount) 
+                        {isNaN(finalTotal) 
                           ? "0 ₫" 
                           : new Intl.NumberFormat("vi-VN", {
                               style: "currency",
                               currency: "VND",
-                            }).format(totalAmount - discount)}
+                            }).format(finalTotal < 0 ? 0 : finalTotal)}
                       </span>
                     </div>
                   </div>
@@ -804,7 +904,7 @@ export default function Checkout() {
                 {/* Select Tỉnh */}
                 <div className="form-floating mb-3 w-100">
                   <select
-                    className="form-control"
+                    className={`form-control ${errorsAddress.province ? "is-invalid" : ""}`}
                     {...registerAddress("province", {
                       required: "Vui lòng chọn tỉnh",
                     })}
@@ -827,7 +927,7 @@ export default function Checkout() {
                 {/* Select Quận */}
                 <div className="form-floating mb-3 w-100">
                   <select
-                    className="form-control"
+                    className={`form-control ${errorsAddress.district ? "is-invalid" : ""}`}
                     {...registerAddress("district", {
                       required: "Vui lòng chọn quận/huyện",
                     })}
@@ -850,7 +950,7 @@ export default function Checkout() {
                 {/* Select Phường/Xã */}
                 <div className="form-floating mb-3 w-100">
                   <select
-                    className="form-control"
+                    className={`form-control ${errorsAddress.ward ? "is-invalid" : ""}`}
                     {...registerAddress("ward", {
                       required: "Vui lòng chọn phường/xã",
                     })}
