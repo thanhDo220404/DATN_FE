@@ -16,14 +16,42 @@ export default function UserAddress() {
   const [districts, setDistricts] = useState([]);
   const [wards, setWards] = useState([]);
 
-  const [address, setAddress] = useState({});
   const [userAddresses, setUserAddresses] = useState([]); // State để lưu danh sách địa chỉ
 
   const [addressId, setAddressId] = useState(null);
 
-  const [isUpdating, setIsUpdating] = useState(null);
+  const {
+    register: registerInsert,
+    handleSubmit: handleSubmitInsert,
+    formState: { errors: errorsInsert },
+    setValue: setValueInsert,
+    reset: resetInsert,
+    watch: watchInsert,
+  } = useForm();
+  const {
+    register: registerUpdate,
+    handleSubmit: handleSubmitUpdate,
+    formState: { errors: errorsUpdate },
+    setValue: setValueUpdate,
+    reset: resetUpdate,
+    watch: watchUpdate,
+  } = useForm();
+  const selectedCity = watchInsert("province") || watchUpdate("provinceUpdate");
+  const selectedDistrict =
+    watchInsert("district") || watchUpdate("districtUpdate");
+  // Tạo useEffect để theo dõi khi giá trị province hoặc district thay đổi
+  useEffect(() => {
+    // Kiểm tra và cập nhật districts nếu province thay đổi
+    const newDistricts =
+      cities.find((location) => location.id === selectedCity)?.districts || [];
+    setDistricts(newDistricts); // Cập nhật giá trị districts
 
-  const [addressSelected, setAddressSelected] = useState({});
+    // Sau khi cập nhật districts, tiếp tục cập nhật wards nếu district thay đổi
+    const newWards =
+      newDistricts.find((district) => district.id === selectedDistrict)
+        ?.wards || [];
+    setWards(newWards); // Cập nhật giá trị wards
+  }, [selectedCity, selectedDistrict]); // Chạy lại khi selectedCity hoặc selectedDistrict thay đổi
 
   const handleDeleteClick = (addressId) => {
     setAddressId(addressId);
@@ -32,7 +60,7 @@ export default function UserAddress() {
     if (addressId) {
       try {
         await deleteById(addressId);
-        await fetchUserAddresses(); // Cập nhật lại danh sách địa chỉ
+        await fetchUserAddresses(userId); // Cập nhật lại danh sách địa chỉ
         setAddressId(null); // Reset địa chỉ đang xóa
 
         // Đóng modal xóa
@@ -47,33 +75,14 @@ export default function UserAddress() {
   };
 
   const handleUpdate = async (address) => {
-    setIsUpdating(true);
-    console.log("Đối tượng address:", address);
     setValueUpdate("_id", address._id);
     setValueUpdate("nameUpdate", address.name);
     setValueUpdate("phoneUpdate", address.phone);
-    const addressStr = `${address.address.name} - ${address.address.district.name} - ${address.address.district.ward.prefix} ${address.address.district.ward.name}`;
-    setValueUpdate("addressUpdate", addressStr);
+    setValueUpdate("provinceUpdate", address.address.id);
+    setValueUpdate("districtUpdate", address.address.district.id);
+    setValueUpdate("wardUpdate", address.address.district.ward.id);
     setValueUpdate("specific_addressUpdate", address.specific_address);
     setValueUpdate("is_defaultUpdate", address.is_default);
-    setValueUpdate(
-      "addressJsonUpdate",
-      JSON.stringify({
-        id: address.address.id,
-        name: address.address.name,
-        district: {
-          id: address.address.district.id,
-          name: address.address.district.name,
-          ward: {
-            id: address.address.district.ward.id,
-            name: address.address.district.ward.name,
-            prefix: address.address.district.ward.prefix,
-          },
-        },
-      })
-    );
-    setAddressSelected(address);
-    console.log("This is addressSelected", addressSelected);
 
     const is_defaultElement = document.getElementById("is_defaultUpdate");
     if (address.is_default === true) {
@@ -93,10 +102,9 @@ export default function UserAddress() {
       setUserId(payload._id);
     }
     fetchCities();
-    fetchUserAddresses();
-  }, [userId]);
+  }, []);
 
-  const fetchUserAddresses = async () => {
+  const fetchUserAddresses = async (userId) => {
     if (userId) {
       try {
         const userAddresses = await getAllByUserId(userId);
@@ -107,33 +115,57 @@ export default function UserAddress() {
     }
   };
   useEffect(() => {
-    fetchUserAddresses();
+    fetchUserAddresses(userId);
   }, [userId]); // Gọi lại khi userId thay đổi
-  console.log(userAddresses);
-
-  const {
-    register: registerInsert,
-    handleSubmit: handleSubmitInsert,
-    formState: { errors: errorsInsert },
-    setValue: setValueInsert,
-    reset: resetInsert,
-  } = useForm();
-
-  const {
-    register: registerUpdate,
-    handleSubmit: handleSubmitUpdate,
-    formState: { errors: errorsUpdate },
-    setValue: setValueUpdate,
-    reset: resetUpdate,
-  } = useForm();
 
   // Hàm onSubmit đã được cập nhật
   const onSubmit = async (formData) => {
+    // Các ID từ formData
+    const provinceId = formData.province;
+    const districtId = formData.district;
+    const wardId = formData.ward;
+
+    // Bước 1: Tìm tỉnh/thành phố trong cities
+    const selectedProvince = cities.find((city) => city.id === provinceId);
+    if (!selectedProvince) {
+      console.error("Không tìm thấy tỉnh/thành phố");
+    }
+
+    // Bước 2: Tìm quận/huyện trong selectedProvince.districts
+    const selectedDistrict = selectedProvince.districts.find(
+      (district) => district.id === districtId
+    );
+    if (!selectedDistrict) {
+      console.error("Không tìm thấy quận/huyện");
+    }
+
+    // Bước 3: Tìm phường/xã trong selectedDistrict.wards
+    const selectedWard = selectedDistrict.wards.find(
+      (ward) => ward.id === wardId
+    );
+    if (!selectedWard) {
+      console.error("Không tìm thấy phường/xã");
+    }
+
+    // Bước 4: Tạo đối tượng JSON với cấu trúc mong muốn
+    const addressJson = {
+      id: selectedProvince.id,
+      name: selectedProvince.name,
+      district: {
+        id: selectedDistrict.id,
+        name: selectedDistrict.name,
+        ward: {
+          id: selectedWard.id,
+          name: selectedWard.name,
+          prefix: selectedWard.prefix,
+        },
+      },
+    };
     const data = {
       name: formData.name,
       userId: userId,
       phone: formData.phone,
-      address: JSON.parse(formData.addressJson),
+      address: addressJson,
       specific_address: formData.specific_address,
       is_default: formData.is_default || false,
     };
@@ -142,7 +174,7 @@ export default function UserAddress() {
       const result = await insert(data);
       console.log(result);
       resetInsert(); // Đặt lại form
-      await fetchUserAddresses(); // Làm mới danh sách địa chỉ
+      await fetchUserAddresses(userId); // Làm mới danh sách địa chỉ
 
       // Đóng modal
       const modal = document.getElementById("newUserAddress");
@@ -154,12 +186,52 @@ export default function UserAddress() {
     }
   };
   const onSubmitUpdate = async (formData) => {
-    console.log("form update: ", formData);
+    // Các ID từ formData
+    const provinceId = formData.provinceUpdate;
+    const districtId = formData.districtUpdate;
+    const wardId = formData.wardUpdate;
+
+    // Bước 1: Tìm tỉnh/thành phố trong cities
+    const selectedProvince = cities.find((city) => city.id === provinceId);
+    if (!selectedProvince) {
+      console.error("Không tìm thấy tỉnh/thành phố");
+    }
+
+    // Bước 2: Tìm quận/huyện trong selectedProvince.districts
+    const selectedDistrict = selectedProvince.districts.find(
+      (district) => district.id === districtId
+    );
+    if (!selectedDistrict) {
+      console.error("Không tìm thấy quận/huyện");
+    }
+
+    // Bước 3: Tìm phường/xã trong selectedDistrict.wards
+    const selectedWard = selectedDistrict.wards.find(
+      (ward) => ward.id === wardId
+    );
+    if (!selectedWard) {
+      console.error("Không tìm thấy phường/xã");
+    }
+
+    // Bước 4: Tạo đối tượng JSON với cấu trúc mong muốn
+    const addressJson = {
+      id: selectedProvince.id,
+      name: selectedProvince.name,
+      district: {
+        id: selectedDistrict.id,
+        name: selectedDistrict.name,
+        ward: {
+          id: selectedWard.id,
+          name: selectedWard.name,
+          prefix: selectedWard.prefix,
+        },
+      },
+    };
     const data = {
       name: formData.nameUpdate,
       userId: userId,
       phone: formData.phoneUpdate,
-      address: JSON.parse(formData.addressJsonUpdate),
+      address: addressJson,
       specific_address: formData.specific_addressUpdate,
       is_default: formData.is_defaultUpdate || false,
     };
@@ -168,7 +240,7 @@ export default function UserAddress() {
       const result = await updateById(formData._id, data);
       console.log(result);
       resetUpdate(); // Đặt lại form
-      await fetchUserAddresses(); // Làm mới danh sách địa chỉ
+      await fetchUserAddresses(userId); // Làm mới danh sách địa chỉ
 
       // Đóng modal
       const modal = document.getElementById("updateUserAddress");
@@ -186,14 +258,13 @@ export default function UserAddress() {
         is_default: true, // Đặt địa chỉ này làm mặc định
       });
       console.log("Địa chỉ đã được cập nhật thành công:", result);
-      await fetchUserAddresses(); // Làm mới danh sách địa chỉ
+      await fetchUserAddresses(userId); // Làm mới danh sách địa chỉ
 
       // Có thể thêm logic để cập nhật state nếu cần
     } catch (error) {
       console.error("Lỗi khi đặt địa chỉ làm mặc định:", error);
     }
   };
-
   // Gọi API để lấy dữ liệu Tỉnh, Quận, Huyện, Xã
   const fetchCities = async () => {
     try {
@@ -205,112 +276,112 @@ export default function UserAddress() {
     }
   };
 
-  const updateAddress = (newValues) => {
-    setAddress((prevAddress) => ({
-      ...prevAddress,
-      ...newValues,
-    }));
-  };
+  // const updateAddress = (newValues) => {
+  //   setAddress((prevAddress) => ({
+  //     ...prevAddress,
+  //     ...newValues,
+  //   }));
+  // };
 
-  const handleProvinceChange = (e) => {
-    const provinceId = e.target.value;
-    const selectedProvinceData = cities.find(
-      (province) => province.id === provinceId
-    );
+  // const handleProvinceChange = (e) => {
+  //   const provinceId = e.target.value;
+  //   const selectedProvinceData = cities.find(
+  //     (province) => province.id === provinceId
+  //   );
 
-    if (selectedProvinceData) {
-      updateAddress({
-        id: selectedProvinceData.id,
-        name: selectedProvinceData.name,
-      });
+  //   if (selectedProvinceData) {
+  //     updateAddress({
+  //       id: selectedProvinceData.id,
+  //       name: selectedProvinceData.name,
+  //     });
 
-      setDistricts(selectedProvinceData.districts);
-      setWards([]);
-      setValueInsert("address", selectedProvinceData.name);
-      if (isUpdating) {
-        setValueUpdate("addressUpdate", selectedProvinceData.name);
-      }
-    }
-  };
+  //     // setDistricts(selectedProvinceData.districts);
+  //     setWards([]);
+  //     setValueInsert("address", selectedProvinceData.name);
+  //     if (isUpdating) {
+  //       setValueUpdate("addressUpdate", selectedProvinceData.name);
+  //     }
+  //   }
+  // };
 
-  const handleDistrictChange = (e) => {
-    const districtId = e.target.value;
-    const selectedDistrictData = districts.find(
-      (district) => district.id === districtId
-    );
+  // const handleDistrictChange = (e) => {
+  //   const districtId = e.target.value;
+  //   const selectedDistrictData = districts.find(
+  //     (district) => district.id === districtId
+  //   );
 
-    if (selectedDistrictData) {
-      updateAddress({
-        district: {
-          id: selectedDistrictData.id,
-          name: selectedDistrictData.name,
-        },
-      });
+  //   if (selectedDistrictData) {
+  //     updateAddress({
+  //       district: {
+  //         id: selectedDistrictData.id,
+  //         name: selectedDistrictData.name,
+  //       },
+  //     });
 
-      setWards(selectedDistrictData.wards);
-      const addressStr = `${address.name} - ${selectedDistrictData.name}`;
-      setValueInsert("address", addressStr);
-      if (isUpdating) {
-        setValueUpdate("addressUpdate", addressStr);
-      }
-    }
-  };
+  //     // setWards(selectedDistrictData.wards);
+  //     const addressStr = `${address.name} - ${selectedDistrictData.name}`;
+  //     setValueInsert("address", addressStr);
+  //     if (isUpdating) {
+  //       setValueUpdate("addressUpdate", addressStr);
+  //     }
+  //   }
+  // };
 
-  const handleWardChange = (e) => {
-    const wardId = e.target.value;
-    const selectedWardData = wards.find((ward) => ward.id === wardId);
+  // const handleWardChange = (e) => {
+  //   const wardId = e.target.value;
+  //   const selectedWardData = wards.find((ward) => ward.id === wardId);
 
-    if (selectedWardData) {
-      updateAddress({
-        district: {
-          ...address.district,
-          ward: {
-            id: selectedWardData.id,
-            name: selectedWardData.name,
-            prefix: selectedWardData.prefix,
-          },
-        },
-      });
+  //   if (selectedWardData) {
+  //     updateAddress({
+  //       district: {
+  //         ...address.district,
+  //         ward: {
+  //           id: selectedWardData.id,
+  //           name: selectedWardData.name,
+  //           prefix: selectedWardData.prefix,
+  //         },
+  //       },
+  //     });
 
-      const addressStr = `${address.name} - ${address.district.name} - ${selectedWardData.prefix} ${selectedWardData.name}`;
-      setValueInsert("address", addressStr);
-      setValueInsert(
-        "addressJson",
-        JSON.stringify({
-          id: address.id,
-          name: address.name,
-          district: {
-            id: address.district.id,
-            name: address.district.name,
-            ward: {
-              id: selectedWardData.id,
-              name: selectedWardData.name,
-              prefix: selectedWardData.prefix,
-            },
-          },
-        })
-      ); // Cập nhật addressJson với thông tin đầy đủ
-      if (isUpdating) {
-        setValueUpdate("addressUpdate", addressStr);
-        setValueUpdate(
-          "addressJsonUpdate",
-          JSON.stringify({
-            id: address.id,
-            name: address.name,
-            district: {
-              id: address.district.id,
-              name: address.district.name,
-              ward: {
-                id: selectedWardData.id,
-                name: selectedWardData.name,
-                prefix: selectedWardData.prefix,
-              },
-            },
-          })
-        );
-      }
-    }
-  };
+  //     const addressStr = `${address.name} - ${address.district.name} - ${selectedWardData.prefix} ${selectedWardData.name}`;
+  //     setValueInsert("address", addressStr);
+  //     setValueInsert(
+  //       "addressJson",
+  //       JSON.stringify({
+  //         id: address.id,
+  //         name: address.name,
+  //         district: {
+  //           id: address.district.id,
+  //           name: address.district.name,
+  //           ward: {
+  //             id: selectedWardData.id,
+  //             name: selectedWardData.name,
+  //             prefix: selectedWardData.prefix,
+  //           },
+  //         },
+  //       })
+  //     ); // Cập nhật addressJson với thông tin đầy đủ
+  //     if (isUpdating) {
+  //       setValueUpdate("addressUpdate", addressStr);
+  //       setValueUpdate(
+  //         "addressJsonUpdate",
+  //         JSON.stringify({
+  //           id: address.id,
+  //           name: address.name,
+  //           district: {
+  //             id: address.district.id,
+  //             name: address.district.name,
+  //             ward: {
+  //               id: selectedWardData.id,
+  //               name: selectedWardData.name,
+  //               prefix: selectedWardData.prefix,
+  //             },
+  //           },
+  //         })
+  //       );
+  //     }
+  //   }
+  // };
 
   return (
     <>
@@ -475,36 +546,15 @@ export default function UserAddress() {
                 </div>
               </div>
 
-              <div className="form-floating w-100 mb-3">
-                <input
-                  type="text"
-                  className={`form-control ${
-                    errorsInsert.address ? "is-invalid" : ""
-                  }`}
-                  id="address"
-                  placeholder="Tỉnh/ Thành phố, Quận/Huyện, Phường/Xã"
-                  {...registerInsert("address", {
-                    required: "Vui lòng nhập địa chỉ",
-                  })}
-                />
-                <label htmlFor="address">
-                  Tỉnh/ Thành phố, Quận/Huyện, Phường/Xã
-                </label>
-                {errorsInsert.address && (
-                  <div className="invalid-feedback">
-                    {errorsInsert.address.message}
-                  </div>
-                )}
-              </div>
-
               {/* Select Tỉnh */}
               <div className="form-floating mb-3 w-100">
                 <select
-                  className="form-control"
+                  className={`form-control ${
+                    errorsInsert.province ? "is-invalid" : ""
+                  }`}
                   {...registerInsert("province", {
-                    required: "Vui lòng chọn tỉnh",
+                    required: "Vui lòng chọn tỉnh", // Kiểm tra yêu cầu
                   })}
-                  onChange={handleProvinceChange}
                 >
                   <option value="">Chọn Tỉnh/Thành phố</option>
                   {cities.map((province) => (
@@ -516,7 +566,8 @@ export default function UserAddress() {
                 <label htmlFor="province">Tỉnh/Thành phố</label>
                 {errorsInsert.province && (
                   <div className="invalid-feedback">
-                    {errorsInsert.province.message}
+                    {errorsInsert.province.message}{" "}
+                    {/* Hiển thị thông báo lỗi */}
                   </div>
                 )}
               </div>
@@ -524,11 +575,12 @@ export default function UserAddress() {
               {/* Select Quận */}
               <div className="form-floating mb-3 w-100">
                 <select
-                  className="form-control"
+                  className={`form-control ${
+                    errorsInsert.district ? "is-invalid" : ""
+                  }`}
                   {...registerInsert("district", {
-                    required: "Vui lòng chọn quận/huyện",
+                    required: "Vui lòng chọn quận/huyện", // Kiểm tra yêu cầu
                   })}
-                  onChange={handleDistrictChange}
                 >
                   <option value="">Chọn Quận/Huyện</option>
                   {districts.map((district) => (
@@ -540,7 +592,8 @@ export default function UserAddress() {
                 <label htmlFor="district">Quận/Huyện</label>
                 {errorsInsert.district && (
                   <div className="invalid-feedback">
-                    {errorsInsert.district.message}
+                    {errorsInsert.district.message}{" "}
+                    {/* Hiển thị thông báo lỗi */}
                   </div>
                 )}
               </div>
@@ -548,11 +601,12 @@ export default function UserAddress() {
               {/* Select Phường/Xã */}
               <div className="form-floating mb-3 w-100">
                 <select
-                  className="form-control"
+                  className={`form-control ${
+                    errorsInsert.ward ? "is-invalid" : ""
+                  }`}
                   {...registerInsert("ward", {
-                    required: "Vui lòng chọn phường/xã",
+                    required: "Vui lòng chọn phường/xã", // Kiểm tra yêu cầu
                   })}
-                  onChange={handleWardChange}
                 >
                   <option value="">Chọn Phường/Xã</option>
                   {wards.map((ward) => (
@@ -564,7 +618,7 @@ export default function UserAddress() {
                 <label htmlFor="ward">Phường/Xã</label>
                 {errorsInsert.ward && (
                   <div className="invalid-feedback">
-                    {errorsInsert.ward.message}
+                    {errorsInsert.ward.message} {/* Hiển thị thông báo lỗi */}
                   </div>
                 )}
               </div>
@@ -648,6 +702,7 @@ export default function UserAddress() {
           </div>
         </div>
       </div>
+
       {/* update */}
       <div
         className="modal fade"
@@ -722,33 +777,15 @@ export default function UserAddress() {
                 </div>
               </div>
 
-              <div className="form-floating w-100 mb-3">
-                <input
-                  type="text"
-                  className={`form-control ${
-                    errorsUpdate.addressUpdate ? "is-invalid" : ""
-                  }`}
-                  id="addressUpdate"
-                  placeholder="Tỉnh/ Thành phố, Quận/Huyện, Phường/Xã"
-                  {...registerUpdate("addressUpdate", {
-                    required: "Vui lòng nhập địa chỉ",
-                  })}
-                />
-                <label htmlFor="addressUpdate">
-                  Tỉnh/ Thành phố, Quận/Huyện, Phường/Xã
-                </label>
-                {errorsUpdate.addressUpdate && (
-                  <div className="invalid-feedback">
-                    {errorsUpdate.addressUpdate.message}
-                  </div>
-                )}
-              </div>
-
               {/* Select Tỉnh */}
               <div className="form-floating mb-3 w-100">
                 <select
-                  className="form-control"
-                  onChange={handleProvinceChange}
+                  className={`form-control ${
+                    errorsUpdate.provinceUpdate ? "is-invalid" : ""
+                  }`}
+                  {...registerUpdate("provinceUpdate", {
+                    required: "Vui lòng chọn Tỉnh/Thành phố",
+                  })}
                 >
                   <option value="">Chọn Tỉnh/Thành phố</option>
                   {cities.map((province) => (
@@ -758,13 +795,22 @@ export default function UserAddress() {
                   ))}
                 </select>
                 <label htmlFor="provinceUpdate">Tỉnh/Thành phố</label>
+                {errorsUpdate.provinceUpdate && (
+                  <div className="invalid-feedback">
+                    {errorsUpdate.provinceUpdate.message}
+                  </div>
+                )}
               </div>
 
               {/* Select Quận */}
               <div className="form-floating mb-3 w-100">
                 <select
-                  className="form-control"
-                  onChange={handleDistrictChange}
+                  className={`form-control ${
+                    errorsUpdate.districtUpdate ? "is-invalid" : ""
+                  }`}
+                  {...registerUpdate("districtUpdate", {
+                    required: "Vui lòng chọn Quận/Huyện",
+                  })}
                 >
                   <option value="">Chọn Quận/Huyện</option>
                   {districts.map((district) => (
@@ -774,11 +820,23 @@ export default function UserAddress() {
                   ))}
                 </select>
                 <label htmlFor="districtUpdate">Quận/Huyện</label>
+                {errorsUpdate.districtUpdate && (
+                  <div className="invalid-feedback">
+                    {errorsUpdate.districtUpdate.message}
+                  </div>
+                )}
               </div>
 
-              {/* Select Phường/Xã */}
+              {/* Select Phường */}
               <div className="form-floating mb-3 w-100">
-                <select className="form-control" onChange={handleWardChange}>
+                <select
+                  className={`form-control ${
+                    errorsUpdate.wardUpdate ? "is-invalid" : ""
+                  }`}
+                  {...registerUpdate("wardUpdate", {
+                    required: "Vui lòng chọn Phường/Xã",
+                  })}
+                >
                   <option value="">Chọn Phường/Xã</option>
                   {wards.map((ward) => (
                     <option key={ward.id} value={ward.id}>
@@ -787,6 +845,11 @@ export default function UserAddress() {
                   ))}
                 </select>
                 <label htmlFor="wardUpdate">Phường/Xã</label>
+                {errorsUpdate.wardUpdate && (
+                  <div className="invalid-feedback">
+                    {errorsUpdate.wardUpdate.message}
+                  </div>
+                )}
               </div>
 
               <div className="form-floating w-100 mb-3">
