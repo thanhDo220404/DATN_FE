@@ -17,6 +17,7 @@ function CustomEditor({ value, onChange }) {
       editor.model.change((writer) => {
         const imageElement = writer.createElement("imageBlock", {
           src: url,
+          alt: url,
         });
         editor.model.insertContent(
           imageElement,
@@ -27,15 +28,6 @@ function CustomEditor({ value, onChange }) {
   };
 
   const handleSelectMedia = (media) => {
-    // const newItems = [...items];
-    // newItems[currentItemIndex].image = media._id;
-    // setItems(newItems);
-    // setImageFilePath((prevPaths) => {
-    //   const newPaths = [...prevPaths];
-    //   newPaths[currentItemIndex] = media.filePath; // Lưu filePath
-    //   return newPaths;
-    // });
-    // console.log(media);
     insertImage(media.filePath);
     setShowMedia(false); // Đóng modal sau khi chọn
   };

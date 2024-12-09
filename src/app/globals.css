@@ -680,3 +680,10 @@ table {
   color: black; 
 }
 
+
+/* Đảm bảo chỉ áp dụng cho nội dung trong phần bài viết */
+#postContent img {
+  max-width: 100%; /* Đảm bảo ảnh không vượt quá chiều rộng container */
+  height: auto; /* Duy trì tỉ lệ ảnh */
+}
+

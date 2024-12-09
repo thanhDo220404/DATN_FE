@@ -139,6 +139,32 @@ export default function Menu() {
           <li>
             <Link
               className={`app-menu__item ${
+                pathname === "/admin/bai-viet" ? "active" : ""
+              }`}
+              href="/admin/bai-viet"
+            >
+              <i className="bi bi-newspaper"></i>
+              <span className="app-menu__label ms-1">Quản lý bài viết</span>
+            </Link>
+            {/* Hiển thị submenu nếu pathname chứa "/admin/san-pham" */}
+            {pathname.includes("/admin/bai-viet") ? (
+              <ul className="app-submenu">
+                <li>
+                  <Link
+                    className={`app-menu__item ${
+                      pathname === "/admin/bai-viet/them" ? "active" : ""
+                    }`}
+                    href="/admin/bai-viet/them"
+                  >
+                    <span className="app-menu__label">Thêm</span>
+                  </Link>
+                </li>
+              </ul>
+            ) : null}
+          </li>
+          <li>
+            <Link
+              className={`app-menu__item ${
                 pathname === "/admin/don-hang" ? "active" : ""
               }`}
               href="/admin/don-hang"

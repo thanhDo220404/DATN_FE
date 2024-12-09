@@ -246,10 +246,10 @@ export default function Dashboard() {
             <div className="col-sm-12 col-lg-6">
               <ChartComponent
                 chartElementId={"chartRevenue"}
-                title={"THỐNG KÊ ĐƠN HÀNG"}
+                title={"THỐNG KÊ DOANH THU"}
                 chartType={"bar"}
                 orders={listOrders}
-                chartDatasetsLabel={"Tổng số lượng đơn hàng"}
+                chartDatasetsLabel={"Tổng doanh thu"}
                 useRevenue={true}
                 borderColor={"rgba(255, 99, 132, 1)"}
                 backgroundColor={"rgba(255, 99, 132, 0.2)"}

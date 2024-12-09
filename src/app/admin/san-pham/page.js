@@ -187,7 +187,7 @@ export default function Products() {
                   </tr>
                 </tfoot>
               </table>
-              <div>
+              <div className="row element-button">
                 <Pagination
                   totalPages={totalPages}
                   currentPage={currentPage}
@@ -220,7 +220,7 @@ export default function Products() {
               ></button>
             </div>
             <div className="modal-body">
-              <p>Bạn có chắc chắn muốn xóa màu này không?</p>
+              <p>Bạn có chắc chắn muốn xóa sản phẩm này không?</p>
             </div>
             <div className="modal-footer">
               <button

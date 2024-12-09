@@ -1,22 +1,7 @@
-import "bootstrap/dist/css/bootstrap.min.css";
-import "bootstrap-icons/font/bootstrap-icons.css";
-import "../globals.css";
-
-export default function gioithieu() {
+export default function AboutUs() {
   return (
     <>
-      <div className="container mt-4">
-        {/* Đường dẫn Breadcrumb */}
-        <nav aria-label="breadcrumb">
-          <ol className="breadcrumb">
-            <li className="breadcrumb-item">
-              <a href="#">Trang chủ</a>
-            </li>
-            <li className="breadcrumb-item active" aria-current="page">
-              Giới thiệu
-            </li>
-          </ol>
-        </nav>
+      <div className="container my-5">
         {/* Phần tiêu đề */}
         <div className="row">
           <div className="col-md-12 text-center">
@@ -47,12 +32,12 @@ export default function gioithieu() {
           <div className="col-md-6">
             <div className="map-container">
               <iframe
-                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3151.8354345096176!2d144.96305771531667!3d-37.81627977975179!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x6ad642af0f11fd81%3A0xf577da3f9daef738!2sGoogle%20Australia!5e0!3m2!1svi!2sau!4v1613792231097!5m2!1svi!2sau"
+                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d415.8350065856255!2d106.62617862981467!3d10.853860978820471!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x31752b6c59ba4c97%3A0x535e784068f1558b!2zVHLGsOG7nW5nIENhbyDEkeG6s25nIEZQVCBQb2x5dGVjaG5pYw!5e0!3m2!1svi!2sus!4v1733735653673!5m2!1svi!2sus"
                 width={600}
-                height={450}
+                height={400}
                 style={{ border: 0 }}
-                allowFullScreen=""
-                loading="lazy"
+                loading={"lazy"}
+                referrerpolicy={"no-referrer-when-downgrade"}
               ></iframe>
             </div>
           </div>
@@ -109,8 +94,6 @@ export default function gioithieu() {
           </div>
         </div>
       </div>
-      {/* Bootstrap JS */}
-      <script src="/bootstrap/js/bootstrap.bundle.js"></script>
     </>
   );
 }

@@ -38,17 +38,17 @@ export default function Footer() {
               <ul className="list-unstyled">
                 <li>
                   <a href="#" className="text-white">
-                    Email: contact@example.com
+                    Email: contact@dreamers.com
                   </a>
                 </li>
                 <li>
                   <a href="#" className="text-white">
-                    Điện thoại: 0123-456-789
+                    Điện thoại: 0918 326 706
                   </a>
                 </li>
                 <li>
                   <a href="#" className="text-white">
-                    Địa chỉ: 123 Đường ABC, Quận 1, HCM
+                    Địa chỉ: 49 Đ. Tô Ký, Trung Mỹ Tây, Quận 12, Hồ Chí Minh
                   </a>
                 </li>
               </ul>
@@ -58,28 +58,28 @@ export default function Footer() {
               <h5>Chuyên mục</h5>
               <ul className="list-unstyled">
                 <li>
-                  <a href="#" className="text-white">
+                  <a href="/" className="text-white">
                     Trang Chủ
                   </a>
                 </li>
                 <li>
-                  <a href="#" className="text-white">
+                  <a href="/san-pham" className="text-white">
                     Sản Phẩm
                   </a>
                 </li>
                 <li>
-                  <a href="#" className="text-white">
-                    Flash Sale
+                  <a href="/danh-muc" className="text-white">
+                    Danh mục
                   </a>
                 </li>
                 <li>
-                  <a href="#" className="text-white">
+                  <a href="/bai-viet" className="text-white">
+                    Bài viết
+                  </a>
+                </li>
+                <li>
+                  <a href="/ve-chung-toi" className="text-white">
                     Về Chúng Tôi
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="text-white">
-                    Hỗ Trợ
                   </a>
                 </li>
               </ul>
