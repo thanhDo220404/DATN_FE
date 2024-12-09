@@ -143,7 +143,7 @@ table {
   width: 696px;
   height: 600px;
   object-fit: cover; /* Đảm bảo hình ảnh vừa khít khung */
-  margin: 20px auto; /* Thêm khoảng cách margin top và bottom */
+  margin: auto; /* Thêm khoảng cách margin top và bottom */
 }
 
 /* CSS cho danh mục và sản phẩm */
@@ -265,7 +265,7 @@ table {
 .thumbnail-images {
   /* Sắp xếp các ảnh phụ theo chiều ngang và cách đều nhau */
   display: flex;
-  justify-content: space-between;
+  gap: 5px;
   margin-top: 15px;
 }
 
@@ -282,25 +282,16 @@ table {
   /* Khi hover vào ảnh phụ, đổi màu viền */
   border-color: #000;   
 }
+.thumbnail-images img.active {
+  /* Khi hover vào ảnh phụ, đổi màu viền */
+  border-color: #000;   
+}
 
 .details-section {
   /* Thiết lập đường viền trên cùng và khoảng cách với các thành phần khác */
   border-top: 1px solid #ddd;
   margin-top: 20px;   
   padding-top: 20px;  
-}
-
-.price {
-  /* Định dạng cho giá sản phẩm */
-  font-size: 1.5rem; /* Kích thước chữ lớn cho giá hiện tại */
-  font-weight: bold;  
-  color: #ff0000;   
-}
-
-.old-price {
-  /* Định dạng cho giá gạch bỏ (giá cũ) */
-  text-decoration: line-through;  
-  color: #888;  
 }
 
 .btn-custom {
@@ -611,30 +602,7 @@ table {
 /* styles/checkout.css */
 
 /* Nút "Tiến hành thanh toán" */
-.btn-primary {
-  background-color:yellow; /* Màu nền nút */
-  color: black; /* Màu chữ */
-  border: none; /* Không viền */
-  padding: 10px 20px; /* Khoảng cách bên trong */
-  font-size: 16px; /* Kích thước chữ */
-  border-radius: 5px; 
-  cursor: pointer; /* Con trỏ chuột */
-  transition: background-color 0.3s ease, transform 0.2s ease; 
-  width: 500px;
-  margin-left: 19px;
-  margin-top: 50px;
- 
-}
 
-/* Thay đổi màu khi di chuột */
-.btn-primary:hover {
-  background-color: #324B4D; /* Màu nền khi di chuột */
-}
-
-/* Hiệu ứng khi nhấn nút */
-.btn-primary:active {
-  transform: scale(0.95); /* Nhỏ lại khi nhấn */
-}
 
 /* Định dạng cho nhóm phương thức thanh toán và đơn vị vận chuyển */
 .payment-method-group,
@@ -712,135 +680,3 @@ table {
   color: black; 
 }
 
-/* ----------------------------tri css trang gio hàng */
-.kShopping{
-  margin-bottom: 80px;
-  border: 2px solid #ddd; /* Thêm đường viền */
-  border-radius: 20px; /* Bo tròn viền */
-  padding: 20px; /* Thêm khoảng cách bên trong để nội dung không dính vào viền */
-}
-.cart-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 10px 0;
-  border-bottom: 1px solid #ddd;
-}
-.cart-item img {
-  width: 50px;
-  height: auto;
-}
-.cart-summary {
-  background-color: #f8f9fa;
-  padding: 20px;
-}
-.cart-summary .btn {
-  width: 100%;
-}
-.Shopping-Cart{
-  padding: 10px 0;
-  border-bottom: 1px solid #ddd;
-}
-
-/* --------------------su-ly-don-hang-user tri */
-
-/* ----------------- CSS cho trạng thái đơn hàng ----------------- */
-
-/* Style chung cho các trạng thái đơn hàng */
-.status-circle {
-  width: 50px;
-  height: 50px;
-  border-radius: 50%;
-  color: white;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin: 0 auto 10px;
-}
-
-/* Đường nối giữa các trạng thái (màu xanh khi hoàn thành) */
-.status-line {
-  height: 4px;
-  background-color: #28a745; /* Màu xanh lá cho trạng thái hoàn thành */
-  position: absolute;
-  top: 25px;
-  left: 12%;
-  width: 75%;
-  z-index: 0;
-}
-
-/* Style cho các văn bản hiển thị tên trạng thái */
-.status-text {
-  margin-top: 10px;
-}
-
-/* ----------------- Trạng thái đã hoàn thành ----------------- */
-
-/* Màu xanh lá cho các trạng thái đã hoàn thành */
-.status-circle.bg-success {
-  background-color: #28a745; /* Màu xanh lá */
-}
-
-.status-text {
-  color: #28a745; /* Văn bản màu xanh lá khi trạng thái hoàn thành */
-}
-
-/* ----------------- Trạng thái chưa hoàn thành ----------------- */
-
-/* Chỉ dùng cho trạng thái chưa hoàn thành (màu xám) */
-.status-circle.inactive {
-  background-color: #dcdcdc; /* Màu xám cho trạng thái chưa hoàn thành */
-}
-
-/* Màu xám cho văn bản của trạng thái chưa hoàn thành */
-.status-text.inactive-text {
-  color: #dcdcdc; /* Văn bản màu xám cho trạng thái chưa hoàn thành */
-}
-
-/* ----------------- Các nút hành động ----------------- */
-.btn-section {
-  margin-top: 40px;
-  display: flex;
-  justify-content: space-around;
-}
-
-/* ------------------------- giới thiệu tri */
-.branch {
-  display: flex;
-  align-items: center; /* Canh giữa hình ảnh và đoạn văn */
-  margin-bottom: 20px;
-}
-
-.branch img {
-  width: 200px; /* Đặt chiều rộng cho hình ảnh */
-  height: auto; /* Đảm bảo tỉ lệ hình ảnh không bị biến dạng */
-  margin-right: 15px; /* Khoảng cách giữa hình ảnh và văn bản */
-}
-
-.branch p {
-  margin: 0; /* Loại bỏ khoảng cách mặc định của đoạn văn */
-  font-size: 16px; /* Tùy chỉnh kích thước chữ nếu cần */
-}
-/* ---------------------- bài viết trí */
-.main-article img {
-  width: 100%;
-  height: auto;
-}
-
-.related-articles img {
-  width: 400px;
-  height: auto;
-}
-
-.d-flex.mb-3 img {
-  width: 200px;
-}
-
-.related-articles .article-title {
-  font-size: 14px;
-  margin-top: 5px;
-}
-
-.related-articles {
-  font-size: 13px;
-}

@@ -2,16 +2,18 @@
 import { parseJwt } from "@/app/databases/users";
 import { getCookie } from "@/app/lib/CookieManager";
 import Link from "next/link";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 
 export default function Menu() {
   const pathname = usePathname();
+  const [userInfo, setUserInfo] = useState({});
 
   useEffect(() => {
     const token = getCookie("LOGIN_INFO");
     if (token) {
       const payload = parseJwt(token);
+      setUserInfo(payload);
       if (payload.role !== 1) {
         window.location.replace("/");
       }
@@ -26,13 +28,13 @@ export default function Menu() {
         <div className="app-sidebar__user">
           <img
             className="app-sidebar__user-avatar"
-            src="/images/hay.jpg"
+            src={`http://localhost:2204/img/user/${userInfo.image}`}
             width="50px"
             alt="User Image"
           />
           <div>
             <p className="app-sidebar__user-name">
-              <b>Võ Trường</b>
+              <b>{userInfo.name}</b>
             </p>
             <p className="app-sidebar__user-designation">
               Chào mừng bạn trở lại
@@ -48,10 +50,11 @@ export default function Menu() {
               }`}
               href="/admin"
             >
-              <i className="bi bi-speedometer2" />
+              <i className="bi bi-speedometer2 me-1" />
               <span className="app-menu__label">Dashboard</span>
             </Link>
           </li>
+
           <li>
             <Link
               className={`app-menu__item ${
@@ -59,34 +62,9 @@ export default function Menu() {
               }`}
               href="/admin/media"
             >
-              <i className="bi bi-card-image"></i>
+              <i className="bi bi-card-image me-1"></i>
               <span className="app-menu__label">Media</span>
             </Link>
-            {/* Hiển thị submenu nếu pathname chứa "/admin/media" */}
-            {pathname.includes("/admin/media") && (
-              <ul className="app-submenu">
-                <li>
-                  <Link
-                    className={`app-menu__item ${
-                      pathname === "/admin/media" ? "active" : ""
-                    }`}
-                    href="/admin/media"
-                  >
-                    <span className="app-menu__label">Thư viện</span>
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    className={`app-menu__item ${
-                      pathname === "/admin/media/videos" ? "active" : ""
-                    }`}
-                    href="/admin/media/videos"
-                  >
-                    <span className="app-menu__label">Videos</span>
-                  </Link>
-                </li>
-              </ul>
-            )}
           </li>
           <li>
             <Link
@@ -95,7 +73,7 @@ export default function Menu() {
               }`}
               href="/admin/users"
             >
-              <i className="bi bi-person" />
+              <i className="bi bi-person me-1" />
               <span className="app-menu__label">Quản lý người dùng</span>
             </Link>
           </li>
@@ -106,7 +84,7 @@ export default function Menu() {
               }`}
               href="/admin/danh-muc"
             >
-              <i className="bi bi-list-task" />
+              <i className="bi bi-list-task me-1" />
               <span className="app-menu__label">Quản lý danh mục</span>
             </Link>
           </li>
@@ -117,9 +95,46 @@ export default function Menu() {
               }`}
               href="/admin/san-pham"
             >
-              <i className="bi bi-tag" />
-              <span className="app-menu__label">Quản lý sản phẩm</span>
+              <i className="bi bi-box-seam-fill"></i>
+              <span className="app-menu__label ms-1">Quản lý sản phẩm</span>
             </Link>
+            {/* Hiển thị submenu nếu pathname chứa "/admin/san-pham" */}
+            {pathname.includes("/admin/san-pham") ||
+            pathname.includes("/admin/mau-sac") ||
+            pathname.includes("/admin/kich-thuoc") ? (
+              <ul className="app-submenu">
+                <li>
+                  <Link
+                    className={`app-menu__item ${
+                      pathname === "/admin/san-pham/them" ? "active" : ""
+                    }`}
+                    href="/admin/san-pham/them"
+                  >
+                    <span className="app-menu__label">Thêm</span>
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    className={`app-menu__item ${
+                      pathname === "/admin/mau-sac" ? "active" : ""
+                    }`}
+                    href="/admin/mau-sac"
+                  >
+                    <span className="app-menu__label">Màu sắc</span>
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    className={`app-menu__item ${
+                      pathname === "/admin/kich-thuoc" ? "active" : ""
+                    }`}
+                    href="/admin/kich-thuoc"
+                  >
+                    <span className="app-menu__label">Kích thước</span>
+                  </Link>
+                </li>
+              </ul>
+            ) : null}
           </li>
           <li>
             <Link
@@ -128,8 +143,8 @@ export default function Menu() {
               }`}
               href="/admin/don-hang"
             >
-              <i className="bi bi-list-task" />
-              <span className="app-menu__label">Quản lý đơn hàng</span>
+              <i className="bi bi-bag-fill"></i>
+              <span className="app-menu__label ms-1">Quản lý đơn hàng</span>
             </Link>
           </li>
           <li>
@@ -139,14 +154,14 @@ export default function Menu() {
               }`}
               href="/admin/bao-cao"
             >
-              <i className="bi bi-bar-chart-line" />
+              <i className="bi bi-bar-chart-line me-1" />
               <span className="app-menu__label">Báo cáo doanh thu</span>
             </Link>
           </li>
           <li>
-            <a className="app-menu__item" href="#">
-              <i className="bi bi-gear" />
-              <span className="app-menu__label">Cài đặt hệ thống</span>
+            <a className="app-menu__item" href="/">
+              <i className="bi bi-house-door-fill"></i>
+              <span className="app-menu__label ms-1">Trang Chủ</span>
             </a>
           </li>
         </ul>

@@ -1,5 +1,4 @@
 import Menu from "./components/menu";
-import Chart from "chart.js/auto"; // nhớ npm install chart.js
 
 import "../admin-main.css";
 
@@ -12,7 +11,7 @@ export default function AdminLayout({ children }) {
   return (
     <>
       <Menu></Menu>
-      <main className="app-content">{children}</main>
+      <main className="app-content overflow-auto">{children}</main>
     </>
   );
 }

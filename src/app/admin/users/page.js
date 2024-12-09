@@ -1,7 +1,24 @@
-export default function user() {
+"use client";
+import { getAllUsers } from "@/app/databases/users";
+import Link from "next/link";
+import { useEffect, useState } from "react";
+
+export default function Users() {
+  const [listUsers, setListUsers] = useState([]);
+
+  const fetchUsers = async () => {
+    const result = await getAllUsers();
+    const filteredUsers = result.Users.filter((user) => user.role === 0);
+    setListUsers(filteredUsers);
+    console.log(filteredUsers);
+  };
+
+  useEffect(() => {
+    fetchUsers();
+  }, []);
+
   return (
     <>
-      {/* nội dung */}
       <div className="app-title">
         <ul className="app-breadcrumb breadcrumb side">
           <li className="breadcrumb-item active">
@@ -17,69 +34,19 @@ export default function user() {
           <div className="tile">
             <div className="tile-body">
               <div className="row element-button">
-                {/* <div className="col-sm-2">
-                    <a
-                      className="btn btn-add btn-sm"
-                      href="form-add-nhan-vien.html"
-                      title="Thêm"
-                    >
-                      <i className="bi bi-plus" />
-                      Tạo mới khách hàng
-                    </a>
-                  </div> */}
                 <div className="col-sm-2">
-                  <a
+                  {/* <a
                     className="btn btn-delete btn-sm nhap-tu-file"
                     type="button"
                     title="Nhập"
                   >
                     <i className="bi bi-file-earmark-arrow-up" /> Tải từ file
-                  </a>
+                  </a> */}
                 </div>
-                <div className="col-sm-2">
-                  <a
-                    className="btn btn-delete btn-sm print-file"
-                    type="button"
-                    title="In"
-                  >
-                    <i className="bi bi-printer" /> In dữ liệu
-                  </a>
-                </div>
-                <div className="col-sm-2">
-                  <a
-                    className="btn btn-delete btn-sm print-file js-textareacopybtn"
-                    type="button"
-                    title="Sao chép"
-                  >
-                    <i className="bi bi-clipboard" /> Sao chép
-                  </a>
-                </div>
-                <div className="col-sm-2">
-                  <a className="btn btn-excel btn-sm" href="" title="In">
-                    <i className="bi bi-file-earmark-spreadsheet" /> Xuất Excel
-                  </a>
-                </div>
-                <div className="col-sm-2">
-                  <a
-                    className="btn btn-delete btn-sm pdf-file"
-                    type="button"
-                    title="In"
-                  >
-                    <i className="bi bi-file-earmark-pdf" /> Xuất PDF
-                  </a>
-                </div>
-                <div className="col-sm-2">
-                  <a
-                    className="btn btn-delete btn-sm"
-                    type="button"
-                    title="Xóa"
-                  >
-                    <i className="bi bi-trash" /> Xóa tất cả
-                  </a>
-                </div>
+                {/* Các button khác */}
               </div>
               <table
-                className="table table-hover table-bordered js-copytextarea"
+                className="table table-hover table-bordered js-copytextarea table-align-center"
                 cellPadding={0}
                 cellSpacing={0}
                 border={0}
@@ -87,302 +54,56 @@ export default function user() {
               >
                 <thead>
                   <tr>
-                    <th width={10}>
-                      <input type="checkbox" id="all" />
-                    </th>
                     <th>ID khách hàng</th>
                     <th width={150}>Họ và tên</th>
-                    <th width={20}>Ảnh thẻ</th>
-                    <th width={300}>Địa chỉ</th>
-                    <th>Ngày sinh</th>
-                    <th>Giới tính</th>
+                    <th width={20}>Ảnh</th>
+                    <th>Email</th>
                     <th>SĐT</th>
-                    <th>pass</th>
-                    <th width={100}>Tính năng</th>
+                    <th>Tính năng</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {/* Dữ liệu khách hàng sẽ ở đây */}
-                  <tr>
-                    <td width={10}>
-                      <input type="checkbox" name="check1" defaultValue={1} />
-                    </td>
-                    <td>#CD12837</td>
-                    <td>Hồ Thị Thanh Ngân</td>
-                    <td>
-                      <img
-                        className="img-card-person"
-                        src="../img-anhthe/2.jpg"
-                        alt=""
-                      />
-                    </td>
-                    <td>155-157 Trần Quốc Thảo, Quận 3, Hồ Chí Minh</td>
-                    <td>12/02/1999</td>
-                    <td>Nữ</td>
-                    <td>0926737168</td>
-                    <td>12345</td>
-                    <td className="table-td-center">
-                      <button
-                        className="btn btn-primary btn-sm trash"
-                        type="button"
-                        title="Xóa"
-                        style={{ width: "20px", margin: "5px" }}
-                      >
-                        <i className="bi bi-trash" />
-                      </button>
-                      <button
-                        className="btn btn-primary btn-sm edit"
-                        type="button"
-                        title="Sửa"
-                        id="show-emp"
-                        data-toggle="modal"
-                        data-target="#ModalUP"
-                        style={{ width: "20px", margin: "5px" }}
-                      >
-                        <i className="bi bi-pencil" />
-                      </button>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td width={10}>
-                      <input type="checkbox" name="check1" defaultValue={1} />
-                    </td>
-                    <td>#CD12837</td>
-                    <td>Hồ Thị Thanh Ngân</td>
-                    <td>
-                      <img
-                        className="img-card-person"
-                        src="../img-anhthe/3.jpg"
-                        alt=""
-                      />
-                    </td>
-                    <td>155-157 Trần Quốc Thảo, Quận 3, Hồ Chí Minh</td>
-                    <td>12/02/1999</td>
-                    <td>Nữ</td>
-                    <td>0926737168</td>
-                    <td>12345</td>
-                    <td className="table-td-center">
-                      <button
-                        className="btn btn-primary btn-sm trash"
-                        type="button"
-                        title="Xóa"
-                        style={{ width: "20px", margin: "5px" }}
-                      >
-                        <i className="bi bi-trash" />
-                      </button>
-                      <button
-                        className="btn btn-primary btn-sm edit"
-                        type="button"
-                        title="Sửa"
-                        id="show-emp"
-                        data-toggle="modal"
-                        data-target="#ModalUP"
-                        style={{ width: "20px", margin: "5px" }}
-                      >
-                        <i className="bi bi-pencil" />
-                      </button>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td width={10}>
-                      <input type="checkbox" name="check1" defaultValue={1} />
-                    </td>
-                    <td>#CD12837</td>
-                    <td>Hồ Thị Thanh Ngân</td>
-                    <td>
-                      <img
-                        className="img-card-person"
-                        src="../img-anhthe/4.jpg"
-                        alt=""
-                      />
-                    </td>
-                    <td>155-157 Trần Quốc Thảo, Quận 3, Hồ Chí Minh</td>
-                    <td>12/02/1999</td>
-                    <td>Nữ</td>
-                    <td>0926737168</td>
-                    <td>12345</td>
-                    <td className="table-td-center">
-                      <button
-                        className="btn btn-primary btn-sm trash"
-                        type="button"
-                        title="Xóa"
-                        style={{ width: "20px", margin: "5px" }}
-                      >
-                        <i className="bi bi-trash" />
-                      </button>
-                      <button
-                        className="btn btn-primary btn-sm edit"
-                        type="button"
-                        title="Sửa"
-                        id="show-emp"
-                        data-toggle="modal"
-                        data-target="#ModalUP"
-                        style={{ width: "20px", margin: "5px" }}
-                      >
-                        <i className="bi bi-pencil" />
-                      </button>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td width={10}>
-                      <input type="checkbox" name="check1" defaultValue={1} />
-                    </td>
-                    <td>#CD12837</td>
-                    <td>Hồ Thị Thanh Ngân</td>
-                    <td>
-                      <img
-                        className="img-card-person"
-                        src="../img-anhthe/5.jpg"
-                        alt=""
-                      />
-                    </td>
-                    <td>155-157 Trần Quốc Thảo, Quận 3, Hồ Chí Minh</td>
-                    <td>12/02/1999</td>
-                    <td>Nữ</td>
-                    <td>0926737168</td>
-                    <td>12345</td>
-                    <td className="table-td-center">
-                      <button
-                        className="btn btn-primary btn-sm trash"
-                        type="button"
-                        title="Xóa"
-                        style={{ width: "20px", margin: "5px" }}
-                      >
-                        <i className="bi bi-trash" />
-                      </button>
-                      <button
-                        className="btn btn-primary btn-sm edit"
-                        type="button"
-                        title="Sửa"
-                        id="show-emp"
-                        data-toggle="modal"
-                        data-target="#ModalUP"
-                        style={{ width: "20px", margin: "5px" }}
-                      >
-                        <i className="bi bi-pencil" />
-                      </button>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td width={10}>
-                      <input type="checkbox" name="check1" defaultValue={1} />
-                    </td>
-                    <td>#CD12837</td>
-                    <td>Hồ Thị Thanh Ngân</td>
-                    <td>
-                      <img
-                        className="img-card-person"
-                        src="../img-anhthe/1.jpg"
-                        alt=""
-                      />
-                    </td>
-                    <td>155-157 Trần Quốc Thảo, Quận 3, Hồ Chí Minh</td>
-                    <td>12/02/1999</td>
-                    <td>Nữ</td>
-                    <td>0926737168</td>
-                    <td>12345</td>
-                    <td className="table-td-center">
-                      <button
-                        className="btn btn-primary btn-sm trash"
-                        type="button"
-                        title="Xóa"
-                        style={{ width: "20px", margin: "5px" }}
-                      >
-                        <i className="bi bi-trash" />
-                      </button>
-                      <button
-                        className="btn btn-primary btn-sm edit"
-                        type="button"
-                        title="Sửa"
-                        id="show-emp"
-                        data-toggle="modal"
-                        data-target="#ModalUP"
-                        style={{ width: "20px", margin: "5px" }}
-                      >
-                        <i className="bi bi-pencil" />
-                      </button>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td width={10}>
-                      <input type="checkbox" name="check1" defaultValue={1} />
-                    </td>
-                    <td>#CD12837</td>
-                    <td>Hồ Thị Thanh Ngân</td>
-                    <td>
-                      <img
-                        className="img-card-person"
-                        src="../img-anhthe/3.jpg"
-                        alt=""
-                      />
-                    </td>
-                    <td>155-157 Trần Quốc Thảo, Quận 3, Hồ Chí Minh</td>
-                    <td>12/02/1999</td>
-                    <td>Nữ</td>
-                    <td>0926737168</td>
-                    <td>12345</td>
-                    <td className="table-td-center">
-                      <button
-                        className="btn btn-primary btn-sm trash"
-                        type="button"
-                        title="Xóa"
-                        style={{ width: "20px", margin: "5px" }}
-                      >
-                        <i className="bi bi-trash" />
-                      </button>
-                      <button
-                        className="btn btn-primary btn-sm edit"
-                        type="button"
-                        title="Sửa"
-                        id="show-emp"
-                        data-toggle="modal"
-                        data-target="#ModalUP"
-                        style={{ width: "20px", margin: "5px" }}
-                      >
-                        <i className="bi bi-pencil" />
-                      </button>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td width={10}>
-                      <input type="checkbox" name="check1" defaultValue={1} />
-                    </td>
-                    <td>#CD12837</td>
-                    <td>Hồ Thị Thanh Ngân</td>
-                    <td>
-                      <img
-                        className="img-card-person"
-                        src="../img-anhthe/6.jpg"
-                        alt=""
-                      />
-                    </td>
-                    <td>155-157 Trần Quốc Thảo, Quận 3, Hồ Chí Minh</td>
-                    <td>12/02/1999</td>
-                    <td>Nữ</td>
-                    <td>0926737168</td>
-                    <td>12345</td>
-                    <td className="table-td-center">
-                      <button
-                        className="btn btn-primary btn-sm trash"
-                        type="button"
-                        title="Xóa"
-                        style={{ width: "20px", margin: "5px" }}
-                      >
-                        <i className="bi bi-trash" />
-                      </button>
-                      <button
-                        className="btn btn-primary btn-sm edit"
-                        type="button"
-                        title="Sửa"
-                        id="show-emp"
-                        data-toggle="modal"
-                        data-target="#ModalUP"
-                        style={{ width: "20px", margin: "5px" }}
-                      >
-                        <i className="bi bi-pencil" />
-                      </button>
-                    </td>
-                  </tr>
+                  {listUsers.length > 0 ? (
+                    listUsers
+                      .sort(
+                        (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+                      )
+                      .map((user) => (
+                        <tr key={user._id}>
+                          <td>{user._id}</td>
+                          <td>{user.name}</td>
+                          <td>
+                            <img
+                              className="img-card-person"
+                              src={`http://localhost:2204/img/user/${user.image}`}
+                              alt="User Avatar"
+                              width="50"
+                            />
+                          </td>
+                          <td>{user.email}</td>
+                          <td>{user.phone}</td>
+                          <td>
+                            <Link href={`/admin/users/${user._id}`}>
+                              <button
+                                className="btn btn-primary btn-sm"
+                                type="button"
+                                title="Xem"
+                                id="show-emp"
+                                style={{ width: "20px", margin: "5px" }}
+                              >
+                                <i className="bi bi-eye-fill"></i>
+                              </button>
+                            </Link>
+                          </td>
+                        </tr>
+                      ))
+                  ) : (
+                    <tr>
+                      <td colSpan="6" style={{ textAlign: "center" }}>
+                        Không có dữ liệu người dùng
+                      </td>
+                    </tr>
+                  )}
                 </tbody>
               </table>
             </div>

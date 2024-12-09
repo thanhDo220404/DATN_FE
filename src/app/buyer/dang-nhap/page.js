@@ -6,6 +6,8 @@ import bcrypt from "bcryptjs";
 import { setCookie, getCookie } from "../../lib/CookieManager"; // Import CookieManager
 import { useState, useEffect } from "react"; // Import useEffect
 import { login } from "@/app/databases/users"; // Import the login function
+import { useSearchParams } from "next/navigation";
+import next from "next";
 
 const fetcher = (...args) => fetch(...args).then((res) => res.json());
 const apiUrl = process.env.NEXT_PUBLIC_API_URL;
@@ -14,11 +16,12 @@ const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 const checkEmailExists = (data, email) => {
   const user = data.Users.find((user) => user.email === email);
   if (!user) return "Email không tồn tại";
-  if (!user.isVerified) return "Tài khoản chưa xác thực email";
   return true;
 };
 
 export default function Login() {
+  const searchParams = useSearchParams();
+  const nextPage = searchParams.get("next");
   const { data, isLoading, error } = useSWR(`${apiUrl}/users`, fetcher, {
     refreshInterval: 6000,
   });
@@ -80,7 +83,11 @@ export default function Login() {
       setCookie("LOGIN_INFO", result.User.token, 1); // Lưu token với thời gian sống 1 ngày
       reset(); // Xóa input
       console.log("Đăng nhập thành công");
-      window.location.reload();
+      if (nextPage) {
+        window.location.href = `${nextPage}`;
+      } else {
+        window.location.href = "/";
+      }
     } catch (error) {
       console.error("Error during login:", error);
     } finally {
@@ -194,7 +201,7 @@ export default function Login() {
         </Link>
       </div>
       <div className="col border border-dark d-none d-md-flex">
-        <img src="/images/logo4x.png" alt="Logo" className="w-50 m-auto" />
+        <img src="/images/logocolor.png" alt="Logo" className="w-50 m-auto" />
       </div>
     </div>
   );

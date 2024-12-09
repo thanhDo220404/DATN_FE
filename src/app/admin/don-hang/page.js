@@ -1,345 +1,185 @@
-export default function donhang() {
+"use client";
+import { getAllOrders } from "@/app/databases/order";
+import { getOrderStatuses } from "@/app/databases/order_status";
+import Link from "next/link";
+import { useEffect, useState } from "react";
+
+export default function Orders() {
+  const [orders, setOrders] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [listOrderStatuses, setListOrderStatues] = useState([]);
+  const [selectedStatus, setSelectedStatus] = useState(null); // Mặc định chọn "Tất cả"
+
+  const fetchOrderStatues = async () => {
+    const result = await getOrderStatuses();
+    setListOrderStatues(result);
+  };
+
+  const fetchOrders = async (statusId = null) => {
+    setIsLoading(true);
+    const result = await getAllOrders();
+    // Lọc đơn hàng theo trạng thái nếu có
+    const filteredOrders = statusId
+      ? result.filter((order) => order.order_status._id === statusId)
+      : result;
+    setOrders(filteredOrders); // Cập nhật trạng thái đơn hàng
+    setIsLoading(false);
+  };
+
+  useEffect(() => {
+    fetchOrders(); // Gọi hàm fetchOrders khi component mount
+    fetchOrderStatues();
+  }, []);
+
+  // Hàm xử lý khi người dùng chọn trạng thái
+  const handleOrderStatus = (statusId) => {
+    setSelectedStatus(statusId); // Cập nhật trạng thái đã chọn
+    fetchOrders(statusId); // Lọc đơn hàng theo trạng thái đã chọn
+  };
+
   return (
     <>
       <div className="app-title">
         <ul className="app-breadcrumb breadcrumb side">
           <li className="breadcrumb-item active">
             <a href="#">
-              <b>Danh sách sản phẩm</b>
+              <b>Danh sách đơn hàng</b>
             </a>
           </li>
         </ul>
         <div id="clock" />
       </div>
-      <div className="row">
+      <div className="bg-white position-sticky top-0 shadow-sm">
+        <div className="d-flex justify-content-between fs-6">
+          {/* Tạo riêng div cho "Tất cả" */}
+          <div
+            className={`p-3 flex-shrink-0 ${
+              selectedStatus === null
+                ? "border-primary border-bottom border-3 "
+                : ""
+            }`}
+            style={{ cursor: "pointer" }}
+            onClick={() => handleOrderStatus(null)} // Khi bấm "Tất cả" thì hiển thị tất cả đơn hàng
+          >
+            Tất cả
+          </div>
+
+          {/* Hiển thị các trạng thái còn lại từ listOrderStatuses */}
+          {listOrderStatuses.map((status, index) => (
+            <div
+              key={index}
+              className={`p-3 flex-grow-1 text-center ${
+                selectedStatus === status._id
+                  ? "border-bottom border-primary border-3"
+                  : ""
+              }`}
+              style={{ cursor: "pointer" }}
+              onClick={() => handleOrderStatus(status._id)} // Xử lý khi bấm vào trạng thái
+            >
+              {status.name}
+            </div>
+          ))}
+        </div>
+      </div>
+      <div className="row mt-3">
         <div className="col-md-12">
           <div className="tile">
             <div className="tile-body">
-              <div className="row element-button">
-                <div className="col-sm-2">
-                  <a
-                    className="btn btn-add btn-sm"
-                    href="form-add-nhan-vien.html"
-                    title="Thêm"
-                  >
-                    <i className="bi bi-plus" />
-                    Thêm sản phẩm
-                  </a>
+              {isLoading ? (
+                <div className="text-center my-3">
+                  <div className="spinner-border text-primary" role="status">
+                    <span className="visually-hidden">Loading...</span>
+                  </div>
                 </div>
-                <div className="col-sm-2">
-                  <a
-                    className="btn btn-delete btn-sm nhap-tu-file"
-                    type="button"
-                    title="Nhập"
-                  >
-                    <i className="bi bi-file-earmark-arrow-up" /> Tải từ file
-                  </a>
+              ) : (
+                <div className="table-responsive">
+                  <table className="table table-hover table-bordered js-copytextarea align-middle">
+                    <thead>
+                      <tr>
+                        <th>ID đơn hàng</th>
+                        <th>Khách hàng</th>
+                        <th>Địa chỉ</th>
+                        <th>Đơn hàng</th>
+                        <th>Số lượng</th>
+                        <th>Tổng tiền</th>
+                        <th>Tình trạng</th>
+                        <th>Tính năng</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {orders.length > 0 ? (
+                        orders.map((order) => (
+                          <tr key={order._id}>
+                            <td>{order._id}</td>
+                            <td>{order.order_address.name}</td>
+                            <td>
+                              {order.order_address.specific_address},{" "}
+                              {order.order_address.address.district.ward.prefix}
+                              , {order.order_address.address.district.ward.name}
+                              , {order.order_address.address.district.name},{" "}
+                              {order.order_address.address.name}
+                            </td>
+                            <td>
+                              {order.products.slice(0, 1).map((product) => (
+                                <div key={product._id}>
+                                  {product.name} - {product.quantity} cái
+                                </div>
+                              ))}
+                              {order.products.length > 1 && (
+                                <span>
+                                  và {order.products.length - 1} sản phẩm
+                                  khác...
+                                </span>
+                              )}
+                            </td>
+
+                            <td>{order.products.length}</td>
+                            <td>{order.order_total.toLocaleString()}đ</td>
+                            <td>
+                              <span
+                                className={`badge ${
+                                  order.order_status.name === "Đã giao hàng"
+                                    ? "bg-success"
+                                    : order.order_status.name === "Chờ xử lý"
+                                    ? "bg-info"
+                                    : order.order_status.name ===
+                                      "Đang giao hàng"
+                                    ? "bg-warning"
+                                    : order.order_status.name === "Đã hủy"
+                                    ? "bg-danger"
+                                    : "bg-primary"
+                                }`}
+                              >
+                                {order.order_status.name}
+                              </span>
+                            </td>
+                            <td className="table-td-center">
+                              <Link href={`/admin/don-hang/sua/${order._id}`}>
+                                <button
+                                  className="btn btn-warning btn-sm edit"
+                                  type="button"
+                                  title="Sửa"
+                                  data-toggle="modal"
+                                  data-target="#ModalUP"
+                                  style={{ width: "20px", margin: "5px" }}
+                                >
+                                  <i className="bi bi-pencil" />
+                                </button>
+                              </Link>
+                            </td>
+                          </tr>
+                        ))
+                      ) : (
+                        <tr>
+                          <td colSpan="8" className="text-center">
+                            Không có đơn hàng nào.
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
                 </div>
-                <div className="col-sm-2">
-                  <a
-                    className="btn btn-delete btn-sm print-file"
-                    type="button"
-                    title="In"
-                  >
-                    <i className="bi bi-printer" /> In dữ liệu
-                  </a>
-                </div>
-                <div className="col-sm-2">
-                  <a
-                    className="btn btn-delete btn-sm print-file js-textareacopybtn"
-                    type="button"
-                    title="Sao chép"
-                  >
-                    <i className="bi bi-clipboard" /> Sao chép
-                  </a>
-                </div>
-                <div className="col-sm-2">
-                  <a className="btn btn-excel btn-sm" href="" title="In">
-                    <i className="bi bi-file-earmark-spreadsheet" /> Xuất Excel
-                  </a>
-                </div>
-                <div className="col-sm-2">
-                  <a
-                    className="btn btn-delete btn-sm pdf-file"
-                    type="button"
-                    title="In"
-                  >
-                    <i className="bi bi-file-earmark-pdf" /> Xuất PDF
-                  </a>
-                </div>
-                <div className="col-sm-2">
-                  <a
-                    className="btn btn-delete btn-sm"
-                    type="button"
-                    title="Xóa"
-                  >
-                    <i className="bi bi-trash" /> Xóa tất cả
-                  </a>
-                </div>
-              </div>
-              <table
-                className="table table-hover table-bordered js-copytextarea"
-                cellPadding={0}
-                cellSpacing={0}
-                border={0}
-                id="sampleTable"
-              >
-                <thead>
-                  <tr>
-                    <th width={10}>
-                      <input type="checkbox" id="all" />
-                    </th>
-                    <th>ID đơn hàng</th>
-                    <th width={300}>khách hàng</th>
-                    <th width={450}>Đơn hàng</th>
-                    <th width={130}>Số lượng</th>
-                    <th width={200}>Tổng tiền</th>
-                    <th width={190}>Tình trạng</th>
-                    <th width={100}>Tính năng</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {/* Dữ liệu khách hàng sẽ ở đây */}
-                  <tr>
-                    <td width={10}>
-                      <input type="checkbox" name="check1" defaultValue={1} />
-                    </td>
-                    <td>MD0837</td>
-                    <td>Triệu Thanh Phú</td>
-                    <td>Ghế làm việc Zuno, Bàn ăn gỗ Theresa</td>
-                    <td>2</td>
-                    <td>5.600.000 đ</td>
-                    <td>
-                      <span class="badge bg-danger">Đã hủy</span>
-                    </td>
-                    <td className="table-td-center">
-                      <button
-                        className="btn btn-primary btn-sm trash"
-                        type="button"
-                        title="Xóa"
-                        style={{ width: "20px", margin: "5px" }}
-                      >
-                        <i className="bi bi-trash" />
-                      </button>
-                      <button
-                        className="btn btn-primary btn-sm edit"
-                        type="button"
-                        title="Sửa"
-                        id="show-emp"
-                        data-toggle="modal"
-                        data-target="#ModalUP"
-                        style={{ width: "20px", margin: "5px" }}
-                      >
-                        <i className="bi bi-pencil" />
-                      </button>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td width={10}>
-                      <input type="checkbox" name="check1" defaultValue={1} />
-                    </td>
-                    <td>MD0837</td>
-                    <td>Triệu Thanh Phú</td>
-                    <td>Ghế làm việc Zuno, Bàn ăn gỗ Theresa</td>
-                    <td>2</td>
-                    <td>5.600.000 đ</td>
-                    <td>
-                      <span class="badge bg-success">Hoàn thành</span>
-                    </td>
-                    <td className="table-td-center">
-                      <button
-                        className="btn btn-primary btn-sm trash"
-                        type="button"
-                        title="Xóa"
-                        style={{ width: "20px", margin: "5px" }}
-                      >
-                        <i className="bi bi-trash" />
-                      </button>
-                      <button
-                        className="btn btn-primary btn-sm edit"
-                        type="button"
-                        title="Sửa"
-                        id="show-emp"
-                        data-toggle="modal"
-                        data-target="#ModalUP"
-                        style={{ width: "20px", margin: "5px" }}
-                      >
-                        <i className="bi bi-pencil" />
-                      </button>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td width={10}>
-                      <input type="checkbox" name="check1" defaultValue={1} />
-                    </td>
-                    <td>MD0837</td>
-                    <td>Triệu Thanh Phú</td>
-                    <td>Ghế làm việc Zuno, Bàn ăn gỗ Theresa</td>
-                    <td>2</td>
-                    <td>5.600.000 đ</td>
-                    <td>
-                      <span class="badge bg-warning">Đang giao hàng</span>
-                    </td>
-                    <td className="table-td-center">
-                      <button
-                        className="btn btn-primary btn-sm trash"
-                        type="button"
-                        title="Xóa"
-                        style={{ width: "20px", margin: "5px" }}
-                      >
-                        <i className="bi bi-trash" />
-                      </button>
-                      <button
-                        className="btn btn-primary btn-sm edit"
-                        type="button"
-                        title="Sửa"
-                        id="show-emp"
-                        data-toggle="modal"
-                        data-target="#ModalUP"
-                        style={{ width: "20px", margin: "5px" }}
-                      >
-                        <i className="bi bi-pencil" />
-                      </button>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td width={10}>
-                      <input type="checkbox" name="check1" defaultValue={1} />
-                    </td>
-                    <td>MD0837</td>
-                    <td>Triệu Thanh Phú</td>
-                    <td>Ghế làm việc Zuno, Bàn ăn gỗ Theresa</td>
-                    <td>2</td>
-                    <td>5.600.000 đ</td>
-                    <td>
-                      <span class="badge bg-info">Chờ thanh toán</span>
-                    </td>
-                    <td className="table-td-center">
-                      <button
-                        className="btn btn-primary btn-sm trash"
-                        type="button"
-                        title="Xóa"
-                        style={{ width: "20px", margin: "5px" }}
-                      >
-                        <i className="bi bi-trash" />
-                      </button>
-                      <button
-                        className="btn btn-primary btn-sm edit"
-                        type="button"
-                        title="Sửa"
-                        id="show-emp"
-                        data-toggle="modal"
-                        data-target="#ModalUP"
-                        style={{ width: "20px", margin: "5px" }}
-                      >
-                        <i className="bi bi-pencil" />
-                      </button>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td width={10}>
-                      <input type="checkbox" name="check1" defaultValue={1} />
-                    </td>
-                    <td>MD0837</td>
-                    <td>Triệu Thanh Phú</td>
-                    <td>Ghế làm việc Zuno, Bàn ăn gỗ Theresa</td>
-                    <td>2</td>
-                    <td>5.600.000 đ</td>
-                    <td>
-                      <span class="badge bg-warning">Đang giao hàng</span>
-                    </td>
-                    <td className="table-td-center">
-                      <button
-                        className="btn btn-primary btn-sm trash"
-                        type="button"
-                        title="Xóa"
-                        style={{ width: "20px", margin: "5px" }}
-                      >
-                        <i className="bi bi-trash" />
-                      </button>
-                      <button
-                        className="btn btn-primary btn-sm edit"
-                        type="button"
-                        title="Sửa"
-                        id="show-emp"
-                        data-toggle="modal"
-                        data-target="#ModalUP"
-                        style={{ width: "20px", margin: "5px" }}
-                      >
-                        <i className="bi bi-pencil" />
-                      </button>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td width={10}>
-                      <input type="checkbox" name="check1" defaultValue={1} />
-                    </td>
-                    <td>MD0837</td>
-                    <td>Triệu Thanh Phú</td>
-                    <td>Ghế làm việc Zuno, Bàn ăn gỗ Theresa</td>
-                    <td>2</td>
-                    <td>5.600.000 đ</td>
-                    <td>
-                      <span class="badge bg-success">Hoàn thành</span>
-                    </td>
-                    <td className="table-td-center">
-                      <button
-                        className="btn btn-primary btn-sm trash"
-                        type="button"
-                        title="Xóa"
-                        style={{ width: "20px", margin: "5px" }}
-                      >
-                        <i className="bi bi-trash" />
-                      </button>
-                      <button
-                        className="btn btn-primary btn-sm edit"
-                        type="button"
-                        title="Sửa"
-                        id="show-emp"
-                        data-toggle="modal"
-                        data-target="#ModalUP"
-                        style={{ width: "20px", margin: "5px" }}
-                      >
-                        <i className="bi bi-pencil" />
-                      </button>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td width={10}>
-                      <input type="checkbox" name="check1" defaultValue={1} />
-                    </td>
-                    <td>MD0837</td>
-                    <td>Triệu Thanh Phú</td>
-                    <td>Ghế làm việc Zuno, Bàn ăn gỗ Theresa</td>
-                    <td>2</td>
-                    <td>5.600.000 đ</td>
-                    <td>
-                      <span class="badge bg-info">Chờ thanh toán</span>
-                    </td>
-                    <td className="table-td-center">
-                      <button
-                        className="btn btn-primary btn-sm trash"
-                        type="button"
-                        title="Xóa"
-                        style={{ width: "20px", margin: "5px" }}
-                      >
-                        <i className="bi bi-trash" />
-                      </button>
-                      <button
-                        className="btn btn-primary btn-sm edit"
-                        type="button"
-                        title="Sửa"
-                        id="show-emp"
-                        data-toggle="modal"
-                        data-target="#ModalUP"
-                        style={{ width: "20px", margin: "5px" }}
-                      >
-                        <i className="bi bi-pencil" />
-                      </button>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
+              )}
             </div>
           </div>
         </div>

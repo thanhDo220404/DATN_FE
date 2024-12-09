@@ -1,0 +1,81 @@
+.sortActive {
+  outline: 1px solid black; /* Đường viền bao quanh phần tử */
+  outline-offset: 3px;      /* Khoảng cách giữa phần tử và outline */
+}
+
+.my-relative {
+  position: relative;
+}
+
+.my-absolute {
+  position: absolute;
+  bottom: 0%;
+  opacity: 0.1;
+  transform: translateY(10px); /* Đẩy xuống một chút khi ẩn */
+  transition: transform 0.3s ease-in-out; /* Chỉ thêm chuyển tiếp cho transform */
+  visibility: hidden; /* Không hiển thị khi không hover */
+  pointer-events: none; /* Không cho phép tương tác khi không hiển thị */
+}
+
+.my-relative:hover > .my-absolute {
+  opacity: 1;
+  visibility: visible; /* Hiển thị khi hover */
+  transform: translateY(0); /* Quay lại vị trí ban đầu khi hiển thị */
+  pointer-events: auto; /* Cho phép tương tác khi hiển thị */
+}
+
+.my-backdrop-filter {
+  border-radius: 10px;
+  backdrop-filter: blur(20px);
+  background: linear-gradient(0deg, rgba(0, 0, 0, .1), rgba(0, 0, 0, .1)), hsla(0, 0%, 100%, .4);
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  padding: 10px;
+  gap: 5px;
+}
+
+
+.my-size-items {
+  background-color: white;
+  color: black;
+  padding: 10px 14px;
+  border-radius: 10px;
+  text-align: center;
+  font-size: 13px;
+  font-weight: bold;
+  transition: background-color 0.3s ease, color 0.3s ease; /* Thêm chuyển tiếp cho màu nền và màu chữ */
+  transform: scale(1); /* Thiết lập kích thước ban đầu */
+}
+
+.my-size-items:hover {
+  background-color: black;
+  color: white;
+  transform: scale(1.1); /* Phóng to khi hover */
+}
+.my-size-items.active {
+  background-color: black;
+  color: white;
+  transform: scale(1.1); /* Phóng to khi hover */
+}
+.my-input {
+  height: 40px;
+  width: 50px;
+  text-align: center;
+}
+
+.my-btn {
+  background-color: #f8f9fa; /* Màu nền nút */
+  border: 1px solid #ced4da; /* Đường viền nút */
+  border-radius: 5px; /* Bo góc nút */
+  cursor: pointer; /* Con trỏ khi di chuột qua */
+}
+
+.my-btn:hover {
+  background-color: #e2e6ea; /* Màu nền khi hover */
+}
+
+.my-btn:active {
+  background-color: #d6d8db; /* Màu nền khi nhấn */
+}
+

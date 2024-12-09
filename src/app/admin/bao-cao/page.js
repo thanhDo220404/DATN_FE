@@ -1,61 +1,142 @@
 "use client"; // Thêm dòng này ở đầu file
 
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import Chart from "chart.js/auto"; // nhớ npm install chart.js
+import { getAllUsers } from "@/app/databases/users";
+import { getAllProducts } from "@/app/databases/products";
+import { getAllOrders } from "@/app/databases/order";
+import ListBestSellerProducts from "./components/bestSellerProducts";
+import TotalOrdersTable from "./components/totalListOrders";
 
 export default function Dashboard() {
   const lineChartRef = useRef(null); // Tham chiếu cho biểu đồ đường
   const barChartRef = useRef(null); // Tham chiếu cho biểu đồ cột
 
+  const [listUsers, setListUsers] = useState([]);
+  const [listProducts, setListProducts] = useState([]);
+  const [listOrders, setListOrders] = useState([]);
+
+  const fetchOrders = async () => {
+    const result = await getAllOrders();
+    setListOrders(result);
+    console.log(result);
+  };
+
+  const fetchUsers = async () => {
+    const result = await getAllUsers();
+    const filteredUsers = result.Users.filter((user) => user.role === 0);
+    setListUsers(filteredUsers);
+    console.log(filteredUsers);
+  };
+
+  const fetchProducts = async () => {
+    const result = await getAllProducts();
+    setListProducts(result);
+  };
+
   useEffect(() => {
-    // Biểu đồ đường - Line Chart
+    fetchUsers();
+    fetchProducts();
+    fetchOrders();
+  }, []);
+
+  function getLastSixMonths() {
+    const currentDate = new Date();
+    const months = [
+      "Tháng 1",
+      "Tháng 2",
+      "Tháng 3",
+      "Tháng 4",
+      "Tháng 5",
+      "Tháng 6",
+      "Tháng 7",
+      "Tháng 8",
+      "Tháng 9",
+      "Tháng 10",
+      "Tháng 11",
+      "Tháng 12",
+    ];
+    const result = [];
+    for (let i = 6; i >= 0; i--) {
+      const date = new Date(
+        currentDate.getFullYear(),
+        currentDate.getMonth() - i
+      );
+      result.push({
+        label: `${months[date.getMonth()]} ${date.getFullYear()}`,
+        month: date.getMonth(),
+        year: date.getFullYear(),
+      });
+    }
+    return result;
+  }
+
+  const lastSixMonths = getLastSixMonths();
+
+  // Tính tổng số lượng đơn hàng và doanh thu theo tháng
+  function calculateMonthlyData(orders) {
+    const monthlyOrderCount = Array(7).fill(0);
+    const monthlyRevenue = Array(7).fill(0);
+
+    orders.forEach((order) => {
+      const orderDate = new Date(order.createdAt);
+      lastSixMonths.forEach((month, index) => {
+        if (
+          orderDate.getMonth() === month.month &&
+          orderDate.getFullYear() === month.year
+        ) {
+          monthlyOrderCount[index] += 1;
+          // Kiểm tra trạng thái của đơn hàng trước khi tính vào doanh thu
+          if (order.order_status._id !== "6724f9c943ad843da1d31150") {
+            monthlyRevenue[index] += order.order_total;
+          }
+        }
+      });
+    });
+
+    return { monthlyOrderCount, monthlyRevenue };
+  }
+
+  useEffect(() => {
+    if (listOrders.length === 0) return;
+
+    const { monthlyOrderCount, monthlyRevenue } =
+      calculateMonthlyData(listOrders);
+
+    // Cấu hình biểu đồ đường cho tổng số lượng đơn hàng
     const lineChartCtx = document
       .getElementById("lineChartDemo")
       .getContext("2d");
+    if (lineChartRef.current) lineChartRef.current.destroy();
     lineChartRef.current = new Chart(lineChartCtx, {
       type: "line",
       data: {
-        labels: [
-          "Tháng 1",
-          "Tháng 2",
-          "Tháng 3",
-          "Tháng 4",
-          "Tháng 5",
-          "Tháng 6",
-        ],
+        labels: lastSixMonths.map((month) => month.label),
         datasets: [
           {
-            label: "Dữ liệu đầu vào",
-            data: [12, 19, 3, 5, 2, 3],
+            label: "Tổng số lượng đơn hàng",
+            data: monthlyOrderCount,
             borderColor: "rgba(75, 192, 192, 1)",
             backgroundColor: "rgba(75, 192, 192, 0.2)",
           },
         ],
       },
-      options: {
-        responsive: true,
-      },
+      options: { responsive: true },
     });
 
-    // Biểu đồ cột - Bar Chart
+    // Cấu hình biểu đồ cột cho doanh thu
     const barChartCtx = document
       .getElementById("barChartDemo")
       .getContext("2d");
+    if (barChartRef.current) barChartRef.current.destroy();
     barChartRef.current = new Chart(barChartCtx, {
       type: "bar",
       data: {
-        labels: [
-          "Tháng 1",
-          "Tháng 2",
-          "Tháng 3",
-          "Tháng 4",
-          "Tháng 5",
-          "Tháng 6",
-        ],
+        labels: lastSixMonths.map((month) => month.label),
         datasets: [
           {
-            label: "Doanh thu",
-            data: [15000000, 20000000, 25000000, 30000000, 35000000, 40000000],
+            label: "Doanh thu (VND)",
+            data: monthlyRevenue,
             backgroundColor: "rgba(255, 99, 132, 0.2)",
             borderColor: "rgba(255, 99, 132, 1)",
             borderWidth: 1,
@@ -67,21 +148,19 @@ export default function Dashboard() {
         scales: {
           y: {
             beginAtZero: true,
+            ticks: {
+              callback: (value) => value.toLocaleString("vi-VN") + " đ",
+            },
           },
         },
       },
     });
 
     return () => {
-      // Cleanup biểu đồ khi component bị unmount
-      if (lineChartRef.current) {
-        lineChartRef.current.destroy();
-      }
-      if (barChartRef.current) {
-        barChartRef.current.destroy();
-      }
+      if (lineChartRef.current) lineChartRef.current.destroy();
+      if (barChartRef.current) barChartRef.current.destroy();
     };
-  }, []);
+  }, [listOrders]);
 
   return (
     <>
@@ -101,23 +180,31 @@ export default function Dashboard() {
       </div>
       <div className="row">
         <div className="col-md-6 col-lg-3">
-          <div className="widget-small primary coloured-icon">
-            <i className="bi bi-person-fill icon" />
-            <div className="info">
-              <h4>Tổng Nhân viên</h4>
-              <p>
-                <b>26 nhân viên</b>
-              </p>
-            </div>
-          </div>
-        </div>
-        <div className="col-md-6 col-lg-3">
           <div className="widget-small info coloured-icon">
             <i className="bi bi-tags-fill icon" />
             <div className="info">
               <h4>Tổng sản phẩm</h4>
               <p>
-                <b>8580 sản phẩm</b>
+                <b>
+                  {listProducts.length > 0 &&
+                    // Tính toán tổng số lượng của tất cả các variations
+                    listProducts.reduce((total, product) => {
+                      return (
+                        total +
+                        product.items.reduce(
+                          (itemTotal, item) =>
+                            itemTotal +
+                            item.variations.reduce(
+                              (variationTotal, variation) => {
+                                return variationTotal + variation.quantity; // Cộng quantity của từng variation
+                              },
+                              0
+                            ),
+                          0
+                        )
+                      );
+                    }, 0)}
+                </b>
               </p>
             </div>
           </div>
@@ -128,53 +215,27 @@ export default function Dashboard() {
             <div className="info">
               <h4>Tổng đơn hàng</h4>
               <p>
-                <b>457 đơn hàng</b>
+                <b>{listOrders.length}</b>
               </p>
             </div>
           </div>
         </div>
-        <div className="col-md-6 col-lg-3">
-          <div className="widget-small danger coloured-icon">
-            <i className="bi bi-info-circle-fill icon" />
-            <div className="info">
-              <h4>Bị cấm</h4>
-              <p>
-                <b>4 nhân viên</b>
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div className="row">
+
         <div className="col-md-6 col-lg-3">
           <div className="widget-small primary coloured-icon">
             <i className="bi bi-bar-chart-line-fill icon" />
             <div className="info">
               <h4>Tổng thu nhập</h4>
               <p>
-                <b>104.890.000 đ</b>
-              </p>
-            </div>
-          </div>
-        </div>
-        <div className="col-md-6 col-lg-3">
-          <div className="widget-small info coloured-icon">
-            <i className="bi bi-person-badge-fill icon" />
-            <div className="info">
-              <h4>Nhân viên mới</h4>
-              <p>
-                <b>3 nhân viên</b>
-              </p>
-            </div>
-          </div>
-        </div>
-        <div className="col-md-6 col-lg-3">
-          <div className="widget-small warning coloured-icon">
-            <i className="bi bi-tag-fill icon" />
-            <div className="info">
-              <h4>Hết hàng</h4>
-              <p>
-                <b>1 sản phẩm</b>
+                <b>
+                  {listOrders
+                    .filter(
+                      (order) =>
+                        order.order_status._id !== "6724f9c943ad843da1d31150"
+                    )
+                    .reduce((total, order) => total + order.order_total, 0)
+                    .toLocaleString()}{" "}
+                </b>
               </p>
             </div>
           </div>
@@ -185,145 +246,29 @@ export default function Dashboard() {
             <div className="info">
               <h4>Đơn hàng hủy</h4>
               <p>
-                <b>2 đơn hàng</b>
+                <b>
+                  {
+                    listOrders.filter(
+                      (order) =>
+                        order.order_status._id === "6724f9c943ad843da1d31150"
+                    ).length
+                  }
+                </b>
               </p>
             </div>
           </div>
         </div>
       </div>
       <div className="row">
-        <div className="col-md-12">
-          <div className="tile">
-            <div>
-              <h3 className="tile-title">SẢN PHẨM BÁN CHẠY</h3>
-            </div>
-            <div className="tile-body">
-              <table
-                className="table table-hover table-bordered"
-                id="sampleTable"
-              >
-                <thead>
-                  <tr>
-                    <th>Mã sản phẩm</th>
-                    <th>Tên sản phẩm</th>
-                    <th>Giá tiền</th>
-                    <th>Danh mục</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td>71309005</td>
-                    <td>Bàn ăn gỗ Theresa</td>
-                    <td>5.600.000 đ</td>
-                    <td>Bàn ăn</td>
-                  </tr>
-                  <tr>
-                    <td>62304003</td>
-                    <td>Bàn ăn Vitali mặt đá</td>
-                    <td>33.235.000 đ</td>
-                    <td>Bàn ăn</td>
-                  </tr>
-                  <tr>
-                    <td>72109004</td>
-                    <td>Ghế làm việc Zuno</td>
-                    <td>3.800.000 đ</td>
-                    <td>Ghế gỗ</td>
-                  </tr>
-                  <tr>
-                    <td>83826226</td>
-                    <td>Tủ ly - tủ bát</td>
-                    <td>2.450.000 đ</td>
-                    <td>Tủ</td>
-                  </tr>
-                  <tr>
-                    <td>71304041</td>
-                    <td>Bàn ăn mở rộng Vegas</td>
-                    <td>21.550.000 đ</td>
-                    <td>Bàn thông minh</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
+        <ListBestSellerProducts
+          listOrders={listOrders}
+          products={listProducts}
+        />
       </div>
       <div className="row">
-        <div className="col-md-12">
-          <div className="tile">
-            <div>
-              <h3 className="tile-title">TỔNG ĐƠN HÀNG</h3>
-            </div>
-            <div className="tile-body">
-              <table
-                className="table table-hover table-bordered"
-                id="sampleTable"
-              >
-                <thead>
-                  <tr>
-                    <th>ID đơn hàng</th>
-                    <th>Khách hàng</th>
-                    <th>Đơn hàng</th>
-                    <th>Số lượng</th>
-                    <th>Tổng tiền</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td>MD0837</td>
-                    <td>Triệu Thanh Phú</td>
-                    <td>Ghế làm việc Zuno, Bàn ăn gỗ Theresa</td>
-                    <td>2 sản phẩm</td>
-                    <td>9.400.000 đ</td>
-                  </tr>
-                  <tr>
-                    <td>MĐ8265</td>
-                    <td>Nguyễn Thị Ngọc Cẩm</td>
-                    <td>Ghế ăn gỗ Lucy màu trắng</td>
-                    <td>1 sản phẩm</td>
-                    <td>3.800.000 đ</td>
-                  </tr>
-                  <tr>
-                    <td>MT9835</td>
-                    <td>Đặng Hoàng Phúc</td>
-                    <td>
-                      Giường ngủ Jimmy, Bàn ăn mở rộng cao cấp Dolas, Ghế làm
-                      việc Zuno
-                    </td>
-                    <td>3 sản phẩm</td>
-                    <td>40.650.000 đ</td>
-                  </tr>
-                  <tr>
-                    <td>ER3835</td>
-                    <td>Nguyễn Thị Mỹ Yến</td>
-                    <td>Bàn ăn mở rộng Gepa</td>
-                    <td>1 sản phẩm</td>
-                    <td>16.770.000 đ</td>
-                  </tr>
-                  <tr>
-                    <td>AL3947</td>
-                    <td>Phạm Thị Ngọc</td>
-                    <td>Bàn ăn Vitali mặt đá, Ghế ăn gỗ Lucy màu trắng</td>
-                    <td>2 sản phẩm</td>
-                    <td>19.770.000 đ</td>
-                  </tr>
-                  <tr>
-                    <td>QY8723</td>
-                    <td>Ngô Thái An</td>
-                    <td>Giường ngủ Kara 1.6x2m</td>
-                    <td>1 sản phẩm</td>
-                    <td>14.500.000 đ</td>
-                  </tr>
-                  <tr>
-                    <th colSpan={4}>Tổng cộng:</th>
-                    <td>104.890.000 đ</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
+        <TotalOrdersTable listOrders={listOrders} />
       </div>
-      <div className="row">
+      {/* <div className="row">
         <div className="col-md-12">
           <div className="tile">
             <div>
@@ -364,8 +309,8 @@ export default function Dashboard() {
             </div>
           </div>
         </div>
-      </div>
-      <div className="row">
+      </div> */}
+      {/* <div className="row">
         <div className="col-md-12">
           <div className="tile">
             <div>
@@ -416,26 +361,24 @@ export default function Dashboard() {
             </div>
           </div>
         </div>
-      </div>
+      </div> */}
       {/* Row for Charts */}
       <div className="row">
         <div className="col-md-6">
           <div className="tile">
-            <h3 className="tile-title">THỐNG KÊ DOANH SỐ</h3>
+            <h3 className="tile-title">BIỂU ĐỒ LỢI NHUẬN</h3>
             <canvas id="barChartDemo" />
           </div>
         </div>
         <div className="col-md-6">
           <div className="tile">
-            <h3 className="tile-title">DỮ LIỆU HÀNG THÁNG</h3>
+            <h3 className="tile-title">THỐNG KÊ ĐƠN HÀNG</h3>
             <canvas id="lineChartDemo" />
           </div>
         </div>
       </div>
       <div className="text-right" style={{ fontSize: "12px" }}>
-        <p>
-          <b>Hệ thống quản lý V2.0 | Code by Trường</b>
-        </p>
+        <p></p>
       </div>
     </>
   );
