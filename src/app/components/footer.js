@@ -88,9 +88,9 @@ export default function Footer() {
             <div className="col-md-3 d-flex justify-content-center align-items-center">
               <a href="/" className="d-block mb-3">
                 <img
-                  src="/images/logo1x.png"
+                  src="/images/logo.png"
                   alt="Logo"
-                  style={{ height: "200px" }}
+                  style={{ height: "150px" }}
                 />
               </a>
             </div>

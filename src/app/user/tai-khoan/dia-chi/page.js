@@ -23,10 +23,11 @@ export default function UserAddress() {
 
   const [isUpdating, setIsUpdating] = useState(null);
 
+  const [addressSelected, setAddressSelected] = useState({});
+
   const handleDeleteClick = (addressId) => {
     setAddressId(addressId);
   };
-
   const handleDeleteConfirm = async () => {
     if (addressId) {
       try {
@@ -44,6 +45,7 @@ export default function UserAddress() {
       }
     }
   };
+
   const handleUpdate = async (address) => {
     setIsUpdating(true);
     console.log("Đối tượng address:", address);
@@ -70,11 +72,16 @@ export default function UserAddress() {
         },
       })
     );
+    setAddressSelected(address);
+    console.log("This is addressSelected", addressSelected);
+
+    const is_defaultElement = document.getElementById("is_defaultUpdate");
     if (address.is_default === true) {
-      const is_default = document.getElementById("is_defaultUpdate");
-      is_default.disabled = true;
+      is_defaultElement.disabled = true;
+      is_defaultElement.checked = true;
     } else {
-      is_default.disabled = false;
+      is_defaultElement.disabled = false;
+      is_defaultElement.checked = false;
     }
   };
 
@@ -656,7 +663,7 @@ export default function UserAddress() {
           >
             <div className="modal-header">
               <h1 className="modal-title fs-5" id="updateUserAddress">
-                Địa chỉ mới
+                Chỉnh sửa địa chỉ
               </h1>
               <button
                 type="button"

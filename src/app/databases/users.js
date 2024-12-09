@@ -67,21 +67,19 @@ const update = async (id, formData) => {
   }
 };
 
-function parseJwt(token) {
-  var base64Url = token.split(".")[1];
-  var base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
-  var jsonPayload = decodeURIComponent(
-    window
-      .atob(base64)
-      .split("")
-      .map(function (c) {
-        return "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2);
-      })
-      .join("")
-  );
+// app/databases/users.js
+const parseJwt = (token) => {
+  try {
+    const base64Url = token.split(".")[1];
+    const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+    const jsonPayload = Buffer.from(base64, "base64").toString("utf-8");
+    return JSON.parse(jsonPayload);
+  } catch (error) {
+    console.error("Error parsing token:", error);
+    return null;
+  }
+};
 
-  return JSON.parse(jsonPayload);
-}
 const getUserById = async (id) => {
   try {
     const response = await fetch(`${apiUrl}/users/${id}`, {
@@ -130,5 +128,37 @@ const updatePassword = async (id, newPassword) => {
     // Có thể xử lý thêm ở đây, như hiển thị thông báo cho người dùng
   }
 };
+// Hàm lấy danh sách tất cả người dùng
+const getAllUsers = async () => {
+  try {
+    const response = await fetch(`${apiUrl}/users`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
 
-export { login, register, update, parseJwt, getUserById, updatePassword };
+    // Kiểm tra phản hồi từ API
+    if (!response) {
+      const errorData = await response.json();
+      throw new Error(
+        errorData.message || "Có lỗi xảy ra khi lấy danh sách người dùng."
+      );
+    }
+
+    return await response.json(); // Trả về dữ liệu danh sách người dùng
+  } catch (error) {
+    console.error("Lỗi lấy danh sách người dùng:", error);
+    throw error; // Ném lỗi để xử lý ngoài hàm
+  }
+};
+
+export {
+  getAllUsers,
+  login,
+  register,
+  update,
+  parseJwt,
+  getUserById,
+  updatePassword,
+};

@@ -1,22 +1,34 @@
 "use client";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { FaSearch, FaShoppingCart, FaUser } from "react-icons/fa";
 import { useState, useEffect } from "react";
 import { eraseCookie, getCookie } from "../lib/CookieManager";
 import { parseJwt } from "../databases/users";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchCartByUserId } from "../../../redux/slices/cartSlice";
+import { getAllCategories } from "../databases/categories";
 const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
 export default function Header() {
+  const dispatch = useDispatch();
   const pathname = usePathname();
+  const router = useRouter();
   const isAdminPage = pathname.includes("/admin");
+  const [categories, setCategories] = useState([]);
 
-  // Nếu là trang admin, không render header
   if (isAdminPage) return null;
+
   const [userLoginInfo, setUserLoginInfo] = useState({});
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
-  //đăng xuất
+  const [searchKeyword, setSearchKeyword] = useState(""); // State lưu từ khóa tìm kiếm
+
+  // Lấy giỏ hàng từ Redux store
+  const carts = useSelector((state) => state.cart.items); // lấy từ cartSlice
+  const totalItems = carts.length; // tính tổng số lượng từ items trong giỏ hàng
+
+  // Đăng xuất
   const handleLogout = () => {
     eraseCookie("LOGIN_INFO");
     setUserLoginInfo("");
@@ -24,12 +36,19 @@ export default function Header() {
     window.location.reload();
   };
 
+  const fetchCategories = async () => {
+    const result = await getAllCategories();
+    setCategories(result);
+  };
+
   useEffect(() => {
     const token = getCookie("LOGIN_INFO");
+    fetchCategories();
     if (token) {
       const payload = parseJwt(token);
       setUserLoginInfo(payload);
-      setIsLoggedIn(true); // Cập nhật trạng thái đã đăng nhập
+      setIsLoggedIn(true);
+      dispatch(fetchCartByUserId(payload._id)); // Dispatch action to fetch cart
       if (payload.role === 1) {
         setIsAdmin(true);
       }
@@ -39,26 +58,89 @@ export default function Header() {
     }
   }, []);
 
+  // Xử lý sự kiện tìm kiếm
+  const handleSearchSubmit = (e) => {
+    e.preventDefault();
+    if (searchKeyword.trim()) {
+      router.push(`/tim-kiem?keywords=${encodeURIComponent(searchKeyword)}`);
+      setSearchKeyword(""); // Xóa chữ trong ô input sau khi tìm kiếm
+    }
+  };
+
   return (
     <header className="menu-header">
       <div className="container">
         <nav className="navbar navbar-expand-lg navbar-dark">
           {/* Icons cho mobile */}
           <div className="nav-icons d-flex d-lg-none align-items-center">
-            <Link href="/dang-nhap">
-              <FaUser className="nav-icon text-light fs-5 me-3" />
-            </Link>
-            <Link href="/gio-hang">
-              <FaShoppingCart className="nav-icon text-light fs-5" />
+            {isLoggedIn ? (
+              <div className="dropdown">
+                <Link
+                  className="nav-link"
+                  href="#"
+                  role="button"
+                  data-bs-toggle="dropdown"
+                  aria-expanded="false"
+                >
+                  {userLoginInfo ? (
+                    <img
+                      width="32"
+                      height="32"
+                      className="rounded-circle me-2"
+                      src={`${apiUrl}/img/user/${userLoginInfo.image}`}
+                      alt=""
+                    />
+                  ) : (
+                    <FaUser className="nav-icon text-light fs-5 me-3" />
+                  )}
+                </Link>
+                <ul className="dropdown-menu">
+                  {isAdmin && (
+                    <li>
+                      <a className="dropdown-item" href="/admin">
+                        Quản lý website
+                      </a>
+                    </li>
+                  )}
+                  <li>
+                    <Link
+                      className="dropdown-item"
+                      href="/user/tai-khoan/ho-so"
+                    >
+                      Tài khoản của tôi
+                    </Link>
+                  </li>
+                  <li>
+                    <Link className="dropdown-item" href="/user/don-mua">
+                      Đơn mua
+                    </Link>
+                  </li>
+                  <li>
+                    <button className="dropdown-item" onClick={handleLogout}>
+                      Đăng xuất
+                    </button>
+                  </li>
+                </ul>
+              </div>
+            ) : (
+              <Link href={`/buyer/dang-nhap?next=${pathname}`}>
+                <FaUser className="nav-icon text-light fs-5 me-3" />
+              </Link>
+            )}
+            <Link href="/gio-hang" className="position-relative">
+              <FaShoppingCart className="nav-icon text-light fs-3" />
+              <div className="position-absolute top-0 start-100 translate-middle badge border rounded-circle bg-danger px-2 py-1">
+                <span style={{ fontSize: "12px" }}>{totalItems}</span>
+              </div>
             </Link>
           </div>
 
           {/* Logo */}
           <Link className="navbar-brand" href="/">
             <img
-              src="/images/logo1x.png"
+              src="/images/logo.png"
               alt="Logo"
-              style={{ width: "70px", height: "70px" }}
+              style={{ width: "150px", height: "70px" }}
             />
           </Link>
 
@@ -82,68 +164,51 @@ export default function Header() {
                   Trang chủ
                 </Link>
               </li>
-              <li className="nav-item dropdown">
+              <li className="nav-item">
+                <Link className="nav-link" href="/san-pham">
+                  Sản phẩm
+                </Link>
+              </li>
+              <div className="dropdown">
                 <Link
-                  className="nav-link dropdown-toggle"
+                  className="nav-link"
                   href="#"
                   role="button"
                   data-bs-toggle="dropdown"
                   aria-expanded="false"
                 >
-                  Sản phẩm
+                  Danh mục
+                  <i className="bi bi-caret-down-fill"></i>
                 </Link>
                 <ul className="dropdown-menu">
-                  <li>
-                    <Link className="dropdown-item" href="#">
-                      ÁO THUN - T SHIRT
-                    </Link>
-                  </li>
-                  <li>
-                    <Link className="dropdown-item" href="#">
-                      QUẦN - PANTS
-                    </Link>
-                  </li>
-                  <li>
-                    <Link className="dropdown-item" href="#">
-                      ÁO KHOÁC - HOODIE
-                    </Link>
-                  </li>
-                  <li>
-                    <Link className="dropdown-item" href="#">
-                      PHỤ KIỆN - ACCESSORY
-                    </Link>
-                  </li>
+                  {categories.map((category) => (
+                    <li key={category._id}>
+                      <Link
+                        className="dropdown-item"
+                        href={`/danh-muc/${category._id}`}
+                      >
+                        {category.name}
+                      </Link>
+                    </li>
+                  ))}
                 </ul>
-              </li>
-              <li className="nav-item">
-                <a className="nav-link d-flex" href="#">
-                  Flash Sale
-                  <img
-                    src="/images/fireFlashSale.png"
-                    width="20px"
-                    alt="Flash Sale"
-                  />
-                </a>
-              </li>
+              </div>
               <li className="nav-item">
                 <Link className="nav-link" href="#">
                   Về chúng tôi
                 </Link>
               </li>
-              <li className="nav-item">
-                <Link className="nav-link" href="#">
-                  Hỗ trợ
-                </Link>
-              </li>
             </ul>
 
             {/* Form tìm kiếm */}
-            <form className="d-flex me-2" role="search">
+            <form className="d-flex me-2" onSubmit={handleSearchSubmit}>
               <input
                 className="form-control me-2"
                 type="search"
                 placeholder="Tìm kiếm sản phẩm..."
                 aria-label="Search"
+                value={searchKeyword}
+                onChange={(e) => setSearchKeyword(e.target.value)}
               />
               <button className="btn btn-outline-light" type="submit">
                 <FaSearch />
@@ -155,7 +220,7 @@ export default function Header() {
               {isLoggedIn ? (
                 <div className="dropdown">
                   <Link
-                    className="nav-link "
+                    className="nav-link"
                     href="#"
                     role="button"
                     data-bs-toggle="dropdown"
@@ -166,27 +231,19 @@ export default function Header() {
                         width="32"
                         height="32"
                         className="rounded-circle me-2"
-                        src={`${apiUrl}/img/${userLoginInfo.image}`}
+                        src={`${apiUrl}/img/user/${userLoginInfo.image}`}
                         alt=""
                       />
                     ) : (
                       <FaUser className="nav-icon text-light fs-5 me-3" />
                     )}
                   </Link>
-                  <ul
-                    className="dropdown-menu"
-                    style={{
-                      position: "absolute",
-                      inset: "0px 0px auto auto",
-                      margin: "0px",
-                      transform: "translate3d(0px, 34.4px, 0px)",
-                    }}
-                  >
+                  <ul className="dropdown-menu">
                     {isAdmin && (
                       <li>
-                        <Link className="dropdown-item" href="/admin">
+                        <a className="dropdown-item" href="/admin">
                           Quản lý website
-                        </Link>
+                        </a>
                       </li>
                     )}
                     <li>
@@ -198,8 +255,8 @@ export default function Header() {
                       </Link>
                     </li>
                     <li>
-                      <Link className="dropdown-item" href="/user/don-hang">
-                        Đơn hàng
+                      <Link className="dropdown-item" href="/user/don-mua">
+                        Đơn mua
                       </Link>
                     </li>
                     <li>
@@ -210,12 +267,15 @@ export default function Header() {
                   </ul>
                 </div>
               ) : (
-                <Link href="/buyer/dang-nhap">
+                <Link href={`/buyer/dang-nhap?next=${pathname}`}>
                   <FaUser className="nav-icon text-light fs-5 me-3" />
                 </Link>
               )}
-              <Link href="/gio-hang">
-                <FaShoppingCart className="nav-icon text-light fs-5" />
+              <Link href="/gio-hang" className="position-relative">
+                <FaShoppingCart className="nav-icon text-light fs-3" />
+                <div className="position-absolute top-0 start-100 translate-middle badge border rounded-circle bg-danger px-2 py-1">
+                  <span style={{ fontSize: "12px" }}>{totalItems}</span>
+                </div>
               </Link>
             </div>
           </div>

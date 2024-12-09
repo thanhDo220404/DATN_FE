@@ -1,9 +1,104 @@
+"use client";
+import "@/app/san-pham/style.css";
+import { useEffect, useState } from "react";
+import ProductCard from "../components/productCard";
+import { getAllProducts } from "../databases/products";
+import { getAllCategories } from "../databases/categories";
+import { getAllOrders } from "../databases/order";
+import Link from "next/link";
+import { ToastContainer } from "react-toastify";
+
 export default function HomePage() {
+  const [products, setProducts] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [orders, setOrders] = useState([]);
+  const [bestSellingProducts, setBestSellingProducts] = useState([]);
+  const fetchProducts = async () => {
+    const result = await getAllProducts();
+    setProducts(result);
+    console.log("this is fetchProducts: ", result);
+  };
+  const fetchCategories = async () => {
+    const result = await getAllCategories();
+    setCategories(result);
+  };
+  const fetchOrders = async () => {
+    const result = await getAllOrders();
+    setOrders(result);
+    console.log("this is fetchOrders: ", result);
+    const bestSeller = getTopPurchasedProducts(result);
+    console.log("this is bestSeller: ", bestSeller);
+  };
+  function getTopPurchasedProducts(orders, limit = 4) {
+    const productCounts = {};
+
+    orders.forEach((order) => {
+      // Kiểm tra nếu order_status._id khác '6724f9c943ad843da1d31150' tức đơn hàng "bị hủy"
+      if (
+        order.order_status &&
+        order.order_status._id !== "6724f9c943ad843da1d31150"
+      ) {
+        order.products.forEach((product) => {
+          const productId = product._id;
+          const quantity = product.quantity;
+
+          if (!productCounts[productId]) {
+            productCounts[productId] = 0;
+          }
+
+          productCounts[productId] += quantity;
+        });
+      }
+    });
+
+    const sortedProducts = Object.entries(productCounts)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, limit); // Giới hạn số lượng theo limit
+
+    // Trả về danh sách chứa cả productId và productCount
+    return sortedProducts.map(([productId, count]) => ({
+      productId,
+      count,
+    }));
+  }
+
+  useEffect(() => {
+    fetchProducts();
+    fetchCategories();
+    fetchOrders();
+  }, []);
+  // Effect hook to calculate best-selling products once products and orders are fetched
+  useEffect(() => {
+    if (products.length > 0 && orders.length > 0) {
+      const bestSellers = getTopPurchasedProducts(orders); // Gồm cả productId và count
+      const bestSellerIds = bestSellers.map((seller) => seller.productId); // Chỉ lấy productId
+
+      // Lọc các sản phẩm bán chạy từ mảng products
+      const bestSelling = products.filter((product) =>
+        bestSellerIds.includes(product._id)
+      );
+
+      // Sắp xếp bestSelling theo thứ tự giống bestSellerIds
+      const sortedBestSelling = bestSelling.sort((a, b) => {
+        return bestSellerIds.indexOf(a._id) - bestSellerIds.indexOf(b._id);
+      });
+
+      setBestSellingProducts(sortedBestSelling);
+    }
+  }, [products, orders]); // Re-run this when either products or orders changes
+
+  console.log(bestSellingProducts);
+
+  const latestProducts = products
+    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+    .slice(0, 4);
+
   return (
     <>
+      <ToastContainer></ToastContainer>
       {/* Carousel */}
       <div
-        className="carousel slide"
+        className="carousel slide mt-0"
         data-bs-ride="carousel"
         id="carouselExampleInterval"
       >
@@ -59,57 +154,82 @@ export default function HomePage() {
       {/* Product Categories */}
       <div className="container mt-5">
         <div className="row product-category">
-          {["T-SHIRT", "PANTS", "HOODIE", "SPORT"].map((category, index) => (
-            <div className="col-md-3" key={index}>
-              <div className="card text-bg-dark">
-                <img
-                  alt={category}
-                  className="card-img"
-                  src={`/images/dm_${index + 1}.jpg`}
-                />
-                <div className="card-img-overlay">
-                  <h5 className="card-title">{category}</h5>
-                </div>
+          {categories.slice(0, 4).map((category, index) => {
+            // Tìm sản phẩm đầu tiên có category._id trùng với category._id hiện tại
+            const productInCategory = products.find(
+              (product) => product.category._id === category._id
+            );
+            // Đặt đường dẫn hình ảnh nếu tìm thấy sản phẩm, nếu không sẽ là hình mặc định
+            const imageSrc =
+              productInCategory &&
+              productInCategory.items[0].image.mediaFilePath
+                ? productInCategory.items[0].image.mediaFilePath
+                : `/images/dm_${index + 1}.jpg`;
+
+            return (
+              <div className="col-md-3" key={category._id}>
+                <Link
+                  href={`/danh-muc/${category._id}`}
+                  className="card text-bg-dark"
+                >
+                  <img
+                    alt={category.name}
+                    className="card-img"
+                    src={imageSrc} // Hiển thị hình ảnh lấy được
+                  />
+                  <div className="card-img-overlay">
+                    <h5 className="card-title">{category.name}</h5>
+                  </div>
+                </Link>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
 
       {/* Featured Products */}
-      <div className="container mt-5">
-        <h3 className="product-title">Sản Phẩm Nổi Bật</h3>
+      <div className="container mt-5 text-start">
+        <h3 className="product-title">Sản Phẩm Mới</h3>
+
         <div className="row featured-products">
-          {Array(8)
-            .fill(null)
-            .map((_, index) => (
-              <div className="col-md-3" key={index}>
-                <div className="card">
-                  <img
-                    alt={`Product ${index + 1}`}
-                    className="card-img-top"
-                    src={`/images/sp${index + 1}.jpg`}
-                  />
-                  <div className="card-body">
-                    <h5 className="card-title">D22-T6 Tee Riot Devil</h5>
-                    <p className="card-text">
-                      199.000đ <del>299.000đ</del>
-                    </p>
-                    <div className="d-flex justify-content-between">
-                      <button className="btn btn-warning">MUA NGAY</button>
-                      <button className="btn btn-outline-secondary">
-                        Xem chi tiết
-                      </button>
+          {products.length === 0 ? (
+            // Hiển thị 3 placeholder khi không có sản phẩm
+            <>
+              {Array.from({ length: 4 }).map((_, index) => (
+                <div className="col-3" key={index}>
+                  <div className="card" aria-hidden="true">
+                    <img src="" className="card-img-top" alt="..." />
+                    <div className="card-body">
+                      <h5 className="card-title placeholder-glow">
+                        <span className="placeholder col-6"></span>
+                      </h5>
+                      <p className="card-text placeholder-glow">
+                        <span className="placeholder col-7"></span>
+                        <span className="placeholder col-4"></span>
+                        <span className="placeholder col-4"></span>
+                        <span className="placeholder col-6"></span>
+                        <span className="placeholder col-8"></span>
+                      </p>
+                      <a
+                        className="btn btn-primary disabled placeholder col-6"
+                        aria-disabled="true"
+                      ></a>
                     </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </>
+          ) : (
+            // Hiển thị danh sách sản phẩm khi đã tải
+            latestProducts.map((product) => (
+              <ProductCard col={3} key={product._id} product={product} />
+            ))
+          )}
         </div>
       </div>
 
       {/* Product Highlight */}
-      <div className="container mt-5">
+      {/* <div className="container mt-5">
         <div className="card mb-3">
           <div className="row g-0">
             <div className="col-md-6">
@@ -142,37 +262,61 @@ export default function HomePage() {
             </div>
           </div>
         </div>
-      </div>
+      </div> */}
 
       {/* Best Selling Products */}
-      <div className="container mt-5">
+      <div className="container mt-5 text-start">
         <h3 className="product-title">Sản Phẩm Bán Chạy</h3>
         <div className="row featured-products">
-          {Array(8)
-            .fill(null)
-            .map((_, index) => (
-              <div className="col-md-3" key={index}>
-                <div className="card">
-                  <img
-                    alt={`Best Seller Product ${index + 1}`}
-                    className="card-img-top"
-                    src={`/images/sp${index + 1}.jpg`}
-                  />
-                  <div className="card-body">
-                    <h5 className="card-title">D22-T6 Tee Riot Devil</h5>
-                    <p className="card-text">
-                      199.000đ <del>299.000đ</del>
-                    </p>
-                    <div className="d-flex justify-content-between">
-                      <button className="btn btn-warning">MUA NGAY</button>
-                      <button className="btn btn-outline-secondary">
-                        Xem chi tiết
-                      </button>
+          {bestSellingProducts.length === 0 ? (
+            <p>Hiện chưa có sản phẩm bán chạy.</p>
+          ) : (
+            bestSellingProducts.map((product) => (
+              <ProductCard col={3} key={product._id} product={product} />
+            ))
+          )}
+        </div>
+      </div>
+      <div className="container mt-5 text-start">
+        <h3 className="product-title">Sản Phẩm Xem Nhiều</h3>
+
+        <div className="row featured-products">
+          {products.length === 0 ? (
+            // Hiển thị 4 placeholder khi không có sản phẩm
+            <>
+              {Array.from({ length: 4 }).map((_, index) => (
+                <div className="col-3" key={index}>
+                  <div className="card" aria-hidden="true">
+                    <img src="" className="card-img-top" alt="..." />
+                    <div className="card-body">
+                      <h5 className="card-title placeholder-glow">
+                        <span className="placeholder col-6"></span>
+                      </h5>
+                      <p className="card-text placeholder-glow">
+                        <span className="placeholder col-7"></span>
+                        <span className="placeholder col-4"></span>
+                        <span className="placeholder col-4"></span>
+                        <span className="placeholder col-6"></span>
+                        <span className="placeholder col-8"></span>
+                      </p>
+                      <a
+                        className="btn btn-primary disabled placeholder col-6"
+                        aria-disabled="true"
+                      ></a>
                     </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </>
+          ) : (
+            // Hiển thị danh sách sản phẩm có view cao nhất
+            products
+              .sort((a, b) => b.view - a.view) // Sắp xếp sản phẩm theo lượt xem từ cao đến thấp
+              .slice(0, 4) // Lấy 4 sản phẩm đầu tiên
+              .map((product) => (
+                <ProductCard col={3} key={product._id} product={product} />
+              ))
+          )}
         </div>
       </div>
     </>
