@@ -91,6 +91,17 @@ export default function Menu() {
           <li>
             <Link
               className={`app-menu__item ${
+                pathname === "/admin/vouchers" ? "active" : ""
+              }`}
+              href="/admin/vouchers"
+            >
+              <i className="bi bi-list-task me-1" />
+              <span className="app-menu__label">Quản lý vouchers</span>
+            </Link>
+          </li>
+          <li>
+            <Link
+              className={`app-menu__item ${
                 pathname === "/admin/san-pham" ? "active" : ""
               }`}
               href="/admin/san-pham"
