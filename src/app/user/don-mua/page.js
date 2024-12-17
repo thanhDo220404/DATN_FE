@@ -291,7 +291,6 @@ export default function Purchure() {
                     </span>
                   </div>
                   {order.order_status._id === "6724f9c943ad843da1d3114c" ||
-                  order.order_status._id === "6724f9c943ad843da1d3114d" ||
                   order.order_status._id === "673f4eb7e8698e7b4115b84c" ||
                   order.order_status._id === "673f4eb7e8698e7b4115b84d" ? (
                     <div className="text-end mt-3">

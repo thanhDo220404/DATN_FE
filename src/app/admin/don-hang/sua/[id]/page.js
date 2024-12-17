@@ -56,6 +56,12 @@ export default function OrderDetails({ params }) {
         "673f4eb7e8698e7b4115b84c" //Chưa thanh toán
       );
       break;
+    case "6724f9c943ad843da1d3114c": // Đã hủy
+      disabledStatuses.push(
+        "673f4eb7e8698e7b4115b84d", // Đã thanh toán
+        "673f4eb7e8698e7b4115b84c" //Chưa thanh toán
+      );
+      break;
 
     case "6724f9c943ad843da1d3114f": // Đã giao hàng
       // Vô hiệu hóa tất cả các trạng thái còn lại
@@ -70,15 +76,17 @@ export default function OrderDetails({ params }) {
       break;
 
     case "6724f9c943ad843da1d3114d": // Đã xác nhận
-      // Vô hiệu hóa Chưa xác nhận
-      disabledStatuses.push("6724f9c943ad843da1d3114c"); // Chưa xác nhận
+      disabledStatuses.push(
+        "673f4eb7e8698e7b4115b84d", // Đã thanh toán
+        "673f4eb7e8698e7b4115b84c", //Chưa thanh toán
+        "6724f9c943ad843da1d31150", // Đã hủy
+        "6724f9c943ad843da1d3114c" // Chưa xác nhận
+      );
       break;
     case "673f4eb7e8698e7b4115b84d": // Đã thanh toán
-      // Vô hiệu hóa Chưa xác nhận
       disabledStatuses.push(
         "673f4eb7e8698e7b4115b84c", //Chưa thanh toán
-        "6724f9c943ad843da1d3114c", // Chưa xác nhận
-        "6724f9c943ad843da1d3114d" // Đã xác nhận
+        "6724f9c943ad843da1d3114c" // Chưa xác nhận
       );
       break;
 
@@ -90,6 +98,15 @@ export default function OrderDetails({ params }) {
         "6724f9c943ad843da1d3114c", // Chưa xác nhận
         "673f4eb7e8698e7b4115b84d", // Đã thanh toán
         "673f4eb7e8698e7b4115b84c" //Chưa thanh toán
+      );
+      break;
+    case "673f4eb7e8698e7b4115b84c": //Chưa thanh toán
+      disabledStatuses.push(
+        "6724f9c943ad843da1d3114d", // Đã xác nhận
+        "6724f9c943ad843da1d3114c", // Chưa xác nhận
+        "673f4eb7e8698e7b4115b84d", // Đã thanh toán
+        "6724f9c943ad843da1d3114e", // Đang giao hàng
+        "6724f9c943ad843da1d3114f" // Đã giao hàng
       );
       break;
 

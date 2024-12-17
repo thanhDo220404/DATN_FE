@@ -7,6 +7,7 @@ import Overlay from "../../components/overlay";
 import Link from "next/link";
 import { getCookie } from "@/app/lib/CookieManager";
 import { register as RegisterUser } from "@/app/databases/users";
+import { useRouter } from "next/navigation";
 
 const fetcher = (...args) => fetch(...args).then((res) => res.json());
 const apiUrl = process.env.NEXT_PUBLIC_API_URL;
@@ -42,6 +43,7 @@ const Alert = ({ message, countdown, onClose }) => (
 );
 
 export default function Register() {
+  const router = useRouter();
   const {
     register,
     handleSubmit,
@@ -64,6 +66,7 @@ export default function Register() {
           if (prev <= 1) {
             clearInterval(timer);
             setShowAlert(false);
+            router.push("/buyer/dang-nhap");
             return 0;
           }
           return prev - 1;
@@ -71,7 +74,7 @@ export default function Register() {
       }, 1000);
     }
     return () => clearInterval(timer);
-  }, [showAlert]);
+  }, [showAlert, router]);
   // useEffect để kiểm tra cookie LOGIN_INFO
   useEffect(() => {
     const token = getCookie("LOGIN_INFO");
@@ -121,7 +124,10 @@ export default function Register() {
           <Alert
             message="Bạn đã đăng ký thành công tài khoản."
             countdown={countdown}
-            onClose={() => setShowAlert(false)}
+            onClose={() => {
+              setShowAlert(false);
+              router.push("/buyer/dang-nhap");
+            }}
           />
         </>
       )}
@@ -174,6 +180,10 @@ export default function Register() {
               placeholder="Số điện thoại"
               {...register("phone", {
                 required: "Số điện thoại không được bỏ trống",
+                pattern: {
+                  value: /(84|0[3|5|7|8|9])+([0-9]{8})\b/g,
+                  message: "Số điện thoại không hợp lệ",
+                },
               })}
             />
             <label htmlFor="floatingPhoneNumber">Số điện thoại</label>
@@ -192,8 +202,13 @@ export default function Register() {
               {...register("pass", {
                 required: "Mật khẩu không được bỏ trống",
                 minLength: {
-                  value: 6,
-                  message: "Mật khẩu phải có ít nhất 6 ký tự",
+                  value: 8,
+                  message: "Mật khẩu phải có ít nhất 8 ký tự",
+                },
+                pattern: {
+                  value: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*\W).{8,}$/,
+                  message:
+                    "Mật khẩu phải có ít nhất 1 chữ thường, 1 chữ hoa, 1 ký tự đặc biệt và 1 số",
                 },
               })}
             />
@@ -236,7 +251,7 @@ export default function Register() {
           type="submit"
           className="w-100 py-3 rounded mb-3 border"
         >
-          Tôi đã có tài khoản
+          Đăng nhập
         </Link>
       </div>
       <div className="col border border-dark d-none d-md-flex">

@@ -119,9 +119,7 @@ export default function PostDetail({ params }) {
             </div>
           </div>
         </div>
-        <div className="my-3">
-          <CommentForm /> {/* Comment form section */}
-        </div>
+        <div className="my-3">{/* <CommentForm /> */}</div>
       </div>
     </>
   );

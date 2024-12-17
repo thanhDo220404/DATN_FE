@@ -65,9 +65,6 @@ export default function Menu() {
       <li className="list-group-item">
         <Link href="/user/don-mua">Đơn Mua</Link>
       </li>
-      <li className="list-group-item">
-        <Link href="/user/vocher">Kho Vocher</Link>
-      </li>
     </ul>
   );
 }

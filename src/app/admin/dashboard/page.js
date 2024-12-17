@@ -198,7 +198,6 @@ export default function Dashboard() {
                   <table className="table table-hover">
                     <thead>
                       <tr>
-                        <th>ID</th>
                         <th>Tên khách hàng</th>
                         <th>Email</th>
                         <th>Số điện thoại</th>
@@ -212,7 +211,6 @@ export default function Dashboard() {
                         ) // Sắp xếp ngày giảm dần
                         .map((user) => (
                           <tr key={user._id}>
-                            <td>{user._id}</td>
                             <td>{user.name}</td>
                             <td>{user.email}</td>
                             <td>

@@ -184,7 +184,7 @@ export default function Menu() {
               <span className="app-menu__label ms-1">Quản lý đơn hàng</span>
             </Link>
           </li>
-          <li>
+          {/* <li>
             <Link
               className={`app-menu__item ${
                 pathname === "/admin/bao-cao" ? "active" : ""
@@ -194,7 +194,7 @@ export default function Menu() {
               <i className="bi bi-bar-chart-line me-1" />
               <span className="app-menu__label">Báo cáo doanh thu</span>
             </Link>
-          </li>
+          </li> */}
           <li>
             <a className="app-menu__item" href="/">
               <i className="bi bi-house-door-fill"></i>

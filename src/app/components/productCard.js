@@ -135,7 +135,7 @@ export default function ProductCard({ product, col }) {
           <div className="my-absolute w-100 p-4 d-none d-sm-block">
             <div className="w-100 my-backdrop-filter">
               <div className="fw-bold mb-0 text-center w-100">
-                <span>Thêm nhanh vào giỏ hàng +</span>
+                <span>Thêm nhanh vào giỏ hàng</span>
               </div>
               {selectedItem.variations
                 .filter((variation) => variation.quantity > 0) // Lọc các variation có quantity > 0

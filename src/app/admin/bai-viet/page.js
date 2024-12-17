@@ -79,7 +79,6 @@ export default function Posts() {
               <table className="table table-hover table-bordered">
                 <thead>
                   <tr>
-                    <th>Mã bài viết</th>
                     <th>Tên bài viết</th>
                     <th>Ngày tạo</th>
                     <th>Ngày cập nhật</th>
@@ -90,7 +89,6 @@ export default function Posts() {
                   {listPosts.length > 0 ? (
                     paginatedPosts.map((post) => (
                       <tr key={post._id}>
-                        <td>{post._id}</td>
                         <td>{post.title}</td>
                         <td>{new Date(post.createdAt).toLocaleDateString()}</td>
                         <td>{new Date(post.updatedAt).toLocaleDateString()}</td>

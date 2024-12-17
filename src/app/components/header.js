@@ -265,9 +265,13 @@ export default function Header() {
                       </Link>
                     </li>
                     <li>
-                      <button className="dropdown-item" onClick={handleLogout}>
+                      <a
+                        className="dropdown-item"
+                        href="#"
+                        onClick={handleLogout}
+                      >
                         Đăng xuất
-                      </button>
+                      </a>
                     </li>
                   </ul>
                 </div>
