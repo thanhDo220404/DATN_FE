@@ -700,13 +700,12 @@ export default function Checkout() {
               </button>
             </div>
             {appliedVoucherDiscount > 0 && (
-              <div className="alert alert-success text-center mt-2 mb-2">
-                Đã giảm:{" "}
-                {new Intl.NumberFormat("vi-VN", {
-                  style: "currency",
-                  currency: "VND",
-                }).format(appliedVoucherDiscount)}
-              </div>
+              <div className="text-center text-success mb-2">
+              Đã giảm: {new Intl.NumberFormat("vi-VN", {
+                style: "currency",
+                currency: "VND",
+              }).format(appliedVoucherDiscount)}
+            </div>
             )}
             <div className="d-flex"></div>
             {voucherError && <div className="text-danger mt-2">{voucherError}</div>}
