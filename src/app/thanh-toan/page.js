@@ -9,6 +9,8 @@ import { useForm } from "react-hook-form";
 import { useRouter } from "next/navigation";
 import { useDispatch } from "react-redux";
 import { removeProductFromCart } from "../../../redux/slices/cartSlice";
+import { toast, ToastContainer } from "react-toastify";
+import { getAllVouchers } from "../databases/voucher";
 
 const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
@@ -51,6 +53,8 @@ export default function Checkout() {
   });
   const [order, setOrder] = useState({});
 
+  const [vouchers, setVouchers] = useState([]);
+
   const [shipping_methods, setShippingMethods] = useState([]);
   const [showShippingMethods, setShowShippingMethods] = useState(false);
   const [selectedShippingMethod, setSelectedShippingMethod] = useState(null);
@@ -65,9 +69,12 @@ export default function Checkout() {
       setData(checkoutData);
       localStorage.removeItem("checkoutData"); // Xóa sau khi lấy xong
     }
-  }, []); // Chỉ chạy sau khi render client-side
-  // console.log(data);
-
+  }, []);
+  const fetchVouchers = async () => {
+    const result = await getAllVouchers();
+    setVouchers(result);
+    console.log(result);
+  };
   const fetchAddress = async (userId) => {
     const result = await getAllByUserId(userId);
     setAddress(result);
@@ -101,6 +108,7 @@ export default function Checkout() {
     }
     fetchShippingMethods();
     fetchCities();
+    fetchVouchers();
   }, [data]);
 
   const districts =
@@ -167,11 +175,13 @@ export default function Checkout() {
 
         if (payment_type === "Ví điện tử VNPAY") {
           try {
+            localStorage.setItem("orderSuccess", "true");
             await createPaymentUrl(paymentData);
           } catch (error) {
             console.error("Payment process failed:", error);
           }
         } else {
+          localStorage.setItem("orderSuccess", "true");
           router.push("/user/don-mua"); // Dùng router.push thay vì window.location.href
         }
       } else {
@@ -190,12 +200,62 @@ export default function Checkout() {
     }
   };
 
+  const [voucherCode, setVoucherCode] = useState("");
+  const [discount, setDiscount] = useState(0);
+
+  const applyVoucher = (code) => {
+    setDiscount(0);
+    // Tìm voucher theo mã
+    const selectedVoucher = vouchers.find((voucher) => voucher.code === code);
+
+    if (!selectedVoucher) {
+      toast.error("Mã giảm giá không hợp lệ");
+      return;
+    }
+
+    // Kiểm tra hạn sử dụng và trạng thái
+    const isExpired = new Date(selectedVoucher.expiryDate) < new Date();
+    if (!selectedVoucher.isActive || isExpired) {
+      toast.error("Mã giảm giá đã hết hạn hoặc không khả dụng");
+      return;
+    }
+
+    // Kiểm tra đơn tối thiểu
+    if (totalAmount < selectedVoucher.minOrderValue) {
+      toast.error(
+        `Đơn hàng phải đạt tối thiểu ${new Intl.NumberFormat("vi-VN", {
+          style: "currency",
+          currency: "VND",
+        }).format(selectedVoucher.minOrderValue)} để áp dụng mã này`
+      );
+      return;
+    }
+
+    // Tính toán giá trị giảm giá
+    let discountValue = 0;
+    if (selectedVoucher.discountType === "percentage") {
+      discountValue = (totalAmount * selectedVoucher.discountValue) / 100;
+
+      // Kiểm tra giảm tối đa
+      if (discountValue > selectedVoucher.maxDiscountAmount) {
+        discountValue = selectedVoucher.maxDiscountAmount;
+      }
+    } else {
+      discountValue = selectedVoucher.discountValue;
+    }
+
+    setDiscount(discountValue);
+    toast.success("Áp dụng mã giảm giá thành công");
+  };
+
   const totalAmount =
     listCheckout.products.reduce((total, product) => {
       const price = product.items.price * (1 - product.items.discount / 100);
       const totalProduct = price * product.quantity;
       return total + totalProduct;
-    }, 0) + (selectedShippingMethod?.price || 0);
+    }, 0) +
+    (selectedShippingMethod?.price || 0) -
+    discount; // Trừ đi giảm giá
 
   const onSubmitAddAddress = async (formData) => {
     // Các ID từ formData
@@ -270,6 +330,7 @@ export default function Checkout() {
   };
   return (
     <>
+      <ToastContainer></ToastContainer>
       <div className="container-sm my-5 position-relative">
         {showSelectAddress && (
           <div className="position-fixed top-50 start-50 translate-middle w-100 h-100 p-3">
@@ -611,7 +672,9 @@ export default function Checkout() {
             <div className="text-end">
               {data && (
                 <span>
-                  Tổng số tiền ({listCheckout.products.length} sản phẩm) :
+                  <span className="fw-bold fs-5">
+                    Tổng số tiền ({listCheckout.products.length} sản phẩm) :
+                  </span>
                   <span className="ms-2 fs-5 text-danger">
                     {new Intl.NumberFormat("vi-VN", {
                       style: "currency",
@@ -621,6 +684,19 @@ export default function Checkout() {
                 </span>
               )}
             </div>
+          </div>
+        </div>
+        <div className="bg-white w-100 mt-3">
+          <div className="w-100 p-3 d-flex ">
+            <h4>Mã giảm giá</h4>
+            <button
+              type="button"
+              className="btn btn-secondary ms-auto"
+              data-bs-toggle="modal"
+              data-bs-target="#showVouchersModal"
+            >
+              Chọn mã giảm giá
+            </button>
           </div>
         </div>
         <div className="bg-white w-100 mt-3">
@@ -669,10 +745,10 @@ export default function Checkout() {
                       onChange={() => setPaymentType("Ví điện tử VNPAY")}
                       checked={payment_type === "Ví điện tử VNPAY"}
                     />
-                    <span>
+                    <span className="fw-bold">
                       <img
                         src="https://mcdn.coolmate.me/image/October2024/mceclip0_81.png"
-                        alt='<strong>Ví điện tử VNPAY</strong><br/> <span class="tw-text-tiny md:tw-text-small tw-text-cm-black-50">Quét QR để thanh toán</span>'
+                        alt='<strong>Ví điện tử VNPAY</strong><br/> <span className="tw-text-tiny md:tw-text-small tw-text-cm-black-50">Quét QR để thanh toán</span>'
                         width={50}
                         height={50}
                       ></img>
@@ -686,8 +762,8 @@ export default function Checkout() {
                   </div>
                   <div className="w-75">
                     <div className="w-50 float-end">
-                      <div className="d-flex justify-content-between py-2">
-                        <span className="me-2">Tổng Thành Tiền</span>
+                      <div className="d-flex justify-content-between py-2 fs-5">
+                        <span className="me-2 fw-bold">Tổng Thành Tiền</span>
                         <span>
                           {new Intl.NumberFormat("vi-VN", {
                             style: "currency",
@@ -703,8 +779,10 @@ export default function Checkout() {
                           )}
                         </span>
                       </div>
-                      <div className="d-flex justify-content-between py-2">
-                        <span className="me-2">Tổng tiền phí vận chuyển</span>
+                      <div className="d-flex justify-content-between py-2 fs-5">
+                        <span className="me-2 fw-bold">
+                          Tổng tiền phí vận chuyển
+                        </span>
                         <span>
                           {new Intl.NumberFormat("vi-VN", {
                             style: "currency",
@@ -712,9 +790,22 @@ export default function Checkout() {
                           }).format(selectedShippingMethod?.price)}
                         </span>
                       </div>
-                      <div className="d-flex justify-content-between py-2">
-                        <span className="me-2">Tổng Thanh Toán</span>
-                        <span className="text-primary fs-5">
+                      {/* Hiển thị số tiền giảm */}
+                      {discount > 0 && (
+                        <div className="d-flex justify-content-between py-2 fs-5 text-danger">
+                          <span className="me-2 fw-bold">Số tiền giảm</span>
+                          <span>
+                            -
+                            {new Intl.NumberFormat("vi-VN", {
+                              style: "currency",
+                              currency: "VND",
+                            }).format(discount)}
+                          </span>
+                        </div>
+                      )}
+                      <div className="d-flex justify-content-between py-2 fs-4">
+                        <span className="me-2 fw-bold">Tổng Thanh Toán</span>
+                        <span className="text-primary">
                           {new Intl.NumberFormat("vi-VN", {
                             style: "currency",
                             currency: "VND",
@@ -946,6 +1037,121 @@ export default function Checkout() {
               </button>
             </div>
           </form>
+        </div>
+      </div>
+
+      {/* <!-- Modal danh sách mã giảm giá --> */}
+      <div
+        className="modal fade"
+        id="showVouchersModal"
+        tabIndex="-1"
+        aria-labelledby="showVouchersModalLabel"
+        aria-hidden="true"
+      >
+        <div className="modal-dialog">
+          <div className="modal-content">
+            <div className="modal-header">
+              <h1 className="modal-title fs-5" id="exampleModalLabel">
+                Danh sách mã giảm giá
+              </h1>
+              <button
+                type="button"
+                className="btn-close"
+                data-bs-dismiss="modal"
+                aria-label="Close"
+              ></button>
+            </div>
+            <div className="modal-body">
+              <form
+                className="d-flex mb-2"
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  applyVoucher(voucherCode);
+                }}
+              >
+                <input
+                  type="text"
+                  className="form-control me-2"
+                  placeholder="Nhập mã giảm giá"
+                  value={voucherCode}
+                  onChange={(e) => setVoucherCode(e.target.value)}
+                />
+                <button className="btn btn-primary" type="submit">
+                  Áp dụng
+                </button>
+              </form>
+              <ul className="list-group">
+                {vouchers.map((voucher) => {
+                  // Kiểm tra xem voucher đã hết hạn chưa
+                  const isExpired = new Date(voucher.expiryDate) < new Date();
+                  const isActive = voucher.isActive && !isExpired;
+                  return (
+                    <li
+                      key={voucher._id}
+                      className="list-group-item mb-2 d-flex justify-content-between align-items-center"
+                    >
+                      <div>
+                        <span className="fw-bold fs-4">Mã: {voucher.code}</span>
+                        <br />
+                        <span>
+                          Giảm{" "}
+                          {voucher.discountType === "percentage"
+                            ? `${voucher.discountValue}%`
+                            : `${new Intl.NumberFormat("vi-VN", {
+                                style: "currency",
+                                currency: "VND",
+                              }).format(voucher.discountValue)}`}
+                        </span>
+                        <br />
+                        <span>
+                          Cho đơn tối thiểu{": "}
+                          {new Intl.NumberFormat("vi-VN", {
+                            style: "currency",
+                            currency: "VND",
+                          }).format(voucher.minOrderValue)}
+                        </span>
+                        <br />
+                        <span>
+                          Giảm tối đa{": "}
+                          {new Intl.NumberFormat("vi-VN", {
+                            style: "currency",
+                            currency: "VND",
+                          }).format(voucher.maxDiscountAmount)}
+                        </span>
+                        <br />
+                        <span>
+                          Hạn sử dụng:{" "}
+                          {new Date(voucher.expiryDate).toLocaleDateString(
+                            "vi-VN"
+                          )}
+                        </span>
+                      </div>
+
+                      {isActive && (
+                        <button
+                          className="btn btn-primary"
+                          onClick={() => {
+                            applyVoucher(voucher.code);
+                          }}
+                        >
+                          Áp dụng
+                        </button>
+                      )}
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
+            <div className="modal-footer">
+              <button
+                type="button"
+                className="btn btn-secondary"
+                data-bs-dismiss="modal"
+              >
+                Close
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </>

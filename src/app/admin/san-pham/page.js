@@ -1,19 +1,34 @@
 "use client";
 import Pagination from "@/app/components/pagination";
-import { deleteProduct, getAllProducts } from "@/app/databases/products";
+import {
+  deleteProduct,
+  getAllProducts,
+  searchProduct,
+} from "@/app/databases/products";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { toast, ToastContainer } from "react-toastify";
 
 export default function Products() {
   const [listProducts, setListProducts] = useState([]);
   const [productSelected, setProductSelected] = useState(null);
-
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
 
   const fetchProducts = async () => {
     const result = await getAllProducts();
     setListProducts(result);
+  };
+  const handleSearch = async (keyword) => {
+    try {
+      const result = keyword.trim()
+        ? await searchProduct(keyword) // Gọi API tìm kiếm
+        : await getAllProducts(); // Nếu không có từ khóa, lấy toàn bộ sản phẩm
+      setListProducts(result);
+      setCurrentPage(1); // Đặt lại trang hiện tại
+    } catch (error) {
+      console.error("Lỗi khi tìm kiếm sản phẩm:", error);
+    }
   };
   const formatCurrency = (value) => {
     return new Intl.NumberFormat("vi-VN", {
@@ -35,8 +50,10 @@ export default function Products() {
         const modal = document.getElementById("deleteProduct");
         const bootstrapModal = bootstrap.Modal.getInstance(modal);
         bootstrapModal.hide(); // Đóng modal
+        toast.success("Xóa sản phẩm thành công.");
       } catch (error) {
         console.error("Xóa sản phẩm thất bại:", error);
+        toast.error("Xóa sản phẩm thất bại.");
       }
     }
   };
@@ -51,6 +68,7 @@ export default function Products() {
   const totalPages = Math.ceil(listProducts.length / itemsPerPage);
   return (
     <>
+      <ToastContainer></ToastContainer>
       <div className="app-title">
         <ul className="app-breadcrumb breadcrumb side">
           <li className="breadcrumb-item active">
@@ -65,7 +83,7 @@ export default function Products() {
         <div className="col-md-12">
           <div className="tile">
             <div className="tile-body">
-              <div className="row element-button">
+              <div className="row justify-content-between element-button">
                 <div className="col-sm-2">
                   <Link
                     className="btn btn-add btn-sm"
@@ -75,6 +93,16 @@ export default function Products() {
                     <i className="bi bi-plus" />
                     Thêm sản phẩm
                   </Link>
+                </div>
+                <div className="col-sm-4">
+                  <input
+                    type="text"
+                    className="form-control"
+                    placeholder="Tìm kiếm sản phẩm"
+                    onChange={(e) => {
+                      handleSearch(e.target.value); // Tìm kiếm sản phẩm theo từ khóa
+                    }}
+                  />
                 </div>
               </div>
               <table
@@ -92,7 +120,7 @@ export default function Products() {
                     <th>Tình trạng</th>
                     <th>Giá tiền</th>
                     <th>Danh mục</th>
-                    <th width={100}>Tính năng</th>
+                    <th>Tính năng</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -142,11 +170,16 @@ export default function Products() {
                             <button
                               className="btn btn-primary btn-sm trash"
                               type="button"
-                              title="Xóa"
                               style={{ width: "20px", margin: "5px" }}
                               data-bs-toggle="modal"
                               data-bs-target="#deleteProduct"
                               onClick={() => handleDelete(product)}
+                              disabled={totalQuantity >= 1} // Vô hiệu hóa nút "Xóa" khi số lượng >= 1
+                              title={
+                                totalQuantity >= 1
+                                  ? "Không thể xoá sản phẩm còn tồn kho"
+                                  : "Xóa sản phẩm"
+                              }
                             >
                               <i className="bi bi-trash" />
                             </button>

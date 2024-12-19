@@ -141,7 +141,7 @@ const Vouchers = () => {
             <table className="table table-striped table-bordered">
               <thead>
                 <tr>
-                  <th>Mã Voucher</th>
+                  <th>Mã Giảm Giá</th>
                   <th>Loại Giảm Giá</th>
                   <th>Giá Trị</th>
                   <th>Giá Trị Đơn Hàng Tối Thiểu</th>
@@ -193,7 +193,7 @@ const Vouchers = () => {
                         data-bs-target="#updateVoucherModal"
                         onClick={() => handleUpdate(voucher)}
                       >
-                        Chỉnh Sửa
+                        <i class="bi bi-pencil"></i>
                       </button>
                       <button
                         className="btn btn-sm btn-danger"
@@ -201,7 +201,7 @@ const Vouchers = () => {
                         data-bs-target="#confirmDeleteModal"
                         onClick={() => handleDelete(voucher)}
                       >
-                        Xóa
+                        <i class="bi bi-trash"></i>
                       </button>
                     </td>
                   </tr>

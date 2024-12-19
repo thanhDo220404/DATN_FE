@@ -111,11 +111,11 @@ export default function Media() {
                   </div>
                 </div>
                 <div className="row w-100">
-                  <div className="col-8 text-center">
+                  <div id="postContent" className="col-8 text-center">
                     <img
                       src={dataOneMedia.filePath}
                       alt={dataOneMedia.fileName}
-                      height={600}
+                      height={1000}
                     />
                   </div>
                   <div className="col-4">
@@ -163,7 +163,7 @@ export default function Media() {
       ) : null}
       <div className="p-3">
         <div className="d-flex">
-          <h3>Media</h3>
+          <h3>Quản Lý Hình Ảnh</h3>
           {/* Input file ẩn */}
           <input
             className="d-none"

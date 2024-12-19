@@ -13,6 +13,21 @@ export default function HomePage() {
   const [categories, setCategories] = useState([]);
   const [orders, setOrders] = useState([]);
   const [bestSellingProducts, setBestSellingProducts] = useState([]);
+
+  useEffect(() => {
+    var Tawk_API = Tawk_API || {},
+      Tawk_LoadStart = new Date();
+    (function () {
+      var s1 = document.createElement("script"),
+        s0 = document.getElementsByTagName("script")[0];
+      s1.async = true;
+      s1.src = "https://embed.tawk.to/6762e22349e2fd8dfef9e0a4/1ifd46nam";
+      s1.charset = "UTF-8";
+      s1.setAttribute("crossorigin", "*");
+      s0.parentNode.insertBefore(s1, s0);
+    })();
+  }, []); // Chỉ chạy một lần sau khi component được mount
+
   const fetchProducts = async () => {
     const result = await getAllProducts();
     setProducts(result);

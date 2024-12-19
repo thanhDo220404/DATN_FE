@@ -184,3 +184,19 @@ export const refundTransaction = async (orderId, transDate, amount) => {
     throw error; // Quăng lỗi nếu cần xử lý ở nơi gọi hàm
   }
 };
+// Tìm kiếm sản phẩm theo tên
+export const searchOrder = async (keyword) => {
+  try {
+    const response = await fetch(`${API_URL}/search/${keyword}`);
+
+    if (!response.ok) {
+      throw new Error("Network response was not ok");
+    }
+
+    const data = await response.json();
+    return data; // Trả về danh sách sản phẩm tìm thấy
+  } catch (error) {
+    console.error("Lỗi khi tìm kiếm sản phẩm:", error);
+    throw error;
+  }
+};

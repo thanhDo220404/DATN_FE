@@ -1,5 +1,6 @@
 "use client";
-import { getAllOrders } from "@/app/databases/order";
+import Pagination from "@/app/components/pagination";
+import { getAllOrders, searchOrder } from "@/app/databases/order";
 import { getOrderStatuses } from "@/app/databases/order_status";
 import Link from "next/link";
 import { useEffect, useState } from "react";
@@ -9,6 +10,8 @@ export default function Orders() {
   const [isLoading, setIsLoading] = useState(true);
   const [listOrderStatuses, setListOrderStatues] = useState([]);
   const [selectedStatus, setSelectedStatus] = useState(null); // Mặc định chọn "Tất cả"
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
 
   const fetchOrderStatues = async () => {
     const result = await getOrderStatuses();
@@ -26,8 +29,21 @@ export default function Orders() {
     setIsLoading(false);
   };
 
+  const handleSearch = async (keyword) => {
+    if (!keyword) {
+      // Nếu không có từ khóa tìm kiếm, hiển thị lại tất cả các đơn hàng
+      fetchOrders(selectedStatus);
+    } else {
+      // Tìm kiếm đơn hàng theo ID
+      const filteredOrders = orders.filter((order) =>
+        order._id.toLowerCase().includes(keyword.toLowerCase())
+      );
+      setOrders(filteredOrders); // Cập nhật danh sách đơn hàng theo kết quả tìm kiếm
+    }
+  };
+
   useEffect(() => {
-    fetchOrders(); // Gọi hàm fetchOrders khi component mount
+    fetchOrders();
     fetchOrderStatues();
   }, []);
 
@@ -36,6 +52,12 @@ export default function Orders() {
     setSelectedStatus(statusId); // Cập nhật trạng thái đã chọn
     fetchOrders(statusId); // Lọc đơn hàng theo trạng thái đã chọn
   };
+
+  const paginatedOders = orders.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+  const totalPages = Math.ceil(orders.length / itemsPerPage);
 
   return (
     <>
@@ -93,6 +115,16 @@ export default function Orders() {
                 </div>
               ) : (
                 <div className="table-responsive">
+                  <div className="py-2 flex-shrink-0">
+                    <input
+                      type="text"
+                      className="form-control"
+                      placeholder="Tìm kiếm ID đơn hàng..."
+                      onChange={(e) => {
+                        handleSearch(e.target.value); // Tìm kiếm sản phẩm theo từ khóa
+                      }}
+                    />
+                  </div>
                   <table className="table table-hover table-bordered js-copytextarea align-middle">
                     <thead>
                       <tr>
@@ -107,8 +139,8 @@ export default function Orders() {
                       </tr>
                     </thead>
                     <tbody>
-                      {orders.length > 0 ? (
-                        orders.map((order) => (
+                      {paginatedOders.length > 0 ? (
+                        paginatedOders.map((order) => (
                           <tr key={order._id}>
                             <td>{order._id}</td>
                             <td>{order.order_address.name}</td>
@@ -180,6 +212,13 @@ export default function Orders() {
                   </table>
                 </div>
               )}
+            </div>
+            <div className="row element-button">
+              <Pagination
+                totalPages={totalPages}
+                currentPage={currentPage}
+                onPageChange={(pageNumber) => setCurrentPage(pageNumber)}
+              />
             </div>
           </div>
         </div>

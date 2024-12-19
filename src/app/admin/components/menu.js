@@ -8,6 +8,7 @@ import { usePathname } from "next/navigation";
 export default function Menu() {
   const pathname = usePathname();
   const [userInfo, setUserInfo] = useState({});
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
   useEffect(() => {
     const token = getCookie("LOGIN_INFO");
@@ -28,7 +29,7 @@ export default function Menu() {
         <div className="app-sidebar__user">
           <img
             className="app-sidebar__user-avatar"
-            src={`http://localhost:2204/img/user/${userInfo.image}`}
+            src={`${apiUrl}/img/user/${userInfo.image}`}
             width="50px"
             alt="User Image"
           />

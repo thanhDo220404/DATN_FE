@@ -443,7 +443,17 @@ export default function ProductDetail({ params }) {
               <div className="d-flex align-items-center">
                 <button
                   className="my-input my-btn my-btn-secondary me-2"
-                  onClick={() => setQuantity(quantity > 1 ? quantity - 1 : 1)}
+                  onClick={() => {
+                    if (quantity > 1) {
+                      setQuantity(quantity - 1);
+                    } else {
+                      toast.warn("Số lượng không thể nhỏ hơn 1!", {
+                        position: "top-center", // Vị trí của toast
+                        autoClose: 3000, // Tự động đóng sau 3 giây
+                        draggable: true,
+                      });
+                    }
+                  }}
                 >
                   -
                 </button>
@@ -457,16 +467,20 @@ export default function ProductDetail({ params }) {
                 />
                 <button
                   className="my-input my-btn my-btn-secondary ms-2"
-                  onClick={() =>
-                    setQuantity(
-                      quantity + 1 <=
-                        (selectedVariation
-                          ? selectedVariation.quantity
-                          : totalQuantity)
-                        ? quantity + 1
-                        : quantity
-                    )
-                  }
+                  onClick={() => {
+                    const maxQuantity = selectedVariation
+                      ? selectedVariation.quantity
+                      : totalQuantity;
+
+                    if (quantity + 1 <= maxQuantity) {
+                      setQuantity(quantity + 1);
+                    } else {
+                      toast.info(`Số lượng không thể lớn hơn ${maxQuantity}!`, {
+                        position: "top-center",
+                        autoClose: 3000,
+                      });
+                    }
+                  }}
                 >
                   +
                 </button>

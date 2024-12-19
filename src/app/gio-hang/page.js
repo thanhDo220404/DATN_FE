@@ -21,6 +21,7 @@ export default function Cart() {
   const [payload, setPayload] = useState();
   const [listCheckout, setListCheckout] = useState([]);
   const [isAllChecked, setIsAllChecked] = useState(false);
+  const [selectedCart, setSelectedCart] = useState(null);
   const [warningMessage, setWarningMessage] = useState("");
 
   let carts = useSelector((state) => state.cart.items);
@@ -101,9 +102,13 @@ export default function Cart() {
     }
   }, [payload, listProducts]);
 
-  const handleDelete = async (id) => {
-    // await deleteCart(id);
+  const handleDelete = async () => {
+    const id = selectedCart._id;
     dispatch(removeProductFromCart(id));
+    const modal = document.getElementById("deleteCart");
+    const bootstrapModal = bootstrap.Modal.getInstance(modal);
+    bootstrapModal.hide();
+    toast.success("Đã xóa sản phẩm khỏi giỏ hàng");
     // Cập nhật listCheckout
     setListCheckout((prevList) =>
       prevList.filter((checkoutItem) => checkoutItem._id !== id)
@@ -114,7 +119,8 @@ export default function Cart() {
     }
   };
 
-  const handleQuantityChange = async (cartId, newQuantity) => {
+  const handleQuantityChange = async (cart, newQuantity) => {
+    const cartId = cart._id;
     // Tìm cartItem trong giỏ hàng theo cartId
     const cartItem = carts.find((item) => item._id === cartId);
 
@@ -139,15 +145,28 @@ export default function Cart() {
     // Kiểm tra xem newQuantity có vượt quá maxQuantity không
     if (newQuantity > maxQuantity) {
       // Hiển thị thông báo lỗi nếu số lượng vượt quá
+      newQuantity = maxQuantity;
       toast.error(`Bạn chỉ có thể mua tối đa ${maxQuantity} sản phẩm`);
       return; // Ngừng thực hiện các bước tiếp theo nếu số lượng không hợp lệ
     }
 
     // Nếu newQuantity = 0, gọi hàm handleDelete
     if (newQuantity === 0) {
-      handleDelete(cartId);
-      toast.success("Đã xóa sản phẩm khỏi giỏ hàng");
+      setSelectedCart(cart);
+      const modal = document.getElementById("deleteCart");
+      // Sử dụng getOrCreateInstance để đảm bảo modal được khởi tạo
+      const bootstrapModal = bootstrap.Modal.getOrCreateInstance(modal);
+      if (bootstrapModal) {
+        bootstrapModal.show();
+      } else {
+        console.error(
+          "Modal không được khởi tạo hoặc không tồn tại trong DOM."
+        );
+      }
       return;
+    }
+    if (newQuantity < 0) {
+      newQuantity = 1;
     }
 
     // Giới hạn số lượng tối đa
@@ -326,7 +345,7 @@ export default function Cart() {
                             className="btn btn-secondary btn-sm"
                             onClick={() =>
                               handleQuantityChange(
-                                cartItem._id,
+                                cartItem,
                                 Math.max(cartItem.product.quantity - 1)
                               )
                             }
@@ -340,7 +359,7 @@ export default function Cart() {
                             value={cartItem.product.quantity}
                             onChange={(e) =>
                               handleQuantityChange(
-                                cartItem._id,
+                                cartItem,
                                 parseInt(e.target.value)
                               )
                             }
@@ -350,7 +369,7 @@ export default function Cart() {
                             className="btn btn-secondary btn-sm"
                             onClick={() =>
                               handleQuantityChange(
-                                cartItem._id,
+                                cartItem,
                                 cartItem.product.quantity + 1
                               )
                             }
@@ -366,7 +385,9 @@ export default function Cart() {
                       <td className="text-center">
                         <button
                           className="btn btn-link text-danger p-0"
-                          onClick={() => handleDelete(cartItem._id)}
+                          data-bs-toggle="modal"
+                          data-bs-target="#deleteCart"
+                          onClick={() => setSelectedCart(cartItem)}
                         >
                           <i className="bi bi-trash fs-5"></i>
                         </button>
@@ -407,6 +428,52 @@ export default function Cart() {
 
               <button className="btn btn-primary" onClick={handleCheckout}>
                 Mua hàng
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* <!-- Modal Xác nhận xóa sản phẩm khỏi giỏ hàng --> */}
+      <div
+        className="modal fade"
+        id="deleteCart"
+        tabIndex="-1"
+        aria-labelledby="deleteCartLabel"
+        aria-hidden="true"
+      >
+        <div className="modal-dialog modal-dialog-centered">
+          <div className="modal-content">
+            <div className="modal-header">
+              <h1 className="modal-title fs-5 text-danger" id="deleteCartLabel">
+                Bạn chắc chắn muốn bỏ sản phẩm này?
+              </h1>
+              <button
+                type="button"
+                className="btn-close"
+                data-bs-dismiss="modal"
+                aria-label="Close"
+              ></button>
+            </div>
+            <div className="modal-body">
+              {selectedCart
+                ? `${selectedCart.product.name} (${selectedCart.product.items.color.colorName}, ${selectedCart.product.items.variations.size.sizeName})`
+                : "co deo dau"}
+            </div>
+            <div className="modal-footer">
+              <button
+                type="button"
+                className="btn btn-secondary"
+                data-bs-dismiss="modal"
+              >
+                Không
+              </button>
+              <button
+                type="button"
+                className="btn btn-danger"
+                onClick={handleDelete}
+              >
+                Có
               </button>
             </div>
           </div>

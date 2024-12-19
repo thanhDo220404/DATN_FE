@@ -3,6 +3,8 @@ import { getAllUsers } from "@/app/databases/users";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
+const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+
 export default function Users() {
   const [listUsers, setListUsers] = useState([]);
 
@@ -73,7 +75,7 @@ export default function Users() {
                           <td>
                             <img
                               className="img-card-person"
-                              src={`http://localhost:2204/img/user/${user.image}`}
+                              src={`${apiUrl}/img/user/${user.image}`}
                               alt="User Avatar"
                               width="50"
                             />

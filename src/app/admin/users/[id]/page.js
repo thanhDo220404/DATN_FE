@@ -37,9 +37,6 @@ export default function ({ params }) {
   const defaultAddress = userAddress.find(
     (address) => address.is_default === true
   );
-  const addressToDisplay = defaultAddress
-    ? `${defaultAddress.specific_address}, ${defaultAddress.address.district.ward.prefix} ${defaultAddress.address.district.ward.name}, ${defaultAddress.address.district.name}, ${defaultAddress.address.name}`
-    : "Chưa có địa chỉ mặt định";
 
   return (
     <>

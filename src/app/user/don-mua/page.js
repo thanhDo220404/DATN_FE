@@ -27,6 +27,7 @@ export default function Purchure() {
   const [reviewData, setReviewData] = useState([]); // Để lưu dữ liệu review
   const [listReviewsByUser, setListreviewsByUser] = useState([]);
   const [listReviewsByOrder, setListReviewsByOrder] = useState(null);
+  const [selectedOrder, setSelectedOrder] = useState(null);
 
   const fetchOrders = async (userId, statusId = null) => {
     const result = await getOrdersByUserId(userId);
@@ -49,22 +50,29 @@ export default function Purchure() {
   };
 
   // Thêm hàm cancelOrder vào mã hiện tại
-  const cancelOrder = async (order) => {
-    console.log(order);
-
-    const orderId = order._id;
-    const order_status = order.order_status;
-    // nếu trạng thái là đã thanh toán thì hoàn tiền
-    if (order_status._id === "673f4eb7e8698e7b4115b84d") {
-      const vnp_TransactionDate = order.vnp_TransactionDate;
-      const amount = order.order_total;
-      await refundTransaction(orderId, vnp_TransactionDate, amount);
-      toast.success("Tiền sẽ được hoàn trả cho bạn vào thời gian sớm nhất");
-      await updateOrderStatus(orderId, "6724f9c943ad843da1d31150");
+  const cancelOrder = async () => {
+    if (selectedOrder) {
+      const order = selectedOrder;
+      const orderId = order._id;
+      const order_status = order.order_status;
+      // nếu trạng thái là đã thanh toán thì hoàn tiền
+      if (order_status._id === "673f4eb7e8698e7b4115b84d") {
+        const vnp_TransactionDate = order.vnp_TransactionDate;
+        const amount = order.order_total;
+        await refundTransaction(orderId, vnp_TransactionDate, amount);
+        toast.success("Tiền sẽ được hoàn trả cho bạn vào thời gian sớm nhất");
+        await updateOrderStatus(orderId, "6724f9c943ad843da1d31150");
+      } else {
+        toast.success("Hủy đơn thành công");
+        await updateOrderStatus(orderId, "6724f9c943ad843da1d31150");
+      }
+      const modal = document.getElementById("cancelOrder");
+      const bootstrapModal = bootstrap.Modal.getInstance(modal);
+      bootstrapModal.hide();
+      fetchOrders(payload._id); // Tải lại danh sách đơn hàng sau khi hủy
     } else {
-      await updateOrderStatus(orderId, "6724f9c943ad843da1d31150");
+      toast.error("Vui lòng chọn đơn hàng");
     }
-    fetchOrders(payload._id); // Tải lại danh sách đơn hàng sau khi hủy
   };
 
   const handlePayment = async (paymentData) => {
@@ -188,7 +196,30 @@ export default function Purchure() {
     );
   };
 
+  const handleCopyOrderId = (orderId) => {
+    navigator.clipboard
+      .writeText(orderId)
+      .then(() => {
+        toast.success("Đã sao chép ID đơn hàng thành công!");
+      })
+      .catch(() => {
+        toast.error("Sao chép ID đơn hàng thất bại.");
+      });
+  };
+
   useEffect(() => {
+    const isOrderSuccess = localStorage.getItem("orderSuccess");
+
+    if (isOrderSuccess) {
+      // Hiển thị thông báo
+      toast.success("Đặt hàng thành công!");
+
+      // Trì hoãn việc xóa trạng thái
+      setTimeout(() => {
+        localStorage.removeItem("orderSuccess");
+      }, 1);
+    }
+
     const token = getCookie("LOGIN_INFO");
     fetchOrderStatues();
     if (token) {
@@ -239,8 +270,19 @@ export default function Purchure() {
           {orders.length > 0 ? (
             orders.map((order, index) => (
               <div className="bg-white mt-3 p-3" key={index}>
-                <div className="text-end text-success fs-6">
-                  <i className="bi bi-truck"></i> {order.order_status.name}
+                <div className="row fs-6">
+                  <div className="col-6 text-start">
+                    Mã đơn hàng: {order._id}
+                    <button
+                      className="btn btn-sm btn-secondary ms-2"
+                      onClick={() => handleCopyOrderId(order._id)}
+                    >
+                      Copy
+                    </button>
+                  </div>
+                  <div className="col-6 text-end text-success">
+                    <i className="bi bi-truck"></i> {order.order_status.name}
+                  </div>
                 </div>
                 <table className="table align-middle">
                   <tbody>
@@ -325,7 +367,9 @@ export default function Purchure() {
                       )}
                       <button
                         className="btn btn-danger"
-                        onClick={() => cancelOrder(order)}
+                        data-bs-toggle="modal"
+                        data-bs-target="#cancelOrder"
+                        onClick={() => setSelectedOrder(order)}
                       >
                         Hủy đơn
                       </button>
@@ -560,6 +604,50 @@ export default function Purchure() {
                 onClick={() => setListReviewsByOrder(null)}
               >
                 Đóng
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+      {/* <!-- Modal hủy đơn hàng --> */}
+      <div
+        className="modal fade"
+        id="cancelOrder"
+        tabIndex="-1"
+        aria-labelledby="cancelOrderLabel"
+        aria-hidden="true"
+      >
+        <div className="modal-dialog modal-dialog-centered">
+          <div className="modal-content">
+            <div className="modal-header">
+              <h1
+                className="modal-title fs-5 text-danger"
+                id="cancelOrderLabel"
+              >
+                Bạn chắc chắn muốn hủy đơn
+              </h1>
+              <button
+                type="button"
+                className="btn-close"
+                data-bs-dismiss="modal"
+                aria-label="Close"
+              ></button>
+            </div>
+            <div className="modal-body">Xác nhận hủy đơn hàng</div>
+            <div className="modal-footer">
+              <button
+                type="button"
+                className="btn btn-secondary"
+                data-bs-dismiss="modal"
+              >
+                Không
+              </button>
+              <button
+                type="button"
+                className="btn btn-danger"
+                onClick={cancelOrder}
+              >
+                Có
               </button>
             </div>
           </div>
