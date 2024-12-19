@@ -158,7 +158,6 @@ export default function ChartComponent({
             easing: "linear",
             from: 1,
             to: 0,
-            loop: true,
           },
         },
 
