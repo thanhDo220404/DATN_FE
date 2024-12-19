@@ -243,7 +243,9 @@ export default function Checkout() {
     } else {
       discountValue = selectedVoucher.discountValue;
     }
-
+    const modal = document.getElementById("showVouchersModal");
+    const bootstrapModal = bootstrap.Modal.getInstance(modal);
+    bootstrapModal.hide();
     setDiscount(discountValue);
     toast.success("Áp dụng mã giảm giá thành công");
   };
@@ -694,6 +696,7 @@ export default function Checkout() {
               className="btn btn-secondary ms-auto"
               data-bs-toggle="modal"
               data-bs-target="#showVouchersModal"
+              onClick={() => setDiscount(0)}
             >
               Chọn mã giảm giá
             </button>
@@ -736,14 +739,27 @@ export default function Checkout() {
                       payment_type === "Ví điện tử VNPAY"
                         ? "border-primary"
                         : ""
-                    }`}
-                    onClick={() => setPaymentType("Ví điện tử VNPAY")}
+                    } ${
+                      totalAmount < 5 ? "opacity-50 cursor-not-allowed" : ""
+                    }`} // Hiệu ứng nếu bị vô hiệu hóa
+                    onClick={() => {
+                      if (totalAmount >= 5) {
+                        setPaymentType("Ví điện tử VNPAY");
+                      }
+                    }}
                   >
                     <input
                       type="radio"
                       name="payment_method"
-                      onChange={() => setPaymentType("Ví điện tử VNPAY")}
+                      onChange={() => {
+                        if (totalAmount >= 5000) {
+                          setPaymentType("Ví điện tử VNPAY");
+                        } else {
+                          setPaymentType("Thanh toán khi nhận hàng");
+                        }
+                      }}
                       checked={payment_type === "Ví điện tử VNPAY"}
+                      disabled={totalAmount < 5000} // Vô hiệu hóa input nếu không đủ điều kiện
                     />
                     <span className="fw-bold">
                       <img
