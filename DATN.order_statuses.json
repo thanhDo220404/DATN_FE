@@ -1,0 +1,42 @@
+[{
+  "_id": {
+    "$oid": "673f4eb7e8698e7b4115b84c"
+  },
+  "name": "Chưa Thanh Toán"
+},
+{
+  "_id": {
+    "$oid": "673f4eb7e8698e7b4115b84d"
+  },
+  "name": "Đã Thanh Toán"
+},
+{
+  "_id": {
+    "$oid": "6724f9c943ad843da1d3114c"
+  },
+  "name": "Chờ xử lý"
+},
+{
+  "_id": {
+    "$oid": "6724f9c943ad843da1d3114d"
+  },
+  "name": "Đã xác nhận"
+},
+{
+  "_id": {
+    "$oid": "6724f9c943ad843da1d3114e"
+  },
+  "name": "Đang giao hàng"
+},
+{
+  "_id": {
+    "$oid": "6724f9c943ad843da1d3114f"
+  },
+  "name": "Đã giao hàng"
+},
+{
+  "_id": {
+    "$oid": "6724f9c943ad843da1d31150"
+  },
+  "name": "Đã hủy"
+}]
