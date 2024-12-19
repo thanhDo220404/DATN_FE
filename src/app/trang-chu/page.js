@@ -13,15 +13,31 @@ export default function HomePage() {
   const [categories, setCategories] = useState([]);
   const [orders, setOrders] = useState([]);
   const [bestSellingProducts, setBestSellingProducts] = useState([]);
+
+  // Tích hợp Tawk.to
+  useEffect(() => {
+    var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date();
+    (function(){
+    var s1=document.createElement("script"),s0=document.getElementsByTagName("script")[0];
+    s1.async=true;
+    s1.src='https://embed.tawk.to/6762e22349e2fd8dfef9e0a4/1ifd46nam';
+    s1.charset='UTF-8';
+    s1.setAttribute('crossorigin','*');
+    s0.parentNode.insertBefore(s1,s0);
+    })();
+  }, []); // Chỉ chạy một lần sau khi component được mount
+
   const fetchProducts = async () => {
     const result = await getAllProducts();
     setProducts(result);
     console.log("this is fetchProducts: ", result);
   };
+
   const fetchCategories = async () => {
     const result = await getAllCategories();
     setCategories(result);
   };
+
   const fetchOrders = async () => {
     const result = await getAllOrders();
     setOrders(result);
@@ -29,11 +45,11 @@ export default function HomePage() {
     const bestSeller = getTopPurchasedProducts(result);
     console.log("this is bestSeller: ", bestSeller);
   };
+
   function getTopPurchasedProducts(orders, limit = 4) {
     const productCounts = {};
 
     orders.forEach((order) => {
-      // Kiểm tra nếu order_status._id khác '6724f9c943ad843da1d31150' tức đơn hàng "bị hủy"
       if (
         order.order_status &&
         order.order_status._id !== "6724f9c943ad843da1d31150"
@@ -53,9 +69,8 @@ export default function HomePage() {
 
     const sortedProducts = Object.entries(productCounts)
       .sort((a, b) => b[1] - a[1])
-      .slice(0, limit); // Giới hạn số lượng theo limit
+      .slice(0, limit);
 
-    // Trả về danh sách chứa cả productId và productCount
     return sortedProducts.map(([productId, count]) => ({
       productId,
       count,
@@ -67,25 +82,23 @@ export default function HomePage() {
     fetchCategories();
     fetchOrders();
   }, []);
-  // Effect hook to calculate best-selling products once products and orders are fetched
+
   useEffect(() => {
     if (products.length > 0 && orders.length > 0) {
-      const bestSellers = getTopPurchasedProducts(orders); // Gồm cả productId và count
-      const bestSellerIds = bestSellers.map((seller) => seller.productId); // Chỉ lấy productId
+      const bestSellers = getTopPurchasedProducts(orders);
+      const bestSellerIds = bestSellers.map((seller) => seller.productId);
 
-      // Lọc các sản phẩm bán chạy từ mảng products
       const bestSelling = products.filter((product) =>
         bestSellerIds.includes(product._id)
       );
 
-      // Sắp xếp bestSelling theo thứ tự giống bestSellerIds
       const sortedBestSelling = bestSelling.sort((a, b) => {
         return bestSellerIds.indexOf(a._id) - bestSellerIds.indexOf(b._id);
       });
 
       setBestSellingProducts(sortedBestSelling);
     }
-  }, [products, orders]); // Re-run this when either products or orders changes
+  }, [products, orders]);
 
   console.log(bestSellingProducts);
 

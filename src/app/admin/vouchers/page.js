@@ -44,28 +44,50 @@ const Vouchers = () => {
 
   const fetchVouchers = async () => {
     try {
-      const result = await getAllVouchers();
-      setVouchers(result);
+      const fetchedVouchers = await getAllVouchers();
+      const currentDate = new Date();
+
+      for (const voucher of fetchedVouchers) {
+        const expiryDate = new Date(voucher.expiryDate);
+        if (voucher.isActive && expiryDate < currentDate) {
+          // Cập nhật trạng thái của voucher thành không hoạt động
+          await updateVoucher(voucher._id, { isActive: false });
+          voucher.isActive = false; // Cập nhật trực tiếp trong danh sách
+        }
+      }
+
+      setVouchers(fetchedVouchers); // Đặt tất cả voucher, bao gồm cả không hoạt động
     } catch (error) {
       console.error("Error fetching vouchers:", error);
-      setError("Không thể tải danh sách voucher.");
+      setError("Đã có lỗi xảy ra khi tải voucher.");
     }
   };
 
   const addVoucher = async (data) => {
     try {
+      // Kiểm tra tính duy nhất trước khi gửi yêu cầu đến server
+      if (vouchers.some((voucher) => voucher.code.toLowerCase() === data.code.toLowerCase())) {
+        setError("Mã voucher đã tồn tại.");
+        return;
+      }
+
       await insertVoucher(data);
-      fetchVouchers();
       toast.success("Thêm voucher thành công!");
+      fetchVouchers();
       resetInsert();
       setError("");
+
       // Close modal
       const modal = document.getElementById("addVoucherModal");
       const bootstrapModal = bootstrap.Modal.getInstance(modal);
       bootstrapModal.hide();
     } catch (error) {
       console.error("Error adding voucher:", error);
-      setError("Có lỗi xảy ra khi thêm voucher.");
+      if (error.response && error.response.status === 409) { // Giả sử server trả về 409 Conflict khi mã trùng
+        setError("Mã voucher đã tồn tại.");
+      } else {
+        setError("Có lỗi xảy ra khi thêm voucher.");
+      }
     }
   };
 
@@ -122,18 +144,18 @@ const Vouchers = () => {
     <>
       <ToastContainer />
       <div className="container-fluid px-4">
-        <h1 className="mt-4">Quản Lý Voucher</h1>
+        <h1 className="mt-4">Quản Lý Mã Giảm Giá</h1>
 
         <div className="card mb-4">
           <div className="card-header d-flex justify-content-between align-items-center">
             <i className="fas fa-table me-1"></i>
-            Danh Sách Voucher
+            Danh Sách Mã Giảm Giá
             <button
               className="btn btn-primary"
               data-bs-toggle="modal"
               data-bs-target="#addVoucherModal"
             >
-              Thêm Voucher
+              Thêm Mã Giảm Giá
             </button>
           </div>
           <div className="card-body">
@@ -141,7 +163,7 @@ const Vouchers = () => {
             <table className="table table-striped table-bordered">
               <thead>
                 <tr>
-                  <th>Mã Voucher</th>
+                  <th>Mã Giảm Giá</th>
                   <th>Loại Giảm Giá</th>
                   <th>Giá Trị</th>
                   <th>Giá Trị Đơn Hàng Tối Thiểu</th>
@@ -182,7 +204,7 @@ const Vouchers = () => {
                           }).format(voucher.maxDiscountAmount)
                         : "Không giới hạn"}
                     </td>
-                    <td>{new Date(voucher.expiryDate).toLocaleDateString()}</td>
+                    <td>{new Date(voucher.expiryDate).toLocaleDateString("vi-VN")}</td>
                     <td>
                       {voucher.isActive ? "Hoạt Động" : "Không Hoạt Động"}
                     </td>
@@ -238,16 +260,19 @@ const Vouchers = () => {
             <div className="modal-body">
               <div className="mb-3">
                 <label htmlFor="voucherCode" className="form-label">
-                  Mã Voucher
+                  Mã Giảm Giá
                 </label>
                 <input
                   type="text"
                   className="form-control"
                   id="voucherCode"
                   {...registerInsert("code", {
-                    required: "Vui lòng nhập mã voucher.",
+                    required: "Vui lòng nhập mã giảm giá.",
+                    validate: (value) =>
+                      !vouchers.some((voucher) => voucher.code === value) ||
+                      "Mã voucher đã tồn tại.",
                   })}
-                  placeholder="Nhập mã voucher"
+                  placeholder="Nhập mã giảm giá"
                 />
                 {errorsInsert.code && (
                   <span className="text-danger">
@@ -565,10 +590,7 @@ const Vouchers = () => {
               </button>
               <button
                 type="button"
-                className="btn btn-danger"
-                onClick={confirmDeleteVoucher}
-              >
-                Xóa
+                className="btn btn-danger"                onClick={confirmDeleteVoucher}              >                Xóa
               </button>
             </div>
           </div>

@@ -104,7 +104,7 @@ export default function ChartComponent({
           orderDate.getFullYear() === period.year
         ) {
           orderCount[index] += 1;
-          if (order.order_status._id !== "6724f9c943ad843da1d31150") {
+          if (order.order_status?. _id !== "6724f9c943ad843da1d31150") {
             revenue[index] += order.order_total;
           }
         }
@@ -114,9 +114,9 @@ export default function ChartComponent({
           orderDate.getFullYear() === period.year
         ) {
           orderCount[index] += 1;
-          if (order.order_status._id !== "6724f9c943ad843da1d31150") {
+          if (order.order_status?. _id !== "6724f9c943ad843da1d31150") {
             revenue[index] += order.order_total;
-          }
+          } 
         }
         if (filter === "years" && orderDate.getFullYear() === period.year) {
           orderCount[index] += 1;

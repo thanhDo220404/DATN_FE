@@ -185,8 +185,17 @@ export default function ProductDetail({ params }) {
   };
   // Hàm xử lý thay đổi số lượng
   const handleQuantityChange = (value) => {
-    const parsedValue = Math.max(1, Math.min(value, totalQuantity));
-    setQuantity(parsedValue);
+    if (value <= 0) {
+      toast.warning("Số lượng không được nhỏ hơn 1.");
+      setQuantity(1);
+      return;
+    }
+    if (value > totalQuantity) {
+      toast.warning(`Chỉ còn ${totalQuantity} sản phẩm có sẵn.`);
+      setQuantity(totalQuantity);
+      return;
+    }
+    setQuantity(value);
   };
   // Hàm kiểm tra số lượng sản phẩm có thể thêm vào giỏ hàng
   const canAddToCart = (newCartItem, listCarts, maxQuantity) => {
@@ -443,7 +452,7 @@ export default function ProductDetail({ params }) {
               <div className="d-flex align-items-center">
                 <button
                   className="my-input my-btn my-btn-secondary me-2"
-                  onClick={() => setQuantity(quantity > 1 ? quantity - 1 : 1)}
+                  onClick={() => handleQuantityChange(quantity - 1)}
                 >
                   -
                 </button>
@@ -457,16 +466,7 @@ export default function ProductDetail({ params }) {
                 />
                 <button
                   className="my-input my-btn my-btn-secondary ms-2"
-                  onClick={() =>
-                    setQuantity(
-                      quantity + 1 <=
-                        (selectedVariation
-                          ? selectedVariation.quantity
-                          : totalQuantity)
-                        ? quantity + 1
-                        : quantity
-                    )
-                  }
+                  onClick={() => handleQuantityChange(quantity + 1)}
                 >
                   +
                 </button>

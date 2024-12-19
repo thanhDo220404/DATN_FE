@@ -1,0 +1,208 @@
+.voucher-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1050;
+}
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1050;
+}
+
+.modal-content {
+  position: relative;
+  background-color: #ffffff;
+  padding: 20px;
+  width: 90%;
+  max-width: 600px;
+  border-radius: 8px;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+  animation: fadeInDown 0.3s ease-out;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #dee2e6;
+}
+
+.close-button {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+}
+
+.modal-body {
+  max-height: 400px;
+  overflow-y: auto;
+  margin-top: 10px;
+}
+
+.voucher-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.voucher-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 0;
+  border-bottom: 1px solid #f1f1f1;
+}
+
+.voucher-code {
+  font-weight: bold;
+  color: #343a40;
+}
+
+.voucher-discount {
+  margin-left: 10px;
+  color: #28a745;
+}
+
+.apply-button {
+  margin-left: auto;
+}
+
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  border-top: 1px solid #dee2e6;
+  padding-top: 10px;
+  margin-top: 10px;
+}
+
+/* Animations */
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Responsive */
+@media (max-width: 576px) {
+  .modal-content {
+    width: 95%;
+    padding: 15px;
+  }
+
+  .voucher-item {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .apply-button {
+    margin-top: 10px;
+    width: 100%;
+  }
+}
+
+/* Cải thiện kiểu dáng bảng sản phẩm */
+.product-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 20px;
+  font-family: Arial, sans-serif;
+}
+
+.product-table th,
+.product-table td {
+  padding: 15px;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+}
+
+.product-table th {
+  background-color: #324B4D;
+  color: #ffffff;
+  font-size: 16px;
+}
+
+.product-table td {
+  font-size: 14px;
+  color: #555555;
+}
+
+.product-table tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+.product-table tr:hover {
+  background-color: #f1f1f1;
+}
+
+.product-image {
+  width: 50px;
+  height: 50px;
+  object-fit: cover;
+  border-radius: 4px;
+}
+
+.product-name {
+  display: flex;
+  align-items: center;
+}
+
+.product-name img {
+  width: 60px;
+  height: 60px;
+  object-fit: cover;
+  border-radius: 4px;
+  margin-right: 15px;
+}
+
+.product-price,
+.product-quantity,
+.product-total {
+  text-align: right;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .product-table th,
+  .product-table td {
+    padding: 10px;
+    font-size: 13px;
+  }
+
+  .product-image {
+    width: 50px;
+    height: 50px;
+  }
+
+  .product-name img {
+    width: 50px;
+    height: 50px;
+    margin-right: 10px;
+  }
+
+  .product-price,
+  .product-quantity,
+  .product-total {
+    text-align: left;
+  }
+}

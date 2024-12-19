@@ -16,6 +16,7 @@ import {
   getReviewsByUser,
 } from "@/app/databases/user_reviews";
 import { toast, ToastContainer } from "react-toastify";
+import 'react-toastify/dist/ReactToastify.css';
 
 export default function Purchure() {
   const [payload, setPayload] = useState(null);
@@ -26,13 +27,16 @@ export default function Purchure() {
   const [reviewData, setReviewData] = useState([]); // Để lưu dữ liệu review
   const [listReviewsByUser, setListreviewsByUser] = useState([]);
   const [listReviewsByOrder, setListReviewsByOrder] = useState(null);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [orderIdToCancel, setOrderIdToCancel] = useState(null);
+  const [confirmedStatusId, setConfirmedStatusId] = useState(null); // Thêm state mới
 
   const fetchOrders = async (userId, statusId = null) => {
     const result = await getOrdersByUserId(userId);
 
     // Lọc đơn hàng theo trạng thái nếu có
     const filteredOrders = statusId
-      ? result.filter((order) => order.order_status._id === statusId)
+      ? result.filter((order) => order.order_status?._id === statusId)
       : result;
     setOrders(filteredOrders); // Cập nhật trạng thái đơn hàng
   };
@@ -43,15 +47,34 @@ export default function Purchure() {
   };
 
   const fetchOrderStatues = async () => {
-    const result = await getOrderStatuses();
-    setListOrderStatues(result);
+    try {
+      const result = await getOrderStatuses();
+      setListOrderStatues(result);
+
+      // Tìm ID của trạng thái "Đã xác nhận"
+      const confirmedStatus = result.find(
+        (status) => status.name === "Đã xác nhận" // Thay "Đã xác nhận" bằng tên trạng thái thực tế
+      );
+      if (confirmedStatus) {
+        setConfirmedStatusId(confirmedStatus._id);
+      } else {
+        console.warn('Không tìm thấy trạng thái "Đã xác nhận"');
+      }
+    } catch (error) {
+      console.error("Lỗi khi lấy trạng thái đơn hàng:", error);
+    }
   };
 
   // Thêm hàm cancelOrder vào mã hiện tại
-  const cancelOrder = async (orderId) => {
-    // Giả sử bạn có một API để hủy đơn hàng bằng orderId
-    await updateOrderStatus(orderId, "6724f9c943ad843da1d31150");
-    fetchOrders(payload._id); // Tải lại danh sách đơn hàng sau khi hủy
+  const cancelOrder = (orderId) => {
+    setShowConfirmModal(true);
+    setOrderIdToCancel(orderId);
+  };
+
+  const onSubmitDelete = async () => {
+    setShowConfirmModal(false);
+    await updateOrderStatus(orderIdToCancel, "6724f9c943ad843da1d31150");
+    fetchOrders(payload._id);
   };
 
   const handlePayment = async (paymentData) => {
@@ -69,8 +92,6 @@ export default function Purchure() {
   };
 
   const handleReview = (orderData) => {
-    // console.log("this is orderData: ", orderData);
-
     setCurrentReviewOrder(orderData);
 
     // Khởi tạo mảng chứa các review cho từng sản phẩm
@@ -90,17 +111,12 @@ export default function Purchure() {
     try {
       console.log(reviewData);
 
-      // console.log("Review Data:", reviewData);
       const reviewPromises = reviewData.map(async (review) => {
-        // const { product, rating, comment } = review;
-
         return createReview(review);
       });
 
       // Đợi tất cả các review được gửi xong
       const results = await Promise.all(reviewPromises);
-
-      // console.log("Kết quả review:", results);
 
       fetchReviewsByUser(payload._id);
 
@@ -175,12 +191,22 @@ export default function Purchure() {
     );
   };
 
+  const handleCopyOrderId = (orderId) => {
+    navigator.clipboard.writeText(orderId)
+      .then(() => {
+        toast.success('Đã sao chép ID đơn hàng thành công!');
+      })
+      .catch(() => {
+        toast.error('Sao chép ID đơn hàng thất bại.');
+      });
+  };
+
   useEffect(() => {
     const token = getCookie("LOGIN_INFO");
     fetchOrderStatues();
     if (token) {
       const result = parseJwt(token);
-      setPayload(parseJwt(token));
+      setPayload(result);
       fetchOrders(result._id);
       fetchReviewsByUser(result._id);
     }
@@ -188,7 +214,7 @@ export default function Purchure() {
 
   return (
     <>
-      <ToastContainer></ToastContainer>
+      <ToastContainer />
       <div className="fs-5">
         <div className="position-relative">
           <div className="bg-white position-sticky top-0 shadow-sm">
@@ -226,9 +252,11 @@ export default function Purchure() {
           {orders.length > 0 ? (
             orders.map((order, index) => (
               <div className="bg-white mt-3 p-3" key={index}>
-                <div className="text-end text-success fs-6">
-                  <i className="bi bi-truck"></i> {order.order_status.name}
-                </div>
+                {order.order_status && (
+                  <div className="text-end text-success fs-6">
+                    <i className="bi bi-truck"></i> {order.order_status.name}
+                  </div>
+                )}
                 <table className="table align-middle">
                   <tbody>
                     {order.products.map((product, index) => {
@@ -283,19 +311,30 @@ export default function Purchure() {
                 </table>
                 <div className="">
                   <div className="text-end">
-                    <span>
-                      Thành tiền :{" "}
-                      <span className="fs-4 text-primary">
-                        {order.order_total.toLocaleString()} ₫
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: 'small' }}>
+                      <div>
+                        <span>ID Đơn Hàng: {order._id}</span>
+                        <button
+                          className="btn btn-sm btn-secondary ms-2"
+                          onClick={() => handleCopyOrderId(order._id)}
+                        >
+                          Copy
+                        </button>
+                      </div>
+                      <span>
+                        Thành tiền :{" "}
+                        <span className="fs-4 text-primary">
+                          {order.order_total.toLocaleString()} ₫
+                        </span>
                       </span>
-                    </span>
+                    </div>
                   </div>
-                  {order.order_status._id === "6724f9c943ad843da1d3114c" ||
-                  order.order_status._id === "673f4eb7e8698e7b4115b84c" ||
-                  order.order_status._id === "673f4eb7e8698e7b4115b84d" ? (
-                    <div className="text-end mt-3">
-                      {order.order_status._id ===
-                        "673f4eb7e8698e7b4115b84c" && (
+                  {(order.order_status?._id === "6724f9c943ad843da1d3114c" ||
+                    order.order_status?._id === "6724f9c943ad843da1d3114d" ||
+                    order.order_status?._id === confirmedStatusId || // Sử dụng confirmedStatusId
+                    order.order_status?._id === "673f4eb7e8698e7b4115b84d") && (
+                      <div className="text-end mt-3">
+                      {order.order_status._id === "673f4eb7e8698e7b4115b84c" && (
                         <button
                           className="btn btn-success me-3"
                           onClick={() =>
@@ -310,14 +349,18 @@ export default function Purchure() {
                           Thanh toán
                         </button>
                       )}
-                      <button
-                        className="btn btn-danger"
-                        onClick={() => cancelOrder(order._id)}
-                      >
-                        Hủy đơn
-                      </button>
+                      {/* Ẩn nút "Hủy đơn" nếu trạng thái là "Đã xác nhận" */}
+                      {order.order_status._id !== confirmedStatusId && (
+                        <button
+                          className="btn btn-danger"
+                          onClick={() => cancelOrder(order._id)}
+                        >
+                          Hủy đơn
+                        </button>
+                      )}
                     </div>
-                  ) : order.order_status._id === "6724f9c943ad843da1d3114f" ? (
+                  )}
+                  {order.order_status?._id === "6724f9c943ad843da1d3114f" && (
                     <div className="text-end mt-3">
                       {listReviewsByUser.some(
                         (review) => review.order._id === order._id
@@ -341,7 +384,7 @@ export default function Purchure() {
                         </button>
                       )}
                     </div>
-                  ) : null}
+                  )}
                 </div>
               </div>
             ))
@@ -432,7 +475,6 @@ export default function Purchure() {
                     <textarea
                       className="form-control mt-2"
                       placeholder="Viết đánh giá của bạn..."
-                      // value={reviewData[product]?.comment || ""}
                       onChange={(e) =>
                         handleCommentChange(product, e.target.value)
                       }
@@ -552,6 +594,52 @@ export default function Purchure() {
           </div>
         </div>
       </div>
+      {/* Modal xác nhận hủy đơn hàng */}
+      {showConfirmModal && (
+        <div
+          className="modal fade show"
+          style={{ display: "block" }}
+          tabIndex="-1"
+          aria-labelledby="deleteColorLabel"
+          aria-modal="true"
+          role="dialog"
+        >
+          <div className="modal-dialog modal-dialog-centered">
+            <div className="modal-content">
+              <div className="modal-header">
+                <h1 className="modal-title fs-5 text-dark" id="deleteColorLabel">
+                  Xác nhận hủy đơn hàng
+                </h1>
+                <button
+                  type="button"
+                  className="btn-close"
+                  onClick={() => setShowConfirmModal(false)}
+                  aria-label="Close"
+                ></button>
+              </div>
+              <div className="modal-body">
+                <p>Bạn có chắc chắn muốn hủy đơn hàng này không?</p>
+              </div>
+              <div className="modal-footer">
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  onClick={() => setShowConfirmModal(false)}
+                >
+                  Hủy
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-danger"
+                  onClick={onSubmitDelete}
+                >
+                  Xác nhận
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }
