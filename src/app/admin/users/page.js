@@ -54,9 +54,8 @@ export default function Users() {
               >
                 <thead>
                   <tr>
-                    <th>ID khách hàng</th>
-                    <th width={150}>Họ và tên</th>
-                    <th width={20}>Ảnh</th>
+                    <th>Họ và tên</th>
+                    <th>Ảnh</th>
                     <th>Email</th>
                     <th>SĐT</th>
                     <th>Tính năng</th>
@@ -70,7 +69,6 @@ export default function Users() {
                       )
                       .map((user) => (
                         <tr key={user._id}>
-                          <td>{user._id}</td>
                           <td>{user.name}</td>
                           <td>
                             <img

@@ -3,6 +3,7 @@ import {
   createPaymentUrl,
   getOrdersByUserId,
   updateOrderStatus,
+  refundTransaction,
 } from "@/app/databases/order";
 import { parseJwt } from "@/app/databases/users";
 import { getCookie } from "@/app/lib/CookieManager";
@@ -48,9 +49,21 @@ export default function Purchure() {
   };
 
   // Thêm hàm cancelOrder vào mã hiện tại
-  const cancelOrder = async (orderId) => {
-    // Giả sử bạn có một API để hủy đơn hàng bằng orderId
-    await updateOrderStatus(orderId, "6724f9c943ad843da1d31150");
+  const cancelOrder = async (order) => {
+    console.log(order);
+
+    const orderId = order._id;
+    const order_status = order.order_status;
+    // nếu trạng thái là đã thanh toán thì hoàn tiền
+    if (order_status._id === "673f4eb7e8698e7b4115b84d") {
+      const vnp_TransactionDate = order.vnp_TransactionDate;
+      const amount = order.order_total;
+      await refundTransaction(orderId, vnp_TransactionDate, amount);
+      toast.success("Tiền sẽ được hoàn trả cho bạn vào thời gian sớm nhất");
+      await updateOrderStatus(orderId, "6724f9c943ad843da1d31150");
+    } else {
+      await updateOrderStatus(orderId, "6724f9c943ad843da1d31150");
+    }
     fetchOrders(payload._id); // Tải lại danh sách đơn hàng sau khi hủy
   };
 
@@ -291,7 +304,6 @@ export default function Purchure() {
                     </span>
                   </div>
                   {order.order_status._id === "6724f9c943ad843da1d3114c" ||
-                  order.order_status._id === "6724f9c943ad843da1d3114d" ||
                   order.order_status._id === "673f4eb7e8698e7b4115b84c" ||
                   order.order_status._id === "673f4eb7e8698e7b4115b84d" ? (
                     <div className="text-end mt-3">
@@ -313,7 +325,7 @@ export default function Purchure() {
                       )}
                       <button
                         className="btn btn-danger"
-                        onClick={() => cancelOrder(order._id)}
+                        onClick={() => cancelOrder(order)}
                       >
                         Hủy đơn
                       </button>

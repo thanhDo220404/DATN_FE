@@ -146,6 +146,7 @@ export default function Cart() {
     // Nếu newQuantity = 0, gọi hàm handleDelete
     if (newQuantity === 0) {
       handleDelete(cartId);
+      toast.success("Đã xóa sản phẩm khỏi giỏ hàng");
       return;
     }
 

@@ -89,6 +89,16 @@ export default function UpdateProduct({ params }) {
   };
 
   const handleRemoveItem = (itemIndex) => {
+    const targetVariations = items[itemIndex].variations;
+
+    // Kiểm tra nếu có variation nào có quantity > 0
+    const hasQuantity = targetVariations.some(
+      (variation) => variation.quantity > 0
+    );
+    if (hasQuantity) {
+      toast.error("Không thể xóa khi còn số lượng !");
+      return;
+    }
     if (items.length <= 1) {
       toast.warning("Mỗi sản phẩm phải có ít nhất một màu");
       return;
@@ -105,6 +115,14 @@ export default function UpdateProduct({ params }) {
   };
 
   const handleRemoveVariation = (itemIndex, variationIndex) => {
+    const targetVariation = items[itemIndex].variations[variationIndex];
+
+    // Kiểm tra số lượng lớn hơn 0
+    if (targetVariation.quantity > 0) {
+      toast.error("Không thể xóa khi còn số lượng !");
+      return;
+    }
+
     if (items[itemIndex].variations.length <= 1) {
       toast.warning("Mỗi màu phải có ít nhất một size!");
       return;

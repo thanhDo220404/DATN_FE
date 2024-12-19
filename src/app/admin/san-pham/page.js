@@ -86,10 +86,9 @@ export default function Products() {
               >
                 <thead>
                   <tr>
-                    <th>Mã sản phẩm</th>
-                    <th width={150}>Tên</th>
-                    <th width={20}>Ảnh</th>
-                    <th width={100}>Số lượng</th>
+                    <th>Tên</th>
+                    <th>Ảnh</th>
+                    <th>Số lượng</th>
                     <th>Tình trạng</th>
                     <th>Giá tiền</th>
                     <th>Danh mục</th>
@@ -115,7 +114,6 @@ export default function Products() {
 
                       return (
                         <tr key={product._id}>
-                          <td>{product._id}</td>
                           <td>{product.name}</td>
                           <td>
                             {firstItem && (
@@ -174,20 +172,19 @@ export default function Products() {
                     </tr>
                   )}
                 </tbody>
-                <tfoot>
+                {/* <tfoot>
                   <tr>
-                    <th>Mã sản phẩm</th>
-                    <th width={150}>tên</th>
-                    <th width={20}>Ảnh</th>
-                    <th width={100}>số lượng</th>
-                    <th>tình trạng</th>
-                    <th>giá tiền</th>
-                    <th>danh mục</th>
+                    <th>Tên</th>
+                    <th>Ảnh</th>
+                    <th>Số lượng</th>
+                    <th>Tình trạng</th>
+                    <th>Giá tiền</th>
+                    <th>Danh mục</th>
                     <th width={100}>Tính năng</th>
                   </tr>
-                </tfoot>
+                </tfoot> */}
               </table>
-              <div>
+              <div className="row element-button">
                 <Pagination
                   totalPages={totalPages}
                   currentPage={currentPage}
@@ -220,7 +217,7 @@ export default function Products() {
               ></button>
             </div>
             <div className="modal-body">
-              <p>Bạn có chắc chắn muốn xóa màu này không?</p>
+              <p>Bạn có chắc chắn muốn xóa sản phẩm này không?</p>
             </div>
             <div className="modal-footer">
               <button

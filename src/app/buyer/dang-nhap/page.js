@@ -130,10 +130,6 @@ export default function Login() {
               placeholder="Mật khẩu"
               {...register("pass", {
                 required: "Mật khẩu không được bỏ trống",
-                minLength: {
-                  value: 6,
-                  message: "Mật khẩu phải có ít nhất 6 ký tự",
-                },
               })}
             />
             <label htmlFor="floatingPassword">Mật khẩu</label>
@@ -160,7 +156,7 @@ export default function Login() {
           )}
 
           <div className="row">
-            <div className="col text-start">
+            {/* <div className="col text-start">
               <input
                 width="20px"
                 type="checkbox"
@@ -170,7 +166,7 @@ export default function Login() {
               <label className="form-check-label" htmlFor="rememberMe">
                 Nhớ mật khẩu
               </label>
-            </div>
+            </div> */}
             <div className="col text-end">
               <Link
                 href="/buyer/quen-mat-khau"
@@ -197,7 +193,7 @@ export default function Login() {
           href="/buyer/dang-ky"
           className="w-100 py-3 rounded mb-3 border"
         >
-          Tôi chưa có tài khoản
+          Đăng ký
         </Link>
       </div>
       <div className="col border border-dark d-none d-md-flex">

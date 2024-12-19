@@ -51,7 +51,7 @@ export default function Menu() {
               href="/admin"
             >
               <i className="bi bi-speedometer2 me-1" />
-              <span className="app-menu__label">Dashboard</span>
+              <span className="app-menu__label">Bảng điều khiển</span>
             </Link>
           </li>
 
@@ -63,7 +63,7 @@ export default function Menu() {
               href="/admin/media"
             >
               <i className="bi bi-card-image me-1"></i>
-              <span className="app-menu__label">Media</span>
+              <span className="app-menu__label">Quản lý hình ảnh</span>
             </Link>
           </li>
           <li>
@@ -86,6 +86,17 @@ export default function Menu() {
             >
               <i className="bi bi-list-task me-1" />
               <span className="app-menu__label">Quản lý danh mục</span>
+            </Link>
+          </li>
+          <li>
+            <Link
+              className={`app-menu__item ${
+                pathname === "/admin/vouchers" ? "active" : ""
+              }`}
+              href="/admin/vouchers"
+            >
+              <i className="bi bi-list-task me-1" />
+              <span className="app-menu__label">Quản lý giảm giá</span>
             </Link>
           </li>
           <li>
@@ -139,6 +150,32 @@ export default function Menu() {
           <li>
             <Link
               className={`app-menu__item ${
+                pathname === "/admin/bai-viet" ? "active" : ""
+              }`}
+              href="/admin/bai-viet"
+            >
+              <i className="bi bi-newspaper"></i>
+              <span className="app-menu__label ms-1">Quản lý bài viết</span>
+            </Link>
+            {/* Hiển thị submenu nếu pathname chứa "/admin/san-pham" */}
+            {pathname.includes("/admin/bai-viet") ? (
+              <ul className="app-submenu">
+                <li>
+                  <Link
+                    className={`app-menu__item ${
+                      pathname === "/admin/bai-viet/them" ? "active" : ""
+                    }`}
+                    href="/admin/bai-viet/them"
+                  >
+                    <span className="app-menu__label">Thêm</span>
+                  </Link>
+                </li>
+              </ul>
+            ) : null}
+          </li>
+          <li>
+            <Link
+              className={`app-menu__item ${
                 pathname === "/admin/don-hang" ? "active" : ""
               }`}
               href="/admin/don-hang"
@@ -147,7 +184,7 @@ export default function Menu() {
               <span className="app-menu__label ms-1">Quản lý đơn hàng</span>
             </Link>
           </li>
-          <li>
+          {/* <li>
             <Link
               className={`app-menu__item ${
                 pathname === "/admin/bao-cao" ? "active" : ""
@@ -157,7 +194,7 @@ export default function Menu() {
               <i className="bi bi-bar-chart-line me-1" />
               <span className="app-menu__label">Báo cáo doanh thu</span>
             </Link>
-          </li>
+          </li> */}
           <li>
             <a className="app-menu__item" href="/">
               <i className="bi bi-house-door-fill"></i>

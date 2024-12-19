@@ -184,17 +184,15 @@ export default function Categories() {
               >
                 <thead>
                   <tr>
-                    <th width={300}>ID</th>
-                    <th width={250}>Tên</th>
-                    <th width={250}>Mô tả</th>
+                    <th>Tên</th>
+                    <th>Mô tả</th>
                     {/* Trường trạng thái cho danh mục */}
-                    <th width={100}>Tính năng</th>
+                    <th width={150}>Tính năng</th>
                   </tr>
                 </thead>
                 <tbody>
                   {listCategories.map((category, index) => (
                     <tr key={index}>
-                      <td>{category._id}</td> {/* ID của danh mục */}
                       <td>{category.name}</td>
                       <td>{category.description}</td> {/* Mô tả của danh mục */}
                       <td className="table-td-center">

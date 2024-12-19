@@ -65,7 +65,7 @@ export default function ({ params }) {
                     alt=""
                     className="w-25 rounded"
                   />
-                  <div className="mt-3">{user._id}</div>
+                  {/* <div className="mt-3">{user._id}</div> */}
                   <div className="mt-3">{user.name}</div>
                 </div>
                 <div className="text-start mt-3">
@@ -77,10 +77,10 @@ export default function ({ params }) {
                     <i className="bi bi-envelope me-3"></i>
                     <span>{user.email}</span>
                   </div>
-                  <div className="d-flex mb-3">
+                  {/* <div className="d-flex mb-3">
                     <i className="bi bi-calendar me-3"></i>
                     <span>{addressToDisplay}</span>
-                  </div>
+                  </div> */}
                 </div>
               </div>
             </div>

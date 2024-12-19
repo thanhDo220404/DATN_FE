@@ -17,7 +17,6 @@ import {
 } from "../../../../redux/slices/cartSlice";
 import ProductCard from "@/app/components/productCard";
 import { useRouter } from "next/navigation";
-import Rating from "react-rating-stars-component";
 import { getReviewsByProduct } from "@/app/databases/user_reviews";
 import ProductReviews from "@/app/components/product_reviews";
 
@@ -338,17 +337,6 @@ export default function ProductDetail({ params }) {
     .sort(() => Math.random() - 0.5)
     .slice(0, 4); // Giới hạn hiển thị 4 sản phẩm
 
-  const totalReviews = 500;
-  const ratingDistribution = {
-    5: 450,
-    4: 50,
-    3: 0,
-    2: 0,
-    1: 0,
-  };
-
-  const averageRating = 4.9;
-
   return (
     <div className="container mt-5">
       <ToastContainer /> {/* Thêm ToastContainer vào đây */}
@@ -520,6 +508,7 @@ export default function ProductDetail({ params }) {
           <div className="product-description">
             <h4>Mô tả sản phẩm</h4>
             <div
+              id="postContent"
               dangerouslySetInnerHTML={{
                 __html: product.description,
               }}

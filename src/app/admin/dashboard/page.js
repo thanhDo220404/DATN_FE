@@ -136,98 +136,6 @@ export default function Dashboard() {
                 </div>
               </div>
             </div>
-
-            {/* Đơn hàng mới*/}
-            <div className="col-md-12">
-              <div className="tile">
-                <h3 className="tile-title">Tình trạng đơn hàng</h3>
-                <div>
-                  <table className="table table-bordered">
-                    <thead>
-                      <tr>
-                        <th>ID đơn hàng</th>
-                        <th>Tên khách hàng</th>
-                        <th>Tổng tiền</th>
-                        <th>Trạng thái</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {listOrders
-                        .sort(
-                          (a, b) =>
-                            new Date(b.createdAt) - new Date(a.createdAt)
-                        ) // Sắp xếp đơn hàng theo thời gian từ mới đến cũ
-                        .slice(0, 4) // Lấy 4 đơn hàng mới nhất
-                        .map((order) => (
-                          <tr key={order._id}>
-                            <td>{order._id}</td>
-                            <td>{order.order_address.name}</td>
-                            <td>
-                              {order.order_total.toLocaleString("vi-VN")} đ
-                            </td>
-                            <td>
-                              <span
-                                className={`badge ${
-                                  order.order_status.name === "Chờ xử lý"
-                                    ? "bg-info" // Trạng thái "Chờ xử lý" -> màu bg-info
-                                    : order.order_status.name === "Đã xác nhận"
-                                    ? "bg-primary" // Trạng thái "Đã xác nhận" -> màu bg-primary
-                                    : order.order_status.name ===
-                                      "Đang giao hàng"
-                                    ? "bg-warning" // Trạng thái "Đang giao hàng" -> màu bg-warning
-                                    : order.order_status.name === "Đã giao hàng"
-                                    ? "bg-success" // Trạng thái "Đã giao hàng" -> màu bg-success
-                                    : "bg-danger" // Trạng thái "Đã hủy" -> màu bg-danger
-                                }`}
-                              >
-                                {order.order_status.name}
-                              </span>
-                            </td>
-                          </tr>
-                        ))}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            </div>
-            {/* Khách hàng mới */}
-            <div className="col-md-12">
-              <div className="tile">
-                <h3 className="tile-title">Khách hàng mới</h3>
-                <div>
-                  <table className="table table-hover">
-                    <thead>
-                      <tr>
-                        <th>ID</th>
-                        <th>Tên khách hàng</th>
-                        <th>Email</th>
-                        <th>Số điện thoại</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {listUsers
-                        .sort(
-                          (a, b) =>
-                            new Date(b.createdAt) - new Date(a.createdAt)
-                        ) // Sắp xếp ngày giảm dần
-                        .map((user) => (
-                          <tr key={user._id}>
-                            <td>{user._id}</td>
-                            <td>{user.name}</td>
-                            <td>{user.email}</td>
-                            <td>
-                              <span className={`tag tag-${user.status}`}>
-                                {user.phone}
-                              </span>
-                            </td>
-                            {/* Hiển thị ngày tạo */}
-                          </tr>
-                        ))}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            </div>
           </div>
         </div>
         {/* END left*/}
@@ -246,10 +154,10 @@ export default function Dashboard() {
             <div className="col-sm-12 col-lg-6">
               <ChartComponent
                 chartElementId={"chartRevenue"}
-                title={"THỐNG KÊ ĐƠN HÀNG"}
+                title={"THỐNG KÊ DOANH THU"}
                 chartType={"bar"}
                 orders={listOrders}
-                chartDatasetsLabel={"Tổng số lượng đơn hàng"}
+                chartDatasetsLabel={"Tổng doanh thu"}
                 useRevenue={true}
                 borderColor={"rgba(255, 99, 132, 1)"}
                 backgroundColor={"rgba(255, 99, 132, 0.2)"}

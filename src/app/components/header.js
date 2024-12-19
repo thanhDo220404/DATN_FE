@@ -194,7 +194,12 @@ export default function Header() {
                 </ul>
               </div>
               <li className="nav-item">
-                <Link className="nav-link" href="#">
+                <Link className="nav-link" href="/bai-viet">
+                  Bài viết
+                </Link>
+              </li>
+              <li className="nav-item">
+                <Link className="nav-link" href="/ve-chung-toi">
                   Về chúng tôi
                 </Link>
               </li>
@@ -260,9 +265,13 @@ export default function Header() {
                       </Link>
                     </li>
                     <li>
-                      <button className="dropdown-item" onClick={handleLogout}>
+                      <a
+                        className="dropdown-item"
+                        href="#"
+                        onClick={handleLogout}
+                      >
                         Đăng xuất
-                      </button>
+                      </a>
                     </li>
                   </ul>
                 </div>

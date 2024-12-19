@@ -1,5 +1,5 @@
 "use client";
-import { getOrderById } from "@/app/databases/order";
+import { getOrderById, refundTransaction } from "@/app/databases/order";
 import { getOrderStatuses } from "@/app/databases/order_status";
 import { updateOrderStatus } from "@/app/databases/order"; // Import hàm updateOrderStatus
 import React, { useEffect, useState } from "react";
@@ -31,12 +31,25 @@ export default function OrderDetails({ params }) {
   }, [id]);
 
   const handleUpdateStatus = async () => {
-    console.log(selectedStatus);
+    const orderId = order._id;
+    const order_status = order.order_status;
 
     try {
-      await updateOrderStatus(order._id, selectedStatus);
-      toast.success("Cập nhật trạng thái đơn hàng thành công!"); // Hiển thị thông báo thành công
-      fetchOrder(id); // Tải lại đơn hàng để cập nhật trạng thái hiển thị
+      if (
+        order_status._id === "673f4eb7e8698e7b4115b84d" &&
+        selectedStatus === "6724f9c943ad843da1d31150"
+      ) {
+        const vnp_TransactionDate = order.vnp_TransactionDate;
+        const amount = order.order_total;
+        console.log("Đơn hàng đã thanh toán và muốn hủy đơn");
+        await refundTransaction(orderId, vnp_TransactionDate, amount);
+        toast.success("Đã hoàn tiền cho khách");
+        await updateOrderStatus(order._id, selectedStatus);
+      } else {
+        await updateOrderStatus(order._id, selectedStatus);
+        toast.success("Cập nhật trạng thái đơn hàng thành công!");
+      }
+      fetchOrder(id);
     } catch (error) {
       console.error("Error updating order status:", error.message);
       toast.error("Cập nhật trạng thái đơn hàng thất bại!"); // Hiển thị thông báo lỗi
@@ -56,6 +69,12 @@ export default function OrderDetails({ params }) {
         "673f4eb7e8698e7b4115b84c" //Chưa thanh toán
       );
       break;
+    case "6724f9c943ad843da1d3114c": // Đã hủy
+      disabledStatuses.push(
+        "673f4eb7e8698e7b4115b84d", // Đã thanh toán
+        "673f4eb7e8698e7b4115b84c" //Chưa thanh toán
+      );
+      break;
 
     case "6724f9c943ad843da1d3114f": // Đã giao hàng
       // Vô hiệu hóa tất cả các trạng thái còn lại
@@ -70,15 +89,17 @@ export default function OrderDetails({ params }) {
       break;
 
     case "6724f9c943ad843da1d3114d": // Đã xác nhận
-      // Vô hiệu hóa Chưa xác nhận
-      disabledStatuses.push("6724f9c943ad843da1d3114c"); // Chưa xác nhận
+      disabledStatuses.push(
+        "673f4eb7e8698e7b4115b84d", // Đã thanh toán
+        "673f4eb7e8698e7b4115b84c", //Chưa thanh toán
+        "6724f9c943ad843da1d31150", // Đã hủy
+        "6724f9c943ad843da1d3114c" // Chưa xác nhận
+      );
       break;
     case "673f4eb7e8698e7b4115b84d": // Đã thanh toán
-      // Vô hiệu hóa Chưa xác nhận
       disabledStatuses.push(
         "673f4eb7e8698e7b4115b84c", //Chưa thanh toán
-        "6724f9c943ad843da1d3114c", // Chưa xác nhận
-        "6724f9c943ad843da1d3114d" // Đã xác nhận
+        "6724f9c943ad843da1d3114c" // Chưa xác nhận
       );
       break;
 
@@ -90,6 +111,15 @@ export default function OrderDetails({ params }) {
         "6724f9c943ad843da1d3114c", // Chưa xác nhận
         "673f4eb7e8698e7b4115b84d", // Đã thanh toán
         "673f4eb7e8698e7b4115b84c" //Chưa thanh toán
+      );
+      break;
+    case "673f4eb7e8698e7b4115b84c": //Chưa thanh toán
+      disabledStatuses.push(
+        "6724f9c943ad843da1d3114d", // Đã xác nhận
+        "6724f9c943ad843da1d3114c", // Chưa xác nhận
+        "673f4eb7e8698e7b4115b84d", // Đã thanh toán
+        "6724f9c943ad843da1d3114e", // Đang giao hàng
+        "6724f9c943ad843da1d3114f" // Đã giao hàng
       );
       break;
 
