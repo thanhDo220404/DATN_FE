@@ -700,12 +700,12 @@ export default function Checkout() {
               </button>
             </div>
             {appliedVoucherDiscount > 0 && (
-              <div className="text-center text-success mb-2">
-              Đã giảm: {new Intl.NumberFormat("vi-VN", {
-                style: "currency",
-                currency: "VND",
-              }).format(appliedVoucherDiscount)}
-            </div>
+              <div className="alert alert-success text-center mt-2 mb-2">
+                Đã giảm: {new Intl.NumberFormat("vi-VN", {
+                  style: "currency",
+                  currency: "VND",
+                }).format(appliedVoucherDiscount)}
+              </div>
             )}
             <div className="d-flex"></div>
             {voucherError && <div className="text-danger mt-2">{voucherError}</div>}
@@ -809,7 +809,7 @@ export default function Checkout() {
           aria-hidden={!showAllVouchers}
         >
           <div className="modal-overlay" onClick={() => setShowAllVouchers(false)}>
-            <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-content" onClick={(e) => e.stopPropagation()}>f
               <div className="modal-header">
                 <h5 className="modal-title">Danh Sách Mã Giảm Giá</h5>
                 <button
