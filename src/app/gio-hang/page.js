@@ -13,6 +13,7 @@ import {
   removeProductFromCart,
   updateCartItemQuantity,
 } from "../../../redux/slices/cartSlice";
+import { Modal, Button } from "react-bootstrap";
 
 export default function Cart() {
   const dispatch = useDispatch();
@@ -22,6 +23,8 @@ export default function Cart() {
   const [listCheckout, setListCheckout] = useState([]);
   const [isAllChecked, setIsAllChecked] = useState(false);
   const [warningMessage, setWarningMessage] = useState("");
+  const [showModal, setShowModal] = useState(false);
+  const [modalContent, setModalContent] = useState({});
 
   let carts = useSelector((state) => state.cart.items);
 
@@ -102,16 +105,21 @@ export default function Cart() {
   }, [payload, listProducts]);
 
   const handleDelete = async (id) => {
-    // await deleteCart(id);
-    dispatch(removeProductFromCart(id));
-    // Cập nhật listCheckout
-    setListCheckout((prevList) =>
-      prevList.filter((checkoutItem) => checkoutItem._id !== id)
-    );
-
-    if (payload && payload._id) {
-      fetchCart(payload._id);
-    }
+    setModalContent({
+      title: "Xác nhận xóa",
+      body: "Bạn có chắc chắn muốn xóa sản phẩm này khỏi giỏ hàng?",
+      onConfirm: () => {
+        dispatch(removeProductFromCart(id));
+        setListCheckout((prevList) =>
+          prevList.filter((checkoutItem) => checkoutItem._id !== id)
+        );
+        if (payload && payload._id) {
+          fetchCart(payload._id);
+        }
+        setShowModal(false);
+      },
+    });
+    setShowModal(true);
   };
 
   const handleQuantityChange = async (cartId, newQuantity) => {
@@ -143,10 +151,9 @@ export default function Cart() {
       return; // Ngừng thực hiện các bước tiếp theo nếu số lượng không hợp lệ
     }
 
-    // Nếu newQuantity = 0, gọi hàm handleDelete
-    if (newQuantity === 0) {
-      handleDelete(cartId);
-      toast.success("Đã xóa sản phẩm khỏi giỏ hàng");
+    // Nếu newQuantity <= 0, cảnh báo người dùng
+    if (newQuantity <= 0) {
+      toast.warning("Số lượng không được nhỏ hơn 1.");
       return;
     }
 
@@ -327,7 +334,7 @@ export default function Cart() {
                             onClick={() =>
                               handleQuantityChange(
                                 cartItem._id,
-                                Math.max(cartItem.product.quantity - 1)
+                                cartItem.product.quantity - 1
                               )
                             }
                             style={{ width: "30px", height: "30px" }}
@@ -412,6 +419,24 @@ export default function Cart() {
           </div>
         </div>
       </div>
+      <Modal
+        show={showModal}
+        onHide={() => setShowModal(false)}
+        centered
+      >
+        <Modal.Header closeButton>
+          <Modal.Title>{modalContent.title}</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>{modalContent.body}</Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowModal(false)}>
+            Hủy
+          </Button>
+          <Button variant="danger" onClick={modalContent.onConfirm}>
+            Xác nhận
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </>
   );
 }

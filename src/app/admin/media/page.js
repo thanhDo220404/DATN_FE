@@ -163,7 +163,7 @@ export default function Media() {
       ) : null}
       <div className="p-3">
         <div className="d-flex">
-          <h3>Media</h3>
+          <h3>Quản Lý Hình Ảnh</h3>
           {/* Input file ẩn */}
           <input
             className="d-none"

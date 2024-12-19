@@ -27,6 +27,7 @@ export default function Purchure() {
   const [reviewData, setReviewData] = useState([]); // Để lưu dữ liệu review
   const [listReviewsByUser, setListreviewsByUser] = useState([]);
   const [listReviewsByOrder, setListReviewsByOrder] = useState(null);
+  const [orderToCancel, setOrderToCancel] = useState(null); // State for the order to be canceled
 
   const fetchOrders = async (userId, statusId = null) => {
     const result = await getOrdersByUserId(userId);
@@ -48,16 +49,15 @@ export default function Purchure() {
     setListOrderStatues(result);
   };
 
-  // Thêm hàm cancelOrder vào mã hiện tại
-  const cancelOrder = async (order) => {
-    console.log(order);
+  const cancelOrder = async () => {
+    if (!orderToCancel) return;
 
-    const orderId = order._id;
-    const order_status = order.order_status;
+    const orderId = orderToCancel._id;
+    const order_status = orderToCancel.order_status;
     // nếu trạng thái là đã thanh toán thì hoàn tiền
     if (order_status._id === "673f4eb7e8698e7b4115b84d") {
-      const vnp_TransactionDate = order.vnp_TransactionDate;
-      const amount = order.order_total;
+      const vnp_TransactionDate = orderToCancel.vnp_TransactionDate;
+      const amount = orderToCancel.order_total;
       await refundTransaction(orderId, vnp_TransactionDate, amount);
       toast.success("Tiền sẽ được hoàn trả cho bạn vào thời gian sớm nhất");
       await updateOrderStatus(orderId, "6724f9c943ad843da1d31150");
@@ -65,6 +65,7 @@ export default function Purchure() {
       await updateOrderStatus(orderId, "6724f9c943ad843da1d31150");
     }
     fetchOrders(payload._id); // Tải lại danh sách đơn hàng sau khi hủy
+    setOrderToCancel(null); // Reset the order to cancel
   };
 
   const handlePayment = async (paymentData) => {
@@ -239,8 +240,20 @@ export default function Purchure() {
           {orders.length > 0 ? (
             orders.map((order, index) => (
               <div className="bg-white mt-3 p-3" key={index}>
+                <div className="d-flex justify-content-end align-items-center mb-2">
+                  <span className="me-2 fs-6">Mã Đơn Hàng: {order._id}</span>
+                  <button
+                    className="btn btn-sm btn-outline-secondary"
+                    onClick={() => {
+                      navigator.clipboard.writeText(order._id);
+                      toast.success("Đã sao chép mã đơn hàng!");
+                    }}
+                  >
+                    Copy
+                  </button>
+                </div>
                 <div className="text-end text-success fs-6">
-                  <i className="bi bi-truck"></i> {order.order_status.name}
+                  <i className="bi bi-truck"></i> {order.order_status?.name}
                 </div>
                 <table className="table align-middle">
                   <tbody>
@@ -303,9 +316,9 @@ export default function Purchure() {
                       </span>
                     </span>
                   </div>
-                  {order.order_status._id === "6724f9c943ad843da1d3114c" ||
-                  order.order_status._id === "673f4eb7e8698e7b4115b84c" ||
-                  order.order_status._id === "673f4eb7e8698e7b4115b84d" ? (
+                  {order.order_status?._id === "6724f9c943ad843da1d3114c" ||
+                  order.order_status?._id === "673f4eb7e8698e7b4115b84c" ||
+                  order.order_status?._id === "673f4eb7e8698e7b4115b84d" ? (
                     <div className="text-end mt-3">
                       {order.order_status._id ===
                         "673f4eb7e8698e7b4115b84c" && (
@@ -325,12 +338,14 @@ export default function Purchure() {
                       )}
                       <button
                         className="btn btn-danger"
-                        onClick={() => cancelOrder(order)}
+                        onClick={() => setOrderToCancel(order)} // Set the order to cancel
+                        data-bs-toggle="modal"
+                        data-bs-target="#confirmCancelModal"
                       >
                         Hủy đơn
                       </button>
                     </div>
-                  ) : order.order_status._id === "6724f9c943ad843da1d3114f" ? (
+                  ) : order.order_status?._id === "6724f9c943ad843da1d3114f" ? (
                     <div className="text-end mt-3">
                       {listReviewsByUser.some(
                         (review) => review.order._id === order._id
@@ -560,6 +575,49 @@ export default function Purchure() {
                 onClick={() => setListReviewsByOrder(null)}
               >
                 Đóng
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+      {/* Modal xác nhận hủy đơn */}
+      <div
+        className="modal fade"
+        id="confirmCancelModal"
+        tabIndex="-1"
+        aria-labelledby="confirmCancelModalLabel"
+        aria-hidden="true"
+        style={{ backgroundColor: "rgba(0, 0, 0, 0.5)" }}
+      >
+        <div className="modal-dialog modal-dialog-centered">
+          <div className="modal-content">
+            <div className="modal-header">
+              <h5 className="modal-title">Xác nhận hủy đơn hàng</h5>
+              <button
+                type="button"
+                className="btn-close"
+                data-bs-dismiss="modal"
+                aria-label="Close"
+              ></button>
+            </div>
+            <div className="modal-body">
+              Bạn có chắc chắn muốn hủy đơn hàng này không?
+            </div>
+            <div className="modal-footer">
+              <button
+                type="button"
+                className="btn btn-secondary"
+                data-bs-dismiss="modal"
+              >
+                Đóng
+              </button>
+              <button
+                type="button"
+                className="btn btn-danger"
+                onClick={cancelOrder}
+                data-bs-dismiss="modal"
+              >
+                Hủy đơn
               </button>
             </div>
           </div>

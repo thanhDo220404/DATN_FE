@@ -119,11 +119,11 @@ export default function Dashboard() {
                     <b>
                       {/* Tính tổng doanh thu của những đơn hàng có order_status._id là 6724f9c943ad843da1d3114f */}
                       {listOrders
-                        .filter(
-                          (order) =>
-                            order.order_status._id !==
-                            "6724f9c943ad843da1d31150"
-                        )
+                          .filter(
+                            (order) =>
+                              order.order_status && 
+                              order.order_status._id !== "6724f9c943ad843da1d31150"
+                          )
                         .reduce((total, order) => total + order.order_total, 0)
                         .toLocaleString()}
                       {" đ"}
@@ -133,6 +133,12 @@ export default function Dashboard() {
                   <p className="info-tong">
                     Tổng số tiền thu được từ các đơn hàng.
                   </p>
+                </div>
+              </div>
+            </div>
+            <div >
+              <div>
+                <div>
                 </div>
               </div>
             </div>

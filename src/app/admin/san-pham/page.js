@@ -1,56 +1,126 @@
 "use client";
 import Pagination from "@/app/components/pagination";
 import { deleteProduct, getAllProducts } from "@/app/databases/products";
+import { getAllVouchers } from "@/app/databases/voucher"; // Ensure you have this import
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { toast, ToastContainer } from 'react-toastify'; // Import toast and ToastContainer
+import 'react-toastify/dist/ReactToastify.css'; // Import react-toastify CSS
 
 export default function Products() {
   const [listProducts, setListProducts] = useState([]);
+  const [filteredProducts, setFilteredProducts] = useState([]); // State for filtered products
   const [productSelected, setProductSelected] = useState(null);
+  const [vouchers, setVouchers] = useState([]); // State for vouchers
+  const [error, setError] = useState(null); // State for error
+  const [searchQuery, setSearchQuery] = useState('');
 
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
 
+  // Fetch all products without query for client-side filtering
   const fetchProducts = async () => {
-    const result = await getAllProducts();
-    setListProducts(result);
+    try {
+      const result = await getAllProducts(); // Ensure getAllProducts fetches all products without filtering
+      setListProducts(result);
+      setFilteredProducts(result); // Initialize filtered products
+    } catch (err) {
+      setError("Đã xảy ra lỗi khi lấy danh sách sản phẩm.");
+      toast.error("Đã xảy ra lỗi khi lấy danh sách sản phẩm.");
+    }
   };
+
+  const fetchVouchers = async () => {
+    try {
+      const fetchedVouchers = await getAllVouchers();
+      const currentDate = new Date();
+
+      // Lọc chỉ những voucher hoạt động và chưa hết hạn
+      const activeVouchers = fetchedVouchers.filter(voucher => 
+        voucher.isActive && new Date(voucher.expiryDate) >= currentDate
+      );
+
+      setVouchers(activeVouchers);
+    } catch (error) {
+      console.error("Error fetching vouchers:", error);
+      setError("Đã có lỗi xảy ra khi tải voucher.");
+      toast.error("Đã có lỗi xảy ra khi tải voucher.");
+    }
+  };
+
   const formatCurrency = (value) => {
     return new Intl.NumberFormat("vi-VN", {
       style: "currency",
       currency: "VND",
     }).format(value);
   };
+
   useEffect(() => {
     fetchProducts();
+    fetchVouchers(); // Gọi hàm fetchVouchers khi component mount
   }, []);
+
+  useEffect(() => {
+    // Filter products based on searchQuery
+    if (searchQuery.trim() === '') {
+      setFilteredProducts(listProducts);
+    } else {
+      const filtered = listProducts.filter(product =>
+        product.name.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+      setFilteredProducts(filtered);
+      setCurrentPage(1); // Reset to first page on new search
+    }
+  }, [searchQuery, listProducts]);
+
   const handleDelete = async (data) => {
     setProductSelected(data);
   };
+
   const onSubmitDelete = async () => {
     if (productSelected) {
+      // Thêm kiểm tra tổng số lượng sản phẩm
+      const totalQuantity = listProducts.find(
+        (product) => product._id === productSelected._id
+      )?.items.reduce((sum, item) => sum + item.variations.reduce((s, v) => s + v.quantity, 0), 0) || 0;
+
+      if (totalQuantity >= 1) {
+        toast.error('Không thể xóa sản phẩm khi còn số lượng lớn hơn hoặc bằng 1.');
+        return;
+      }
+
       try {
         await deleteProduct(productSelected._id);
         await fetchProducts(); // Cập nhật lại danh sách
         const modal = document.getElementById("deleteProduct");
         const bootstrapModal = bootstrap.Modal.getInstance(modal);
         bootstrapModal.hide(); // Đóng modal
+        toast.success('Xóa sản phẩm thành công.');
       } catch (error) {
         console.error("Xóa sản phẩm thất bại:", error);
+        toast.error('Xóa sản phẩm thất bại.');
       }
     }
   };
+
   const handleReplaceUpdate = (id) => {
     window.location.href = `/admin/san-pham/sua/${id}`;
   };
 
-  const paginatedProducts = listProducts.slice(
+  const handleSearchChange = (event) => {
+    setSearchQuery(event.target.value);
+  };
+
+  const paginatedProducts = filteredProducts.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
-  const totalPages = Math.ceil(listProducts.length / itemsPerPage);
+  const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
+
   return (
     <>
+      {/* Thêm ToastContainer để hiển thị thông báo */}
+      <ToastContainer />
       <div className="app-title">
         <ul className="app-breadcrumb breadcrumb side">
           <li className="breadcrumb-item active">
@@ -76,6 +146,15 @@ export default function Products() {
                     Thêm sản phẩm
                   </Link>
                 </div>
+                <div className="col-sm-4">
+                  <input
+                    type="text"
+                    className="form-control"
+                    placeholder="Tìm kiếm sản phẩm"
+                    value={searchQuery}
+                    onChange={handleSearchChange}
+                  />
+                </div>
               </div>
               <table
                 className="table table-hover table-bordered js-copytextarea"
@@ -96,7 +175,7 @@ export default function Products() {
                   </tr>
                 </thead>
                 <tbody>
-                  {listProducts && listProducts.length > 0 ? (
+                  {filteredProducts && filteredProducts.length > 0 ? (
                     paginatedProducts.map((product) => {
                       // Lấy item đầu tiên và tổng số lượng variations
                       const firstItem =
@@ -147,6 +226,8 @@ export default function Products() {
                               data-bs-toggle="modal"
                               data-bs-target="#deleteProduct"
                               onClick={() => handleDelete(product)}
+                              disabled={totalQuantity >= 1} // Vô hiệu hóa nút "Xóa" khi số lượng >= 1
+                              title={totalQuantity >= 1 ? "Không thể xoá sản phẩm còn tồn kho" : "Xóa sản phẩm"}
                             >
                               <i className="bi bi-trash" />
                             </button>
@@ -166,7 +247,7 @@ export default function Products() {
                     })
                   ) : (
                     <tr>
-                      <td colSpan="9" style={{ textAlign: "center" }}>
+                      <td colSpan="7" style={{ textAlign: "center" }}>
                         Không có sản phẩm nào
                       </td>
                     </tr>

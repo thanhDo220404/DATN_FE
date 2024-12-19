@@ -155,32 +155,3 @@ export const createPaymentUrl = async (paymentData) => {
     throw error;
   }
 };
-
-export const refundTransaction = async (orderId, transDate, amount) => {
-  try {
-    const response = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/orders/refund`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          orderId, // Mã giao dịch
-          transDate, // Ngày giao dịch (định dạng `YYYYMMDDHHmmss`)
-          amount, // Số tiền hoàn
-        }),
-      }
-    );
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! Status: ${response.status}`);
-    }
-
-    const result = await response.json();
-    return result;
-  } catch (error) {
-    console.error("Lỗi khi gửi yêu cầu refund:", error);
-    throw error; // Quăng lỗi nếu cần xử lý ở nơi gọi hàm
-  }
-};

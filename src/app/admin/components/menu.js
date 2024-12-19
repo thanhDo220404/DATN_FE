@@ -96,7 +96,7 @@ export default function Menu() {
               href="/admin/vouchers"
             >
               <i className="bi bi-list-task me-1" />
-              <span className="app-menu__label">Quản lý giảm giá</span>
+              <span className="app-menu__label">Quản lý mã giảm giá</span>
             </Link>
           </li>
           <li>

@@ -39,7 +39,7 @@ export default function ({ params }) {
   );
   const addressToDisplay = defaultAddress
     ? `${defaultAddress.specific_address}, ${defaultAddress.address.district.ward.prefix} ${defaultAddress.address.district.ward.name}, ${defaultAddress.address.district.name}, ${defaultAddress.address.name}`
-    : "Chưa có địa chỉ mặt định";
+    : "Chưa có địa chỉ Mặc định";
 
   return (
     <>

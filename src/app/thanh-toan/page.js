@@ -1,6 +1,7 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { getAllByUserId, insert } from "../databases/address";
+import { insertVoucher, getAllVouchers, getVoucherById, updateVoucher, deleteVoucher } from "../databases/voucher";
 import Overlay from "../components/overlay";
 import { useSearchParams } from "next/navigation";
 import { getAllShippingMethods } from "../databases/shipping_methods";
@@ -9,6 +10,9 @@ import { useForm } from "react-hook-form";
 import { useRouter } from "next/navigation";
 import { useDispatch } from "react-redux";
 import { removeProductFromCart } from "../../../redux/slices/cartSlice";
+import './page.css';
+import axios from "axios"; 
+import { FaTruck, FaMoneyBillWave, FaMapMarkerAlt, FaTag, FaBoxOpen } from 'react-icons/fa'; // Import thêm biểu tượng từ react-icons
 
 const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
@@ -23,8 +27,10 @@ export default function Checkout() {
     reset: resetInsert,
   } = useForm();
 
+  const [showVoucherModal, setShowVoucherModal] = useState(false);
   const selectedCity = watchAddress("province");
   const selectedDistrict = watchAddress("district");
+  
 
   const [cities, setCities] = useState([]);
 
@@ -57,6 +63,40 @@ export default function Checkout() {
   const [userId, setUserId] = useState(null);
   const [data, setData] = useState(null);
 
+  // Define voucher-related states
+  const [voucherCode, setVoucherCode] = useState('');
+  const [discount, setDiscount] = useState(0);
+  const [voucherError, setVoucherError] = useState('');
+  const [vouchers, setVouchers] = useState([]);
+
+  // New state variables for voucher modal
+  const [showAllVouchers, setShowAllVouchers] = useState(false);
+  const [allVouchers, setAllVouchers] = useState([]);
+
+  // Thêm trạng thái để quản lý modal
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [discountAmount, setDiscountAmount] = useState(0);
+
+  // New state to store the applied voucher discount amount
+  const [appliedVoucherDiscount, setAppliedVoucherDiscount] = useState(0);
+
+  // Function to fetch all vouchers
+  const fetchAllVouchers = async () => {
+    try {
+      const response = await getAllVouchers();
+      const currentDate = new Date();
+
+      // Lọc chỉ những voucher hoạt động và chưa hết hạn
+      const activeVouchers = response.filter(voucher => 
+        voucher.isActive && new Date(voucher.expiryDate) >= currentDate
+      );
+
+      setAllVouchers(activeVouchers);
+    } catch (error) {
+      console.error("Error fetching all vouchers:", error);
+    }
+  };
+
   const searchParams = useSearchParams();
   const nextPage = searchParams.get("next");
   useEffect(() => {
@@ -83,6 +123,16 @@ export default function Checkout() {
     setSelectedShippingMethod(result[0]);
   };
 
+  const fetchVouchers = async () => {
+    try {
+      const response = await axios.get(`${apiUrl}/vouchers`);
+      setVouchers(response.data);
+    } catch (error) {
+      console.error("Error fetching vouchers:", error);
+    }
+  };
+  
+
   useEffect(() => {
     if (data) {
       // Lấy thông tin người dùng từ data
@@ -101,6 +151,7 @@ export default function Checkout() {
     }
     fetchShippingMethods();
     fetchCities();
+    fetchVouchers();
   }, [data]);
 
   const districts =
@@ -143,7 +194,7 @@ export default function Checkout() {
         shipping_method: selectedShippingMethod,
         order_address: defaultAddress,
         payment_type: payment_type,
-        order_total: totalAmount, // Tổng tiền đã tính toán
+        order_total: finalTotal, // Tổng tiền đã tính toán
       };
 
       setOrder(newOrder);
@@ -160,7 +211,7 @@ export default function Checkout() {
 
         const paymentData = {
           orderId: result._id,
-          amount: totalAmount,
+          amount: finalTotal,
           bankCode: "",
           language: "vn",
         };
@@ -190,12 +241,62 @@ export default function Checkout() {
     }
   };
 
-  const totalAmount =
-    listCheckout.products.reduce((total, product) => {
-      const price = product.items.price * (1 - product.items.discount / 100);
-      const totalProduct = price * product.quantity;
-      return total + totalProduct;
-    }, 0) + (selectedShippingMethod?.price || 0);
+  const applyVoucher = async (code) => {
+    if (!code.trim()) {
+      setVoucherError("Vui lòng nhập mã voucher.");
+      return;
+    }
+    try {
+      const response = await axios.post(`${apiUrl}/vouchers/validate`, {
+        code,
+        orderValue: totalAmount,
+      });
+      const { discountAmount, message } = response.data;
+  
+      const parsedDiscount = Number(discountAmount) || 0;
+  
+      // Tính toán tối đa giảm giá
+      const maxDiscount = listCheckout.products.reduce((acc, product) => acc + product.items.price * product.quantity, 0) + (selectedShippingMethod ? selectedShippingMethod.price : 0);
+
+      // Nếu giá trị giảm giá vượt quá tối đa, điều chỉnh giảm giá
+      const adjustedDiscount = Math.min(parsedDiscount, maxDiscount);
+
+      setDiscount(adjustedDiscount);
+
+      if (parsedDiscount > maxDiscount) {
+        setVoucherError("Giá trị giảm giá vượt quá tổng số tiền đơn hàng. Đã điều chỉnh giá trị giảm giá.");
+      } else {
+        setVoucherError("");
+      }
+  
+      // Cập nhật state để hiển thị modal
+      setDiscountAmount(adjustedDiscount);
+      setShowSuccessModal(true);
+      setAppliedVoucherDiscount(adjustedDiscount); // Set the applied voucher discount amount
+    } catch (error) {
+      console.error("Lỗi khi áp dụng voucher:", error);
+      if (error.response && error.response.data && error.response.data.message) {
+        setVoucherError(error.response.data.message);
+      } else {
+        setVoucherError("Mã giảm giá không hợp lệ hoặc đã hết hạn.");
+      }
+      setDiscount(0);
+      setAppliedVoucherDiscount(0); // Reset the applied voucher discount amount
+    }
+  };
+  const totalAmount = useMemo(() => {
+    const productsTotal = listCheckout.products.reduce((total, product) => {
+      const price =
+        product.items.price * (1 - product.items.discount / 100);
+      return total + price * product.quantity;
+    }, 0);
+    const shipping = selectedShippingMethod?.price || 0;
+    return productsTotal + shipping;
+  }, [listCheckout.products, selectedShippingMethod]);
+  
+  const finalTotal = useMemo(() => {
+    return Math.max(totalAmount - discount, 0);
+  }, [totalAmount, discount]);
 
   const onSubmitAddAddress = async (formData) => {
     // Các ID từ formData
@@ -268,6 +369,7 @@ export default function Checkout() {
       }
     }
   };
+
   return (
     <>
       <div className="container-sm my-5 position-relative">
@@ -425,11 +527,9 @@ export default function Checkout() {
             }}
           ></div>
           <div className="w-100 p-3">
-            <div className="fs-5 text-primary">
-              <span className="me-2">
-                <i className="bi bi-geo-alt-fill"></i>
-              </span>
-              Địa chỉ nhận hàng
+            <div className="fs-5 text-primary d-flex align-items-center">
+              <FaMapMarkerAlt className="me-2" />
+              <span>Địa chỉ nhận hàng</span>
             </div>
             <div className="mt-3 ms-1">
               {data ? (
@@ -470,65 +570,21 @@ export default function Checkout() {
                   </span>
                 )
               ) : null}
-              {/* {defaultAddress ? (
-                <>
-                  <span className="fw-bold me-3">
-                    {defaultAddress.name} {defaultAddress.phone}
-                  </span>
-                  <span className="me-3">
-                    {defaultAddress.specific_address},{" "}
-                    {defaultAddress.address.district.ward.prefix}{" "}
-                    {defaultAddress.address.district.ward.name},{" "}
-                    {defaultAddress.address.district.name},{" "}
-                    {defaultAddress.address.name}
-                  </span>
-                  {defaultAddress.is_default && (
-                    <span className="border border-primary p-1 text-primary me-3">
-                      Mặc định
-                    </span>
-                  )}
-                  <button
-                    className="ms-3 text-primary"
-                    onClick={handleShowSelectAddress}
-                  >
-                    Thay đổi
-                  </button>
-                </>
-              ) : (
-                <span className="text-muted">
-                  Chưa có địa chỉ mặc định
-                  <button
-                    className="btn btn-success ms-3"
-                    data-bs-toggle="modal"
-                    data-bs-target="#newUserAddress"
-                  >
-                    Thêm địa chỉ mới
-                  </button>
-                </span>
-              )} */}
             </div>
           </div>
         </div>
         <div className="bg-white w-100 mt-3">
           <div className="w-100 p-3">
-            <table className="table table-borderless align-middle">
+            <table className="product-table">
               <thead>
                 <tr>
-                  <th scope="col">
-                    <h4>Sản phẩm</h4>
-                  </th>
-                  <th scope="col" className="text-end">
-                    Đơn giá
-                  </th>
-                  <th scope="col" className="text-end">
-                    Số lượng
-                  </th>
-                  <th scope="col" className="text-end">
-                    Thành tiền
-                  </th>
+                  <th>Sản Phẩm</th>
+                  <th className="product-price">Đơn giá</th>
+                  <th className="product-quantity">Số lượng</th>
+                  <th className="product-total">Thành tiền</th>
                 </tr>
               </thead>
-              <tbody className="border-top">
+              <tbody>
                 {listCheckout.products.map((product) => {
                   const price =
                     product.items.price * (1 - product.items.discount / 100);
@@ -537,7 +593,7 @@ export default function Checkout() {
                   return (
                     <tr key={product._id} className="border-bottom">
                       <td>
-                        <div className="d-flex align-items-center">
+                        <div className="product-name">
                           <img
                             src={product.items.image.mediaFilePath}
                             alt={product.name}
@@ -557,14 +613,14 @@ export default function Checkout() {
                           </div>
                         </div>
                       </td>
-                      <td className="text-end">
+                      <td className="product-price">
                         {new Intl.NumberFormat("vi-VN", {
                           style: "currency",
                           currency: "VND",
                         }).format(price)}
                       </td>
-                      <td className="text-end">{product.quantity}</td>
-                      <td className="text-end">
+                      <td className="product-quantity">{product.quantity}</td>
+                      <td className="product-total">
                         {new Intl.NumberFormat("vi-VN", {
                           style: "currency",
                           currency: "VND",
@@ -578,11 +634,14 @@ export default function Checkout() {
           </div>
           <div className="bg-white w-100 mt-3">
             <div className="w-100 p-3">
-              <h4>Phương thức giao hàng</h4>
+              <h4 className="d-flex align-items-center">
+                <FaBoxOpen className="me-2" />
+                Phương thức giao hàng
+              </h4>
               {data
                 ? selectedShippingMethod && (
                     <>
-                      <div className="d-flex gap-5 align-items-center">
+                      <div className="d-flex justify-content-between align-items-center">
                         <div>
                           <div>{selectedShippingMethod.name}</div>
                           <small className="text-muted">
@@ -625,103 +684,108 @@ export default function Checkout() {
         </div>
         <div className="bg-white w-100 mt-3">
           <div className="w-100 p-3">
+            <div className="d-flex align-items-center justify-content-between">
+              <h4 className="d-flex align-items-center">
+                <FaTag className="me-2" />
+                Mã giảm giá
+              </h4>
+              <button
+                className="btn btn-secondary"
+                onClick={() => {
+                  fetchAllVouchers();
+                  setShowAllVouchers(true);
+                }}
+              >
+                Chọn Mã Giảm Giá
+              </button>
+            </div>
+            {appliedVoucherDiscount > 0 && (
+              <div className="text-center text-success mt-2 mb-2 " style={{ fontWeight: 'bold', fontSize: '1.2rem', backgroundColor: '#d4edda', padding: '10px', borderRadius: '5px' }}>
+              Đã giảm: {new Intl.NumberFormat("vi-VN", {
+                style: "currency",
+                currency: "VND",
+              }).format(appliedVoucherDiscount)}
+            </div>
+            )}
+            <div className="d-flex"></div>
+            {voucherError && <div className="text-danger mt-2">{voucherError}</div>}
+            </div>
+            </div>
+
+        <div className="bg-white w-100 mt-3">
+          <div className="w-100 p-3">
             <h4>Phương thức thanh toán</h4>
             {data && (
               <>
-                <div className="d-flex gap-2">
-                  <div
-                    className={`border rounded flex-fill p-3 mb-2 d-flex gap-2 align-items-center ${
-                      payment_type === "Thanh toán khi nhận hàng"
-                        ? "border-primary"
-                        : ""
-                    }`}
-                    onClick={() => setPaymentType("Thanh toán khi nhận hàng")}
-                  >
-                    <input
-                      type="radio"
-                      name="payment_method"
-                      onChange={() =>
-                        setPaymentType("Thanh toán khi nhận hàng")
-                      }
-                      checked={payment_type === "Thanh toán khi nhận hàng"}
-                    />
-                    <span className="fw-bold">
-                      <img
-                        src="https://mcdn.coolmate.me/image/October2024/mceclip2_42.png"
-                        alt="<strong>Thanh toán khi nhận hàng</strong>"
-                        width={40}
-                        height={40}
-                      ></img>
-                      Thanh toán khi nhận hàng
-                    </span>
+                <div className="d-flex flex-column flex-md-row mb-2">
+                  {/* Ô 'Thanh toán khi nhận hàng' */}
+                  <div className="border rounded p-3 me-md-2 mb-2 mb-md-0 flex-fill">
+                    <label className="d-flex align-items-center">
+                      <input
+                        type="radio"
+                        name="payment_method"
+                        onChange={() => setPaymentType("Thanh toán khi nhận hàng")}
+                        defaultChecked
+                        className="me-2"
+                      />
+                      <FaTruck className="me-2" /> {/* Biểu tượng xe tải */}
+                      <span>Thanh toán khi nhận hàng</span>
+                    </label>
                   </div>
-                  <div
-                    className={`border rounded flex-fill p-3 mb-2 d-flex gap-2 align-items-center ${
-                      payment_type === "Ví điện tử VNPAY"
-                        ? "border-primary"
-                        : ""
-                    }`}
-                    onClick={() => setPaymentType("Ví điện tử VNPAY")}
-                  >
-                    <input
-                      type="radio"
-                      name="payment_method"
-                      onChange={() => setPaymentType("Ví điện tử VNPAY")}
-                      checked={payment_type === "Ví điện tử VNPAY"}
-                    />
-                    <span>
-                      <img
-                        src="https://mcdn.coolmate.me/image/October2024/mceclip0_81.png"
-                        alt='<strong>Ví điện tử VNPAY</strong><br/> <span class="tw-text-tiny md:tw-text-small tw-text-cm-black-50">Quét QR để thanh toán</span>'
-                        width={50}
-                        height={50}
-                      ></img>
-                      Ví điện tử VNPAY
-                    </span>
+                  {/* Ô 'Ví điện tử VNPAY' */}
+                  <div className="border rounded p-3 flex-fill">
+                    <label className="d-flex align-items-center">
+                      <input
+                        type="radio"
+                        name="payment_method"
+                        onChange={() => setPaymentType("Ví điện tử VNPAY")}
+                        className="me-2"
+                      />
+                      <FaMoneyBillWave className="me-2" /> {/* Biểu tượng tiền mặt */}
+                      <span>Ví điện tử VNPAY</span>
+                    </label>
                   </div>
                 </div>
-                <div className="bg-danger-subtle text-end p-3 d-flex">
-                  <div className="w-25">
-                    <span className="invisible">.</span>
+
+                {/* Phần hiển thị tổng thanh toán */}
+                <div className="bg-danger-subtle text-end p-4">
+                  <div className="d-flex justify-content-between mb-3">
+                    <strong>Tổng tiền hàng:</strong>
+                    <span className="ms-2 fs-5 text-danger">
+                      {new Intl.NumberFormat("vi-VN", {
+                        style: "currency",
+                        currency: "VND",
+                      }).format(totalAmount)}
+                    </span>
                   </div>
-                  <div className="w-75">
-                    <div className="w-50 float-end">
-                      <div className="d-flex justify-content-between py-2">
-                        <span className="me-2">Tổng Thành Tiền</span>
-                        <span>
-                          {new Intl.NumberFormat("vi-VN", {
-                            style: "currency",
-                            currency: "VND",
-                          }).format(
-                            listCheckout.products.reduce((total, product) => {
-                              const price =
-                                product.items.price *
-                                (1 - product.items.discount / 100);
-                              const totalProduct = price * product.quantity;
-                              return total + totalProduct;
-                            }, 0)
-                          )}
-                        </span>
-                      </div>
-                      <div className="d-flex justify-content-between py-2">
-                        <span className="me-2">Tổng tiền phí vận chuyển</span>
-                        <span>
-                          {new Intl.NumberFormat("vi-VN", {
-                            style: "currency",
-                            currency: "VND",
-                          }).format(selectedShippingMethod?.price)}
-                        </span>
-                      </div>
-                      <div className="d-flex justify-content-between py-2">
-                        <span className="me-2">Tổng Thanh Toán</span>
-                        <span className="text-primary fs-5">
-                          {new Intl.NumberFormat("vi-VN", {
-                            style: "currency",
-                            currency: "VND",
-                          }).format(totalAmount)}
-                        </span>
-                      </div>
+                  <div className="d-flex justify-content-between mb-3">
+                    <strong>Phí vận chuyển:</strong>
+                    <span>
+                      {new Intl.NumberFormat("vi-VN", {
+                        style: "currency",
+                        currency: "VND",
+                      }).format(selectedShippingMethod?.price || 0)}
+                    </span>
+                  </div>
+                  {discount > 0 && (
+                    <div className="d-flex justify-content-between mb-3">
+                      <strong>Giảm giá:</strong>
+                      <span className="text-danger">
+                        -{new Intl.NumberFormat("vi-VN", {
+                          style: "currency",
+                          currency: "VND",
+                        }).format(discount)}
+                      </span>
                     </div>
+                  )}
+                  <div className="d-flex justify-content-between border-top pt-2">
+                    <strong>Tổng thanh toán:</strong>
+                    <span className="text-primary fs-5">
+                      {new Intl.NumberFormat("vi-VN", {
+                        style: "currency",
+                        currency: "VND",
+                      }).format(finalTotal)}
+                    </span>
                   </div>
                 </div>
               </>
@@ -731,6 +795,87 @@ export default function Checkout() {
               <button className="btn btn-primary" onClick={handleOrder}>
                 Đặt hàng
               </button>
+            </div>
+          </div>
+        </div>
+        {/* Button to show all vouchers */}
+        
+
+        {/* Voucher Modal */}
+        <div
+          className={`modal fade${showAllVouchers ? ' show' : ''}`}
+          tabIndex="-1"
+          style={{ display: showAllVouchers ? 'block' : 'none' }}
+          aria-hidden={!showAllVouchers}
+        >
+          <div className="modal-overlay" onClick={() => setShowAllVouchers(false)}>
+            <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+              <div className="modal-header">
+                <h5 className="modal-title">Danh Sách Mã Giảm Giá</h5>
+                <button
+                  type="button"
+                  className="btn-close"
+                  onClick={() => setShowAllVouchers(false)}
+                ></button>
+              </div>
+                <ul className="list-group">
+                  {allVouchers.map((voucher) => {
+                    // Kiểm tra xem voucher đã hết hạn chưa
+                    const isExpired = new Date(voucher.expiryDate) < new Date();
+                    const isActive = voucher.isActive && !isExpired;
+
+                    return (
+                      <li key={voucher._id} className="list-group-item d-flex justify-content-between align-items-center">
+                        <div>
+                          <span className="fw-bold">Mã: {voucher.code}</span>
+                          <br />
+                          <span>
+                            Giảm {voucher.discountType === "percentage"
+                              ? `${voucher.discountValue}%`
+                              : `${new Intl.NumberFormat("vi-VN", {
+                                  style: "currency",
+                                  currency: "VND",
+                                }).format(voucher.discountValue)}`
+                            }
+                          </span>
+                          <br />
+                          <span>Hạn sử dụng: {new Date(voucher.expiryDate).toLocaleDateString("vi-VN")}</span>
+                        </div>
+                        {isActive && (
+                          <button
+                            className="btn btn-primary"
+                            onClick={() => {
+                              applyVoucher(voucher.code);
+                              setShowAllVouchers(false);
+                            }}
+                          >
+                            Áp dụng
+                          </button>
+                        )}
+                      </li>
+                      
+                    );
+                  })}
+                </ul>
+                <div className="modal-body">
+                <form className="d-flex " onSubmit={(e) => { e.preventDefault(); applyVoucher(voucherCode); }}>
+                  <input
+                    type="text"
+                    className="form-control me-2"
+                    placeholder="Nhập mã giảm giá"
+                    value={voucherCode}
+                    onChange={(e) => setVoucherCode(e.target.value)}
+                  />
+                  <button className="btn btn-primary" type="submit">
+                    Áp dụng
+                  </button>
+                </form>
+              </div>
+              <div className="modal-footer">
+                <button className="btn btn-secondary" onClick={() => setShowAllVouchers(false)}>
+                  Đóng
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -943,9 +1088,28 @@ export default function Checkout() {
               </button>
               <button type="submit" className="btn btn-success">
                 Lưu địa chỉ
-              </button>
+              </button>            </div>          </form>        </div>      </div>
+      {/* Modal Hiển Thị Thành Công */}
+      <div
+        className={`modal fade ${showSuccessModal ? 'show d-block' : ''}`}
+        tabIndex="-1"
+        aria-labelledby="successModalLabel"
+        aria-hidden="true"
+        style={{ backgroundColor: showSuccessModal ? 'rgba(0,0,0,0.5)' : 'transparent' }}
+      >
+        <div className="modal-dialog modal-dialog-centered">
+          <div className="modal-content">
+            <div className="modal-header">
+              <h5 className="modal-title" id="successModalLabel">Thành Công</h5>
+              <button type="button" className="btn-close" onClick={() => setShowSuccessModal(false)} aria-label="Close"></button>
             </div>
-          </form>
+            <div className="modal-body">
+              Áp dụng voucher thành công! Bạn đã được giảm {new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" }).format(discountAmount)}.
+            </div>
+            <div className="modal-footer">
+              <button type="button" className="btn btn-secondary" onClick={() => setShowSuccessModal(false)}>Đóng</button>
+            </div>
+          </div>
         </div>
       </div>
     </>

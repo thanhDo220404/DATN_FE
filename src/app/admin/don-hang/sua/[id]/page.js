@@ -1,5 +1,5 @@
 "use client";
-import { getOrderById, refundTransaction } from "@/app/databases/order";
+import { getOrderById } from "@/app/databases/order";
 import { getOrderStatuses } from "@/app/databases/order_status";
 import { updateOrderStatus } from "@/app/databases/order"; // Import hàm updateOrderStatus
 import React, { useEffect, useState } from "react";
@@ -12,12 +12,13 @@ export default function OrderDetails({ params }) {
   const [selectedStatus, setSelectedStatus] = useState({});
   const [selectedStatusToDisabled, setSelectedStatusToDisabled] =
     useState(null);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
 
   const fetchOrder = async (id) => {
     const result = await getOrderById(id);
     setOrder(result);
-    setSelectedStatus(result.order_status._id); // Set trạng thái hiện tại
-    setSelectedStatusToDisabled(result.order_status._id);
+    setSelectedStatus(result.order_status?._id); // Set trạng thái hiện tại
+    setSelectedStatusToDisabled(result.order_status?._id);
   };
 
   const fetchOrderStatus = async () => {
@@ -31,28 +32,30 @@ export default function OrderDetails({ params }) {
   }, [id]);
 
   const handleUpdateStatus = async () => {
-    const orderId = order._id;
-    const order_status = order.order_status;
+    if (selectedStatus === "6724f9c943ad843da1d31150") {
+      setShowConfirmModal(true);
+      return;
+    }
 
     try {
-      if (
-        order_status._id === "673f4eb7e8698e7b4115b84d" &&
-        selectedStatus === "6724f9c943ad843da1d31150"
-      ) {
-        const vnp_TransactionDate = order.vnp_TransactionDate;
-        const amount = order.order_total;
-        console.log("Đơn hàng đã thanh toán và muốn hủy đơn");
-        await refundTransaction(orderId, vnp_TransactionDate, amount);
-        toast.success("Đã hoàn tiền cho khách");
-        await updateOrderStatus(order._id, selectedStatus);
-      } else {
-        await updateOrderStatus(order._id, selectedStatus);
-        toast.success("Cập nhật trạng thái đơn hàng thành công!");
-      }
+      await updateOrderStatus(order._id, selectedStatus);
+      toast.success("Cập nhật trạng thái đơn hàng thành công!");
       fetchOrder(id);
     } catch (error) {
       console.error("Error updating order status:", error.message);
-      toast.error("Cập nhật trạng thái đơn hàng thất bại!"); // Hiển thị thông báo lỗi
+      toast.error("Cập nhật trạng thái đơn hàng thất bại!");
+    }
+  };
+
+  const onSubmitDelete = async () => {
+    setShowConfirmModal(false);
+    try {
+      await updateOrderStatus(order._id, selectedStatus);
+      toast.success("Cập nhật trạng thái đơn hàng thành công!");
+      fetchOrder(id);
+    } catch (error) {
+      console.error("Error updating order status:", error.message);
+      toast.error("Cập nhật trạng thái đơn hàng thất bại!");
     }
   };
 
@@ -65,12 +68,6 @@ export default function OrderDetails({ params }) {
         "6724f9c943ad843da1d3114c", // Chưa xác nhận
         "6724f9c943ad843da1d3114d", // Đã xác nhận
         "6724f9c943ad843da1d3114e", // Đang giao hàng
-        "673f4eb7e8698e7b4115b84d", // Đã thanh toán
-        "673f4eb7e8698e7b4115b84c" //Chưa thanh toán
-      );
-      break;
-    case "6724f9c943ad843da1d3114c": // Đã hủy
-      disabledStatuses.push(
         "673f4eb7e8698e7b4115b84d", // Đã thanh toán
         "673f4eb7e8698e7b4115b84c" //Chưa thanh toán
       );
@@ -89,17 +86,18 @@ export default function OrderDetails({ params }) {
       break;
 
     case "6724f9c943ad843da1d3114d": // Đã xác nhận
-      disabledStatuses.push(
-        "673f4eb7e8698e7b4115b84d", // Đã thanh toán
-        "673f4eb7e8698e7b4115b84c", //Chưa thanh toán
-        "6724f9c943ad843da1d31150", // Đã hủy
-        "6724f9c943ad843da1d3114c" // Chưa xác nhận
-      );
+      // Vô hiệu hóa Chưa xác nhận
+       disabledStatuses.push(
+        "6724f9c943ad843da1d3114c", // Chưa xác nhận
+        "6724f9c943ad843da1d31150" // Đã hủy
+       );
       break;
     case "673f4eb7e8698e7b4115b84d": // Đã thanh toán
+      // Vô hiệu hóa Chưa xác nhận
       disabledStatuses.push(
         "673f4eb7e8698e7b4115b84c", //Chưa thanh toán
-        "6724f9c943ad843da1d3114c" // Chưa xác nhận
+        "6724f9c943ad843da1d3114c", // Chưa xác nhận
+        "6724f9c943ad843da1d3114d" // Đã xác nhận
       );
       break;
 
@@ -111,15 +109,6 @@ export default function OrderDetails({ params }) {
         "6724f9c943ad843da1d3114c", // Chưa xác nhận
         "673f4eb7e8698e7b4115b84d", // Đã thanh toán
         "673f4eb7e8698e7b4115b84c" //Chưa thanh toán
-      );
-      break;
-    case "673f4eb7e8698e7b4115b84c": //Chưa thanh toán
-      disabledStatuses.push(
-        "6724f9c943ad843da1d3114d", // Đã xác nhận
-        "6724f9c943ad843da1d3114c", // Chưa xác nhận
-        "673f4eb7e8698e7b4115b84d", // Đã thanh toán
-        "6724f9c943ad843da1d3114e", // Đang giao hàng
-        "6724f9c943ad843da1d3114f" // Đã giao hàng
       );
       break;
 
@@ -149,218 +138,267 @@ export default function OrderDetails({ params }) {
   }, 0);
 
   return (
-    <div className="container-fluid py-4">
-      <ToastContainer />
-      <div className="row g-4">
-        {/* Phần bên trái - Tổng quan đơn hàng */}
-        <div className="col-3 m-auto p-2 alert-success text-success">
-          <div className="d-flex align-items-center">
-            <div className="bg-success p-3 me-2">
-              <i className="bi bi-cart-fill"></i>
-            </div>
-            <div className="fs-5">
-              Ngày đặt
-              <small className="d-block">
-                {new Intl.DateTimeFormat("vi-VN", {
-                  year: "numeric",
-                  month: "2-digit",
-                  day: "2-digit",
-                  hour: "2-digit",
-                  minute: "2-digit",
-                }).format(new Date(order.createdAt))}
-              </small>
-            </div>
-          </div>
-        </div>
-
-        <div className="col-3 m-auto p-2 alert-info text-info">
-          <div className="d-flex align-items-center">
-            <div className="bg-info p-3 me-2 ">
-              <i className="bi bi-person-fill"></i>
-            </div>
-            <div className="fs-5">
-              Tên
-              <small className="d-block">{order.order_address.name}</small>
+    <>
+      <div className="container-fluid py-4">
+        <ToastContainer />
+        <div className="row g-4">
+          {/* Phần bên trái - Tổng quan đơn hàng */}
+          <div className="col-3 m-auto p-2 alert-success text-success">
+            <div className="d-flex align-items-center">
+              <div className="bg-success p-3 me-2">
+                <i className="bi bi-cart-fill"></i>
+              </div>
+              <div className="fs-5">
+                Ngày đặt
+                <small className="d-block">
+                  {new Intl.DateTimeFormat("vi-VN", {
+                    year: "numeric",
+                    month: "2-digit",
+                    day: "2-digit",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  }).format(new Date(order.createdAt))}
+                </small>
+              </div>
             </div>
           </div>
-        </div>
-        <div className="col-3 m-auto p-2 alert-danger text-danger">
-          <div className="d-flex align-items-center">
-            <div className="bg-danger p-3 me-2">
-              <i className="bi bi-telephone-fill"></i>
-            </div>
-            <div className="fs-5">
-              Số điện thoại
-              <small className="d-block">{order.order_address.phone}</small>
+
+          <div className="col-3 m-auto p-2 alert-info text-info">
+            <div className="d-flex align-items-center">
+              <div className="bg-info p-3 me-2 ">
+                <i className="bi bi-person-fill"></i>
+              </div>
+              <div className="fs-5">
+                Tên
+                <small className="d-block">{order.order_address.name}</small>
+              </div>
             </div>
           </div>
-        </div>
+          <div className="col-3 m-auto p-2 alert-danger text-danger">
+            <div className="d-flex align-items-center">
+              <div className="bg-danger p-3 me-2">
+                <i className="bi bi-telephone-fill"></i>
+              </div>
+              <div className="fs-5">
+                Số điện thoại
+                <small className="d-block">{order.order_address.phone}</small>
+              </div>
+            </div>
+          </div>
 
-        <div className="col-lg-8">
-          <div className="card border-0 shadow-sm">
-            <div className="card-body">
-              <h5 className="card-title mb-4">Tổng quan đơn hàng</h5>
+          <div className="col-lg-8">
+            <div className="card border-0 shadow-sm">
+              <div className="card-body">
+                <h5 className="card-title mb-4">Tổng quan đơn hàng</h5>
 
-              <div className="table-responsive">
-                <table className="table align-middle">
-                  <thead className="table-light">
-                    <tr>
-                      <th scope="col" style={{ width: "15%" }}>
-                        <div className="d-flex align-items-center">
-                          HÌNH ẢNH<i className="bi bi-arrow-down-up ms-1"></i>
-                        </div>
-                      </th>
-                      <th scope="col" style={{ width: "40%" }}>
-                        <div className="d-flex align-items-center">
-                          TÊN SẢN PHẨM
-                          <i className="bi bi-arrow-down-up ms-1"></i>
-                        </div>
-                      </th>
-                      <th
-                        scope="col"
-                        className="text-center"
-                        style={{ width: "20%" }}
-                      >
-                        <div className="d-flex align-items-center justify-content-center">
-                          SỐ LƯỢNG<i className="bi bi-arrow-down-up ms-1"></i>
-                        </div>
-                      </th>
-                      <th
-                        scope="col"
-                        className="text-end"
-                        style={{ width: "25%" }}
-                      >
-                        <div className="d-flex align-items-center justify-content-end">
-                          GIÁ<i className="bi bi-arrow-down-up ms-1"></i>
-                        </div>
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {products.map((product) => (
-                      <tr key={product.items.variations._id}>
-                        <td>
-                          <img
-                            src={product.items.image.mediaFilePath}
-                            alt={product.name}
-                            className="img-fluid rounded"
-                            style={{
-                              width: "80px",
-                              height: "80px",
-                              objectFit: "cover",
-                            }}
-                          />
-                        </td>
-                        <td>
-                          <div className="fw-medium">{product.name}</div>
-                          <div className="text-primary small">
-                            {product.category.categoryName}
+                <div className="table-responsive">
+                  <table className="table align-middle">
+                    <thead className="table-light">
+                      <tr>
+                        <th scope="col" style={{ width: "15%" }}>
+                          <div className="d-flex align-items-center">
+                            HÌNH ẢNH<i className="bi bi-arrow-down-up ms-1"></i>
                           </div>
-                          <div className="text-primary small">
-                            {product.items.color.colorName} -{" "}
-                            {product.items.variations.size.sizeName}
+                        </th>
+                        <th scope="col" style={{ width: "40%" }}>
+                          <div className="d-flex align-items-center">
+                            TÊN SẢN PHẨM
+                            <i className="bi bi-arrow-down-up ms-1"></i>
                           </div>
-                        </td>
-                        <td className="text-center">{product.quantity}</td>
-                        <td className="text-end">
-                          {(
-                            product.items.price *
-                            (1 - product.items.discount / 100)
-                          ).toLocaleString()}{" "}
-                          đ
-                        </td>
+                        </th>
+                        <th
+                          scope="col"
+                          className="text-center"
+                          style={{ width: "20%" }}
+                        >
+                          <div className="d-flex align-items-center justify-content-center">
+                            SỐ LƯỢNG<i className="bi bi-arrow-down-up ms-1"></i>
+                          </div>
+                        </th>
+                        <th
+                          scope="col"
+                          className="text-end"
+                          style={{ width: "25%" }}
+                        >
+                          <div className="d-flex align-items-center justify-content-end">
+                            GIÁ<i className="bi bi-arrow-down-up ms-1"></i>
+                          </div>
+                        </th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+                    </thead>
+                    <tbody>
+                      {products.map((product) => (
+                        <tr key={product.items.variations._id}>
+                          <td>
+                            <img
+                              src={product.items.image.mediaFilePath}
+                              alt={product.name}
+                              className="img-fluid rounded"
+                              style={{
+                                width: "80px",
+                                height: "80px",
+                                objectFit: "cover",
+                              }}
+                            />
+                          </td>
+                          <td>
+                            <div className="fw-medium">{product.name}</div>
+                            <div className="text-primary small">
+                              {product.category.categoryName}
+                            </div>
+                            <div className="text-primary small">
+                              {product.items.color.colorName} -{" "}
+                              {product.items.variations.size.sizeName}
+                            </div>
+                          </td>
+                          <td className="text-center">{product.quantity}</td>
+                          <td className="text-end">
+                            {(
+                              product.items.price *
+                              (1 - product.items.discount / 100)
+                            ).toLocaleString()}{" "}
+                            đ
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
 
-              <div className="border-top pt-3 mt-3">
-                <div className="d-flex justify-content-between mb-2">
-                  <span>Tổng giá trị sản phẩm:</span>
-                  <span className="fw-medium" style={{ minWidth: "100px" }}>
-                    {totalProductValue.toLocaleString()} đ
-                  </span>
-                </div>
-                <div className="d-flex justify-content-between mb-2">
-                  <span>Giá vận chuyển:</span>
-                  <span className="fw-medium" style={{ minWidth: "100px" }}>
-                    {shipping_method.price.toLocaleString()} đ
-                  </span>
-                </div>
-                <div className="d-flex justify-content-between mb-2">
-                  <span>Tổng giá trị đơn hàng:</span>
-                  <span className="fw-medium" style={{ minWidth: "100px" }}>
-                    {order_total.toLocaleString()} đ
-                  </span>
+                <div className="border-top pt-3 mt-3">
+                  <div className="d-flex justify-content-between mb-2">
+                    <span>Tổng giá trị sản phẩm:</span>
+                    <span className="fw-medium" style={{ minWidth: "100px" }}>
+                      {totalProductValue.toLocaleString()} đ
+                    </span>
+                  </div>
+                  <div className="d-flex justify-content-between mb-2">
+                    <span>Giá vận chuyển:</span>
+                    <span className="fw-medium" style={{ minWidth: "100px" }}>
+                      {shipping_method.price.toLocaleString()} đ
+                    </span>
+                  </div>
+                  <div className="d-flex justify-content-between mb-2">
+                    <span>Tổng giá trị đơn hàng:</span>
+                    <span className="fw-medium" style={{ minWidth: "100px" }}>
+                      {order_total.toLocaleString()} đ
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
 
-        {/* Phần bên phải - Trạng thái đơn hàng */}
-        <div className="col-lg-4">
-          <div className="card border-0 shadow-sm">
-            <div className="card-body">
-              <h5 className="card-title mb-4">Trạng thái đơn hàng</h5>
+          {/* Phần bên phải - Trạng thái đơn hàng */}
+          <div className="col-lg-4">
+            <div className="card border-0 shadow-sm">
+              <div className="card-body">
+                <h5 className="card-title mb-4">Trạng thái đơn hàng</h5>
 
-              <div className="mb-3">
-                <label className="form-label">Mã đơn hàng</label>
-                <input
-                  type="text"
-                  className="form-control bg-light"
-                  value={order._id}
-                  readOnly
-                />
+                <div className="mb-3">
+                  <label className="form-label">Mã đơn hàng</label>
+                  <input
+                    type="text"
+                    className="form-control bg-light"
+                    value={order._id}
+                    readOnly
+                  />
+                </div>
+
+                <div className="mb-3">
+                  <label className="form-label">Trạng thái đơn hàng</label>
+                  <select
+                    className="form-select"
+                    value={selectedStatus}
+                    onChange={(e) => setSelectedStatus(e.target.value)}
+                  >
+                    {orderStatus.map((status) => (
+                      <option
+                        key={status._id}
+                        value={status._id}
+                        disabled={disabledStatuses.includes(status._id)}
+                      >
+                        {status.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="mb-3">
+                  <label className="form-label">Hình thức thanh toán</label>
+                  <input
+                    type="text"
+                    className="form-control bg-light"
+                    value={payment_type}
+                    readOnly
+                  />
+                </div>
+
+                <div className="mb-3">
+                  <label className="form-label">Địa chỉ giao hàng</label>
+                  <textarea
+                    className="form-control bg-light"
+                    rows="4"
+                    value={`${order_address.name}, ${order_address.specific_address}, ${order_address.address.district.ward.prefix} ${order_address.address.district.ward.name}, ${order_address.address.district.name}, ${order_address.address.name}`}
+                    readOnly
+                  />
+                </div>
+
+                <button className="btn btn-primary" onClick={handleUpdateStatus}>
+                  Cập nhật
+                </button>
               </div>
-
-              <div className="mb-3">
-                <label className="form-label">Trạng thái đơn hàng</label>
-                <select
-                  className="form-select"
-                  value={selectedStatus}
-                  onChange={(e) => setSelectedStatus(e.target.value)}
-                >
-                  {orderStatus.map((status) => (
-                    <option
-                      key={status._id}
-                      value={status._id}
-                      disabled={disabledStatuses.includes(status._id)}
-                    >
-                      {status.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="mb-3">
-                <label className="form-label">Hình thức thanh toán</label>
-                <input
-                  type="text"
-                  className="form-control bg-light"
-                  value={payment_type}
-                  readOnly
-                />
-              </div>
-
-              <div className="mb-3">
-                <label className="form-label">Địa chỉ giao hàng</label>
-                <textarea
-                  className="form-control bg-light"
-                  rows="4"
-                  value={`${order_address.name}, ${order_address.specific_address}, ${order_address.address.district.ward.prefix} ${order_address.address.district.ward.name}, ${order_address.address.district.name}, ${order_address.address.name}`}
-                  readOnly
-                />
-              </div>
-
-              <button className="btn btn-primary" onClick={handleUpdateStatus}>
-                Cập nhật
-              </button>
             </div>
           </div>
         </div>
       </div>
-    </div>
+
+      {/* Modal xác nhận xóa */}
+      {showConfirmModal && (
+        <div
+          className="modal fade show"
+          style={{ display: "block" }}
+          tabIndex="-1"
+          aria-labelledby="deleteColorLabel"
+          aria-modal="true"
+          role="dialog"
+        >
+          <div className="modal-dialog modal-dialog-centered">
+            <div className="modal-content">
+              <div className="modal-header">
+                <h1 className="modal-title fs-5 text-dark" id="deleteColorLabel">
+                  Xác nhận hủy đơn hàng
+                </h1>
+                <button
+                  type="button"
+                  className="btn-close"
+                  onClick={() => setShowConfirmModal(false)}
+                  aria-label="Close"
+                ></button>
+              </div>
+              <div className="modal-body">
+                <p>Bạn có chắc chắn muốn hủy đơn hàng này không?</p>
+              </div>
+              <div className="modal-footer">
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  onClick={() => setShowConfirmModal(false)}
+                >
+                  Hủy
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-danger"
+                  onClick={onSubmitDelete}
+                >
+                  Xóa
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 }
