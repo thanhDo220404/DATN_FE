@@ -1,5 +1,5 @@
 "use client";
-import { getOrderById } from "@/app/databases/order";
+import { getOrderById, refundTransaction } from "@/app/databases/order";
 import { getOrderStatuses } from "@/app/databases/order_status";
 import { updateOrderStatus } from "@/app/databases/order"; // Import hàm updateOrderStatus
 import React, { useEffect, useState } from "react";
@@ -31,12 +31,25 @@ export default function OrderDetails({ params }) {
   }, [id]);
 
   const handleUpdateStatus = async () => {
-    console.log(selectedStatus);
+    const orderId = order._id;
+    const order_status = order.order_status;
 
     try {
-      await updateOrderStatus(order._id, selectedStatus);
-      toast.success("Cập nhật trạng thái đơn hàng thành công!"); // Hiển thị thông báo thành công
-      fetchOrder(id); // Tải lại đơn hàng để cập nhật trạng thái hiển thị
+      if (
+        order_status._id === "673f4eb7e8698e7b4115b84d" &&
+        selectedStatus === "6724f9c943ad843da1d31150"
+      ) {
+        const vnp_TransactionDate = order.vnp_TransactionDate;
+        const amount = order.order_total;
+        console.log("Đơn hàng đã thanh toán và muốn hủy đơn");
+        await refundTransaction(orderId, vnp_TransactionDate, amount);
+        toast.success("Đã hoàn tiền cho khách");
+        await updateOrderStatus(order._id, selectedStatus);
+      } else {
+        await updateOrderStatus(order._id, selectedStatus);
+        toast.success("Cập nhật trạng thái đơn hàng thành công!");
+      }
+      fetchOrder(id);
     } catch (error) {
       console.error("Error updating order status:", error.message);
       toast.error("Cập nhật trạng thái đơn hàng thất bại!"); // Hiển thị thông báo lỗi

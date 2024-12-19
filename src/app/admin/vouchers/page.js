@@ -122,12 +122,12 @@ const Vouchers = () => {
     <>
       <ToastContainer />
       <div className="container-fluid px-4">
-        <h1 className="mt-4">Quản Lý Voucher</h1>
+        <h1 className="mt-4">Quản Lý Mã Giảm Giá</h1>
 
         <div className="card mb-4">
           <div className="card-header d-flex justify-content-between align-items-center">
             <i className="fas fa-table me-1"></i>
-            Danh Sách Voucher
+            Danh Sách Mã Giảm Giá
             <button
               className="btn btn-primary"
               data-bs-toggle="modal"
@@ -397,7 +397,7 @@ const Vouchers = () => {
             <div className="modal-body">
               <div className="mb-3">
                 <label htmlFor="updateCode" className="form-label">
-                  Mã Voucher
+                  Mã Giảm Giá
                 </label>
                 <input
                   type="text"
@@ -552,8 +552,7 @@ const Vouchers = () => {
               ></button>
             </div>
             <div className="modal-body">
-              Bạn có chắc chắn muốn xóa voucher "{selectedVoucher?.code || ""}"
-              không?
+              Bạn có chắc chắn muốn xóa mã giảm giá không?
             </div>
             <div className="modal-footer">
               <button

@@ -174,7 +174,7 @@ export default function Products() {
                   className="form-select w-auto float-end"
                   onChange={(e) => setSortOrder(e.target.value)} // Cập nhật giá trị sắp xếp
                 >
-                  <option value="">Mặt định</option>
+                  <option value="">Mặc định</option>
                   <option value="asc">Giá tăng dần</option>
                   <option value="desc">Giá giảm dần</option>
                 </select>

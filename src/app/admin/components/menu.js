@@ -51,7 +51,7 @@ export default function Menu() {
               href="/admin"
             >
               <i className="bi bi-speedometer2 me-1" />
-              <span className="app-menu__label">Dashboard</span>
+              <span className="app-menu__label">Bảng điều khiển</span>
             </Link>
           </li>
 
@@ -63,7 +63,7 @@ export default function Menu() {
               href="/admin/media"
             >
               <i className="bi bi-card-image me-1"></i>
-              <span className="app-menu__label">Media</span>
+              <span className="app-menu__label">Quản lý hình ảnh</span>
             </Link>
           </li>
           <li>
@@ -96,7 +96,7 @@ export default function Menu() {
               href="/admin/vouchers"
             >
               <i className="bi bi-list-task me-1" />
-              <span className="app-menu__label">Quản lý vouchers</span>
+              <span className="app-menu__label">Quản lý giảm giá</span>
             </Link>
           </li>
           <li>

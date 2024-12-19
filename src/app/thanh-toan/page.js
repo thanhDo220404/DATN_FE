@@ -582,7 +582,7 @@ export default function Checkout() {
               {data
                 ? selectedShippingMethod && (
                     <>
-                      <div className="d-flex w-50 justify-content-between align-items-center">
+                      <div className="d-flex gap-5 align-items-center">
                         <div>
                           <div>{selectedShippingMethod.name}</div>
                           <small className="text-muted">
@@ -628,22 +628,57 @@ export default function Checkout() {
             <h4>Phương thức thanh toán</h4>
             {data && (
               <>
-                <div className="border rounded p-3 mb-2 d-flex justify-content-between align-items-center">
-                  <span>Thanh toán khi nhận hàng</span>
-                  <input
-                    type="radio"
-                    name="payment_method"
-                    onChange={() => setPaymentType("Thanh toán khi nhận hàng")}
-                    defaultChecked
-                  />
-                </div>
-                <div className="border rounded p-3 mb-2 d-flex justify-content-between align-items-center">
-                  <span>Ví điện tử VNPAY</span>
-                  <input
-                    type="radio"
-                    name="payment_method"
-                    onChange={() => setPaymentType("Ví điện tử VNPAY")}
-                  />
+                <div className="d-flex gap-2">
+                  <div
+                    className={`border rounded flex-fill p-3 mb-2 d-flex gap-2 align-items-center ${
+                      payment_type === "Thanh toán khi nhận hàng"
+                        ? "border-primary"
+                        : ""
+                    }`}
+                    onClick={() => setPaymentType("Thanh toán khi nhận hàng")}
+                  >
+                    <input
+                      type="radio"
+                      name="payment_method"
+                      onChange={() =>
+                        setPaymentType("Thanh toán khi nhận hàng")
+                      }
+                      checked={payment_type === "Thanh toán khi nhận hàng"}
+                    />
+                    <span className="fw-bold">
+                      <img
+                        src="https://mcdn.coolmate.me/image/October2024/mceclip2_42.png"
+                        alt="<strong>Thanh toán khi nhận hàng</strong>"
+                        width={40}
+                        height={40}
+                      ></img>
+                      Thanh toán khi nhận hàng
+                    </span>
+                  </div>
+                  <div
+                    className={`border rounded flex-fill p-3 mb-2 d-flex gap-2 align-items-center ${
+                      payment_type === "Ví điện tử VNPAY"
+                        ? "border-primary"
+                        : ""
+                    }`}
+                    onClick={() => setPaymentType("Ví điện tử VNPAY")}
+                  >
+                    <input
+                      type="radio"
+                      name="payment_method"
+                      onChange={() => setPaymentType("Ví điện tử VNPAY")}
+                      checked={payment_type === "Ví điện tử VNPAY"}
+                    />
+                    <span>
+                      <img
+                        src="https://mcdn.coolmate.me/image/October2024/mceclip0_81.png"
+                        alt='<strong>Ví điện tử VNPAY</strong><br/> <span class="tw-text-tiny md:tw-text-small tw-text-cm-black-50">Quét QR để thanh toán</span>'
+                        width={50}
+                        height={50}
+                      ></img>
+                      Ví điện tử VNPAY
+                    </span>
+                  </div>
                 </div>
                 <div className="bg-danger-subtle text-end p-3 d-flex">
                   <div className="w-25">
