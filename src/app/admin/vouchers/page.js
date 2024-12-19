@@ -54,6 +54,15 @@ const Vouchers = () => {
 
   const addVoucher = async (data) => {
     try {
+      // Kiểm tra mã voucher đã tồn tại
+      const existingVoucher = vouchers.find(
+        (voucher) => voucher.code.toLowerCase() === data.code.toLowerCase()
+      );
+
+      if (existingVoucher) {
+        toast.error("Mã voucher này đã tồn tại. Vui lòng đặt mã khác.");
+        return;
+      }
       await insertVoucher(data);
       fetchVouchers();
       toast.success("Thêm voucher thành công!");
@@ -193,7 +202,7 @@ const Vouchers = () => {
                         data-bs-target="#updateVoucherModal"
                         onClick={() => handleUpdate(voucher)}
                       >
-                        <i class="bi bi-pencil"></i>
+                        <i className="bi bi-pencil"></i>
                       </button>
                       <button
                         className="btn btn-sm btn-danger"
@@ -201,7 +210,7 @@ const Vouchers = () => {
                         data-bs-target="#confirmDeleteModal"
                         onClick={() => handleDelete(voucher)}
                       >
-                        <i class="bi bi-trash"></i>
+                        <i className="bi bi-trash"></i>
                       </button>
                     </td>
                   </tr>
@@ -538,7 +547,6 @@ const Vouchers = () => {
           </form>
         </div>
       </div>
-
       {/* Modal Xác Nhận Xóa */}
       <div className="modal fade" id="confirmDeleteModal" tabIndex="-1">
         <div className="modal-dialog">

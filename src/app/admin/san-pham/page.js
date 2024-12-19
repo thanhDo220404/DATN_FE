@@ -125,7 +125,7 @@ export default function Products() {
                 </thead>
                 <tbody>
                   {listProducts && listProducts.length > 0 ? (
-                    paginatedProducts.map((product) => {
+                    paginatedProducts.map((product, index) => {
                       // Lấy item đầu tiên và tổng số lượng variations
                       const firstItem =
                         product.items.length > 0 ? product.items[0] : null;
@@ -141,7 +141,7 @@ export default function Products() {
                       );
 
                       return (
-                        <tr key={product._id}>
+                        <tr key={index}>
                           <td>{product.name}</td>
                           <td>
                             {firstItem && (

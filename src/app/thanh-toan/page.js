@@ -204,7 +204,6 @@ export default function Checkout() {
   const [discount, setDiscount] = useState(0);
 
   const applyVoucher = (code) => {
-    setDiscount(0);
     // Tìm voucher theo mã
     const selectedVoucher = vouchers.find((voucher) => voucher.code === code);
 
